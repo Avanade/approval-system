@@ -14,7 +14,7 @@ This project contains a PowerApp, which is the main entry point for the applicat
 It's recommended to call the leaving API as part of your JML process when users leave the organisation, but a Power Automate example is provided as an alternative (this is significantly less performant.)
 
 ## Licensing
-github-mgmt is available under the [MIT Licence](./LICENCE).
+github-mgmt is available under the [MIT Licence](LICENCE).
 
 ## Solutions Referenced
 
@@ -31,7 +31,7 @@ DELETE THIS COMMENT
 The `docs` folder contains [more detailed documentation](./docs/start-here.md), along with setup instructions.
 
 ## Contact
-Feel free to [raise an issue on GitHub](https://github.com/Avanade/avanade-template/issues), or see our [security disclosure](./SECURITY.md) policy.
+Feel free to [raise an issue on GitHub](https://github.com/Avanade/avanade-template/issues), or see our [security disclosure](SECURITY.md) policy.
 
 ## Contributing
 Contributions are welcome. See information on [contributing](./CONTRIBUTING.md), as well as our [code of conduct](https://avanade.github.io/code-of-conduct/).
