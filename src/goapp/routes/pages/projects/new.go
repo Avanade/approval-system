@@ -8,12 +8,14 @@ import (
 	session "main/pkg/session"
 	template "main/pkg/template"
 	"net/http"
+	db "main/pkg/ghmgmtdb"
 )
 
 func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		template.UseTemplate(&w, r, "projects/new", nil)
+		users := db.GetUsersWithGithub()
+		template.UseTemplate(&w, r, "projects/new", users)
 	case "POST":
 		sessionaz, _ := session.Store.Get(r, "auth-session")
 		iprofile := sessionaz.Values["profile"]
@@ -28,17 +30,20 @@ func ProjectsNewHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if ghmgmtdb.Projects_IsExisting(body) {
-			http.Error(w, "Existing Project Name", http.StatusBadRequest)
+		nameCheck := make(chan bool, 2)
+
+		go func() { nameCheck <- ghmgmtdb.Projects_IsExisting(body) }()
+		go func() { b, _ := githubAPI.Repo_IsExisting(body.Name); nameCheck <- b }()
+
+		if <-nameCheck || <-nameCheck {
+			http.Error(w, "Project already exists.", http.StatusBadRequest)
 		} else {
+			_, err = githubAPI.CreatePrivateGitHubRepository(body)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 			ghmgmtdb.PRProjectsInsert(body, username.(string))
 		}
-
-		_, err = githubAPI.CreatePrivateGitHubRepository(body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
 	}
 }
