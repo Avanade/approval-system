@@ -168,15 +168,16 @@ func postCallback(itemId string) {
 	}
 	res, err := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", queryParams)
 	handleError(err)
+	approvalDate := res[0]["DateResponded"].(time.Time)
 
 	var callbackUrl string
 	callbackUrl = res[0]["CallbackUrl"].(string)
 	if callbackUrl != "" {
 		postParams := TypPostParams{
-			itemId:       itemId,
-			isApproved:   res[0]["IsApproved"].(bool),
-			remarks:      res[0]["ApproverRemarks"].(string),
-			responseDate: res[0]["DateResponded"].(time.Time),
+			ItemId:       itemId,
+			IsApproved:   res[0]["IsApproved"].(bool),
+			Remarks:      res[0]["ApproverRemarks"].(string),
+			ResponseDate: approvalDate.Format("2006-01-02T15:04:05.000Z"),
 		}
 
 		ch := make(chan *http.Response)
@@ -186,12 +187,11 @@ func postCallback(itemId string) {
 
 		res := <-ch
 
-		var isCallbackFailed bool
-
-		if res.StatusCode == 200 {
-			isCallbackFailed = false
-		} else {
-			isCallbackFailed = true
+		isCallbackFailed := true
+		if res != nil {
+			if res.StatusCode == 200 {
+				isCallbackFailed = false
+			}
 		}
 		params := map[string]interface{}{
 			"ItemId":           itemId,
@@ -205,14 +205,16 @@ func postCallback(itemId string) {
 
 func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Response) {
 	jsonReq, err := json.Marshal(data)
-	res, err := http.Post(url, "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
-	handleError(err)
+	res, err := http.Post(url, "application/json", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		ch <- nil
+	}
 	ch <- res
 }
 
 type TypPostParams struct {
-	itemId       string
-	isApproved   bool
-	remarks      string
-	responseDate time.Time
+	ItemId       string `json:"itemId"`
+	IsApproved   bool   `json:"isApproved"`
+	Remarks      string `json:"remarks"`
+	ResponseDate string `json:"responseDate"`
 }

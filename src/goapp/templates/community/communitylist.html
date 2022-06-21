@@ -1,0 +1,69 @@
+{{ define "content" }}
+
+
+<div id="pageTitle">Community List</div>
+
+<div x-data="myCommunitiesData()" x-init="getCommunity()">
+ 
+    <div x-html="tbl.template">
+ 
+    </div>
+    
+
+</div>
+
+<script src="/public/components/clsDataTable.js"></script>
+
+
+<script>
+    function myCommunitiesData() {
+        return {
+            showSpinner: true,
+            Communitylist: [],
+            tbl: {
+                template: "",
+                headers: 
+                [
+                    { name: "Name ", value: "Name" },
+                    { name: "Description ", value: "Description" },
+                    { name: "URL ", value: "Url" },
+                    { name: "Notes ", value: "Notes" },
+                    { name: "TradeAssocId ", value: "TradeAssocId" },
+                ]
+                ,
+                data:[]
+              
+            },
+
+            getCommunity() {
+                var modal = Alpine.store('master').modal
+                modal.update('loading', 'Loading', 'Please wait', '', '')
+
+                fetch('/community')
+                    .then(r => {
+                        r.json().then(body => {
+                            this.Communitylist = body
+                            this.tbl.data = body    
+                            this.showSpinner = false
+                        });
+                        modal.visible=false
+                    })
+                    .catch(e => {
+                        modal.update('error', 'Error getting data', 'Please try again', '', '')
+                    })
+                 var dt = new clsDataTable()
+                this.tbl.template = dt.template(
+                     'tbl1',
+                     'Community List',
+                     'List of all Community',
+                     'tbl.headers',
+                     'tbl.data',
+                     '/community/new',
+                     '/community/{Id}',
+                     'Id'
+                 )
+            }
+        }
+    }
+</script>
+{{ end }}
