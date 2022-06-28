@@ -1,5 +1,6 @@
-# gh-management
-> This tool allows an organization to manage users, and their association to a public GitHub, and a private GitHub enterprise (for InnerSource.)
+# Approval System
+> The approval system is created to centralize the approvals required by different applications.
+![image](https://user-images.githubusercontent.com/95854197/176138855-c9f72680-ab09-444a-87d1-c684b932ceda.png)
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 ![GitHub issues](https://img.shields.io/github/issues/Avanade/gh-management)
@@ -8,32 +9,9 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://avanade.github.io/code-of-conduct/)
 [![Incubating InnerSource](https://img.shields.io/badge/Incubating-Ava--Maturity-%23FF5800?labelColor=yellow)](https://avanade.github.io/maturity-model/)
 
-## Overview
-<!-- TODO: Update overview -->
-
-This project contains a PowerApp, which is the main entry point for the application. Backend functionality is provided through a Go application, which handles associations with GitHub, and events (including leavers.)
-
-Microsoft has an excellent [GitHub management portal](https://github.com/microsoft/opensource-portal) to allow for self-service at scale - but this provides significantly more functionality than some organizations require.
-
-It's recommended to call the leaving API as part of your JML process when users leave the organisation, but a Power Automate example is provided as an alternative (this is significantly less performant.)
-
-This repository allows for basic self-service and automation of common workflows using PowerApps for:
-- Automatically
-  - Ensuring all users on GitHub are active employees
-  - Checking each repository has an active business sponsor
-  - Checking each repository has mandatory code scans
-- Self-service
-  - Request to join the GitHub organization
-  - Request a new repository, and tracking of the ticket through approvals
-  - Request permission for a code contribution of <50 lines
 
 ## Licensing
-gh-management is available under the [MIT Licence](./LICENCE).
-
-## Solutions Referenced
-<!-- TODO: Update referenced solutions -->
-- [Microsoft PowerApps](https://docs.microsoft.com/en-us/powerapps/WT.mc_id=AI-MVP-5004204)
-- [Microsoft PowerAutomate](https://docs.microsoft.com/en-us/power-automate/?WT.mc_id=AI-MVP-5004204)
+Approval System is available under the [MIT Licence](./LICENCE).
 
 ## Documentation
 The `docs` folder contains [more detailed documentation](./docs/start-here.md), along with setup instructions.
