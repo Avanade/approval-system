@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,7 +9,6 @@ import (
 	"github.com/coreos/go-oidc"
 
 	auth "main/pkg/authentication"
-	ghmgmt "main/pkg/ghmgmtdb"
 	session "main/pkg/session"
 )
 
@@ -66,27 +64,16 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userPrincipalName := fmt.Sprint(profile["preferred_username"])
-
 	session.Values["id_token"] = rawIDToken
 	session.Values["access_token"] = token.AccessToken
 	session.Values["profile"] = profile
 	session.Values["refresh_token"] = token.RefreshToken
 	session.Values["expiry"] = token.Expiry.UTC().Format("2006-01-02 15:04:05")
-	isAdmin := ghmgmt.IsUserAdmin(userPrincipalName)
-	session.Values["isUserAdmin"] = isAdmin
-	errS := session.Save(r, w)
+	session.Options.MaxAge = 43200
+	err = session.Save(r, w)
 
-	// Insert Azure User
-	name := fmt.Sprint(profile["name"])
-	errIU := ghmgmt.InsertUser(userPrincipalName, name, "", "", "")
-	if errIU != nil {
-		http.Error(w, errIU.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if errS != nil {
-		http.Error(w, errS.Error(), http.StatusInternalServerError)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

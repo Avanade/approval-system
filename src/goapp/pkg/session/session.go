@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	"main/models"
 	auth "main/pkg/authentication"
 
 	"github.com/gorilla/sessions"
@@ -29,24 +28,21 @@ func InitializeSession() {
 
 func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// Check session if there is saved user profile
+	url := fmt.Sprintf("/loginredirect?redirect=%v",r.URL)
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
 		c := http.Cookie{
 			Name:   "auth-session",
 			MaxAge: -1}
 		http.SetCookie(w, &c)
-		cgh := http.Cookie{
-			Name:   "gh-auth-session",
-			MaxAge: -1}
-		http.SetCookie(w, &cgh)
-		http.Redirect(w, r, "/login/azure", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 		return
 	}
-
+	// fmt.Println(session)
 	if _, ok := session.Values["profile"]; !ok {
 
 		// Asks user to login if there is no saved user profile
-		http.Redirect(w, r, "/login/azure", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 
 	} else {
 		// If there is a user profile saved
@@ -99,56 +95,6 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 	}
 }
 
-func IsGHAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	// Check session if there is saved user profile
-	session, err := Store.Get(r, "gh-auth-session")
-	if err != nil {
-		c := http.Cookie{
-			Name:   "gh-auth-session",
-			MaxAge: -1}
-		http.SetCookie(w, &c)
-		http.Redirect(w, r, "/login/github", http.StatusTemporaryRedirect)
-		return
-	}
-
-	if _, ok := session.Values["ghProfile"]; !ok || !session.Values["ghIsValid"].(bool) {
-
-		// Asks user to login if there is no saved user profile
-		http.Redirect(w, r, "/error/ghlogin", http.StatusTemporaryRedirect)
-
-	} else {
-		next(w, r)
-	}
-}
-
-func GetGitHubUserData(w http.ResponseWriter, r *http.Request) (models.TypGitHubUser, error) {
-	session, err := Store.Get(r, "gh-auth-session")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return models.TypGitHubUser{LoggedIn: false}, err
-	}
-	var gitHubUser models.TypGitHubUser
-
-	if _, ok := session.Values["ghProfile"]; ok {
-		err = json.Unmarshal([]byte(fmt.Sprintf("%s", session.Values["ghProfile"])), &gitHubUser)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return models.TypGitHubUser{LoggedIn: false}, err
-		}
-
-		if _, okIsValid := session.Values["ghIsValid"]; okIsValid {
-			gitHubUser.IsValid = session.Values["ghIsValid"].(bool)
-		}
-
-		gitHubUser.AccessToken = fmt.Sprintf("%s", session.Values["ghAccessToken"])
-		gitHubUser.LoggedIn = true
-	} else {
-		gitHubUser.LoggedIn = false
-	}
-
-	return gitHubUser, nil
-}
-
 func GetState(w http.ResponseWriter, r *http.Request) (string, error) {
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
@@ -162,36 +108,6 @@ func GetState(w http.ResponseWriter, r *http.Request) (string, error) {
 
 	}
 	return "", nil
-}
-
-func RemoveGitHubAccount(w http.ResponseWriter, r *http.Request) error {
-	session, err := Store.Get(r, "gh-auth-session")
-	if err != nil {
-		return err
-	}
-
-	session.Options.MaxAge = -1
-	err = session.Save(r, w)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Check if user is an admin
-func IsUserAdmin(w http.ResponseWriter, r *http.Request) (bool, error) {
-	session, err := Store.Get(r, "auth-session")
-	if err != nil {
-		return false, err
-	}
-
-	isUserAdmin := false
-	if session.Values["isUserAdmin"] != nil {
-		isUserAdmin = session.Values["isUserAdmin"].(bool)
-	} 
-	return isUserAdmin, nil
 }
 
 type ErrorDetails struct {

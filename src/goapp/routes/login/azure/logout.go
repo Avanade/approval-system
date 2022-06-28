@@ -21,15 +21,6 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := session.GetGitHubUserData(w, r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if user.LoggedIn {
-		session.RemoveGitHubAccount(w, r)
-	}
-
 	logoutUrl, err := url.Parse("https://login.microsoftonline.com/" + os.Getenv("TENANT_ID") + "/oauth2/logout?client_id=" + os.Getenv("CLIENT_ID") + "&post_logout_redirect_uri=" + os.Getenv("HOME_URL"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

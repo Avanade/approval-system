@@ -18,51 +18,29 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 		return err
 	}
 
-	sessiongh, err := session.GetGitHubUserData(*w, r)
-	if err != nil {
-		return err
-	}
-
-	isAdmin, err := session.IsUserAdmin(*w, r)
-	if err != nil {
-		return err
-	}
-
 	// Data on master page
 	var menu []models.TypMenu
-	menu = append(menu, models.TypMenu{Name: "Dashboard", Url: "/", IconPath: "/public/icons/dashboard.svg"})
-	menu = append(menu, models.TypMenu{Name: "Projects", Url: "/projects", IconPath: "/public/icons/projects.svg"})
-	menu = append(menu, models.TypMenu{Name: "Communities", Url: "/communities/list", IconPath: "/public/icons/communities.svg"})
-	menu = append(menu, models.TypMenu{Name: "Guidance", Url: "/guidance", IconPath: "/public/icons/guidance.svg"})
-	menu = append(menu, models.TypMenu{Name: "Approvals", Url: "https://uat-approval-system-app.azurewebsites.net", IconPath: "/public/icons/approvals.svg"})
-	menu = append(menu, models.TypMenu{Name: "Search", Url: "/search", IconPath: "/public/icons/search.svg"})
-	if isAdmin {
-		menu = append(menu, models.TypMenu{Name: "Admin", Url: "/admin/members", IconPath: "/public/icons/lock.svg"})
-	}
-
-	var externalLinks []models.TypMenu
-	externalLinks = append(externalLinks, models.TypMenu{Name: "Tech Community Calendar", Url: "/#", IconPath: "/public/icons/calendar.svg"})
-	externalLinks = append(externalLinks, models.TypMenu{Name: "Stack Overflow at Avanade", Url: "/#", IconPath: "/public/icons/questionmark.svg"})
-	externalLinks = append(externalLinks, models.TypMenu{Name: "Open Innovation Meetup", Url: "/#", IconPath: "/public/icons/microphone.svg"})
-	masterPageData := models.TypHeaders{Menu: menu, ExternalLinks: externalLinks, Page: getUrlPath(r.URL.Path)}
+	menu = append(menu, models.TypMenu{Name: "My Requests", Url: "/", IconPath: "/public/icons/projects.svg"})
+	menu = append(menu, models.TypMenu{Name: "My Approvals", Url: "/myapprovals", IconPath: "/public/icons/approvals.svg"})
+	masterPageData := models.TypHeaders{Menu: menu, Page: getUrlPath(r.URL.Path)}
 
 	data := models.TypPageData{
-		Header:    masterPageData,
-		Profile:   sessionaz.Values["profile"],
-		ProfileGH: sessiongh,
-		Content:   pageData}
+		Header:  masterPageData,
+		Profile: sessionaz.Values["profile"],
+		Content: pageData}
 
 	tmpl := template.Must(
-		template.ParseFiles("templates/master.html",
+		template.ParseFiles("templates/master.html", "templates/buttons.html",
 			fmt.Sprintf("templates/%v.html", page)))
+	(*w).WriteHeader(http.StatusBadRequest)
 	return tmpl.Execute(*w, data)
 }
 
 func getUrlPath(path string) string {
 	p := strings.Split(path, "/")
 	if p[1] == "" {
-		return "Dashboard"
+		return "/"
 	} else {
-		return strings.Title(p[1])
+		return fmt.Sprintf("/%s", p[1])
 	}
 }

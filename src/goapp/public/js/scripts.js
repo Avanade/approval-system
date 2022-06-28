@@ -5,7 +5,6 @@
     shade = document.getElementById("shade")
 
   moveToMain("pageTitle")
-  moveToMain("ghAccount")
 
   function moveToMain(id) {
     let dom = document.getElementById(id)
