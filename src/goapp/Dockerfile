@@ -15,7 +15,7 @@ COPY . .
 EXPOSE 8080
 
 # Build the Go app
-RUN go build -o gh-mgnt .
+RUN go build -o approvalsystem .
 
 # Command to run the executable
-CMD ./gh-mgnt
+CMD ./approvalsystem
