@@ -1,16 +1,16 @@
-name: Docker - Approval System Container
+name: UAT - Docker - Approval System Container
 
 on:
   push:
     branches:
-      - test
+      - uat
     paths:
-      - "src/approvalsystem/goapp/**"
+      - "src/goapp/**"
   workflow_dispatch:
 
 defaults:
   run:
-    working-directory: src/approvalsystem/goapp
+    working-directory: src/goapp
 
 jobs:
   build-goapp-container:
