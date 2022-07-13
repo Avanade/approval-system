@@ -18,7 +18,7 @@ IF EXISTS (
 	AND A.Id = @ApplicationId
 	AND AM.Id = @ApplicationModuleId
 	AND I.Id = @ItemId
-	AND I.ApproverEmail = @ApproverEmail
+	AND (I.ApproverEmail = @ApproverEmail OR @ApproverEmail = '')
 	)
 	
 	BEGIN

@@ -40,10 +40,14 @@ func handleError(err error) {
 func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
+		var username string
 		sessionaz, _ := session.Store.Get(r, "auth-session")
 		iprofile := sessionaz.Values["profile"]
-		profile := iprofile.(map[string]interface{})
 
+		if iprofile != nil {
+			profile := iprofile.(map[string]interface{})
+			username = profile["preferred_username"].(string)
+		}
 		params := mux.Vars(r)
 
 		appGuid := params["appGuid"]
@@ -51,7 +55,6 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 		itemGuid := params["itemGuid"]
 		isApproved := params["isApproved"]
 
-		username := profile["preferred_username"]
 
 		sqlParamsIsAuth := map[string]interface{}{
 			"ApplicationId":       appGuid,
@@ -87,6 +90,7 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 				template.UseTemplate(&w, r, "AlreadyProcessed", data)
 			} else {
 				resItems, err := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", sqlParamsItems)
+				
 				handleErrorReturn(w, err)
 				requireRemarks := resIsAuth[0]["RequireRemarks"]
 				data := map[string]interface{}{
@@ -127,6 +131,11 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 		params["ApproverEmail"] = req.ApproverEmail
 		verification, err := db.ExecuteStoredProcedureWithResult("PR_Items_IsValid", params)
 		handleErrorReturn(w, err)
+		authReq := true
+		authReq = session.IsAuthRequired(req.ApplicationModuleId)
+		if authReq == false {
+			verification[0]["IsValid"] = "1"
+		}
 
 		if verification[0]["IsValid"] == "1" {
 			for k := range params {

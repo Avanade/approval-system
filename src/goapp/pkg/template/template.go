@@ -17,6 +17,14 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 		http.Error(*w, err.Error(), http.StatusInternalServerError)
 		return err
 	}
+	profile := sessionaz.Values["profile"]
+
+	if profile == nil {
+		profile = map[string]interface{}{
+			"name": "",
+			"preferred_username":"",
+		}
+	}
 
 	// Data on master page
 	var menu []models.TypMenu
@@ -26,7 +34,7 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 
 	data := models.TypPageData{
 		Header:  masterPageData,
-		Profile: sessionaz.Values["profile"],
+		Profile: profile,
 		Content: pageData}
 
 	tmpl := template.Must(

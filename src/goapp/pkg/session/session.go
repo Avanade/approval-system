@@ -1,6 +1,7 @@
 package session
 
 import (
+	"strings"
 	"context"
 	"encoding/gob"
 	"encoding/json"
@@ -9,11 +10,12 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"main/pkg/sql"
 
 	auth "main/pkg/authentication"
-
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -27,8 +29,23 @@ func InitializeSession() {
 }
 
 func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	var url string
+	url = fmt.Sprintf("%v",r.URL)
+	if strings.HasPrefix(url, "/response/") {
+		authReq := true
+		params := mux.Vars(r)
+		var appModuleGuid string
+		appModuleGuid = params["appModuleGuid"]
+
+		authReq = IsAuthRequired(appModuleGuid)
+		if authReq == false {
+			next(w, r)
+			return
+		}
+	}
+	
 	// Check session if there is saved user profile
-	url := fmt.Sprintf("/loginredirect?redirect=%v",r.URL)
+	url = fmt.Sprintf("/loginredirect?redirect=%v",r.URL)
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
 		c := http.Cookie{
@@ -108,6 +125,32 @@ func GetState(w http.ResponseWriter, r *http.Request) (string, error) {
 
 	}
 	return "", nil
+}
+
+func connectSql() (db *sql.DB) {
+	db, err := sql.Init(sql.ConnectionParam{ConnectionString: os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING")})
+	if err != nil {
+		fmt.Printf("ERROR: %+v", err)
+	}
+	return
+}
+
+func IsAuthRequired(appModuleGuid string) bool {
+	db := connectSql()
+	defer db.Close()
+	queryParams := map[string]interface{}{
+		"ApplicationModuleId": appModuleGuid,
+	}
+	isAuthRequired := true
+	res, err := db.ExecuteStoredProcedureWithResult("PR_ApplicationModules_IsAuthRequired", queryParams)
+	if err != nil {
+		fmt.Printf("ERROR: %+v", err)
+	} else {
+		if res[0] != nil {
+			isAuthRequired = res[0]["RequireAuthentication"].(bool)
+		}
+	}
+	return isAuthRequired
 }
 
 type ErrorDetails struct {

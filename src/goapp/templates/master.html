@@ -10,9 +10,9 @@
     <title>Approval System</title>
   </head>
   <body>
-    <div>
+    <div x-data="masterData()">
       <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
-      <div class="relative z-40 md:hidden" role="dialog" aria-modal="true">
+      <div class="relative z-40 md:hidden" role="dialog" aria-modal="true" x-show="profile.name!=''">
         <div class="fixed inset-0 bg-gray-600 bg-opacity-75" id="shade"></div>
         <div class="fixed inset-0 flex z-40" id="sidebar">
           <div class="relative flex-1 flex flex-col max-w-xs w-full bg-white">
@@ -88,12 +88,12 @@
                     <p
                       class="text-base font-medium text-gray-700 group-hover:text-gray-900"
                     >
-                      {{ .Profile.name }}
+                      <span x-text="profile.name"></span>
                     </p>
                     <p
                       class="text-sm font-medium text-gray-500 group-hover:text-gray-700"
                     >
-                      View profile | <a href="/logout/azure">Logout</a>
+                    <a :href="profileUrl" target="_blank">View profile</a> | <a href="/logout/azure">Logout</a>
                     </p>
                   </div>
                 </div>
@@ -107,7 +107,7 @@
       </div>
 
       <!-- Static sidebar for desktop -->
-      <div class="hidden md:flex md:w-72 md:flex-col md:fixed md:inset-y-0">
+      <div class="hidden md:flex md:w-72 md:flex-col md:fixed md:inset-y-0" x-show="profile.name!=''">
         <div
           class="flex-1 flex flex-col min-h-0 border-r border-gray-200 bg-white"
         >
@@ -162,7 +162,7 @@
                   <p
                     class="text-xs font-medium text-gray-500 group-hover:text-gray-700"
                   >
-                    View profile | <a href="/logout/azure">Logout</a>
+                    <a :href="profileUrl" target="_blank">View profile</a> | <a href="/logout/azure">Logout</a>
                   </p>
                 </div>
               </div>
@@ -170,7 +170,7 @@
           </div>
         </div>
       </div>
-      <div class="md:pl-72 flex flex-col flex-1 min-h-screen bg-gray-100">
+      <div :class="profile.name!='' ? 'md:pl-72' : ''" class="flex flex-col flex-1 min-h-screen bg-gray-100">
         <div
           class="sticky top-0 z-10 md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 bg-white"
         >
@@ -271,6 +271,23 @@
         </footer>
       </div>
     </div>
+    <script type="text/javascript">
+      function masterData(){
+        return {
+          profile:{
+            name:'{{.Profile.name}}',
+            username:'{{.Profile.preferred_username}}'
+          },
+          get profileDomain() {
+            var domain = this.profile.username.split('@')[1]
+            return domain
+          },
+          get profileUrl() {
+            return 'https://people.'+this.profileDomain
+          }
+        }
+      }
+    </script>
   </body>
   <script src="/public/js/scripts.js"></script>
 </html>
