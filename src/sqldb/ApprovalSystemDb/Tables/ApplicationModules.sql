@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[ApplicationModules] (
     [IsActive]       BIT              CONSTRAINT [DF_ApplicationModules_IsActive] DEFAULT ((1)) NOT NULL,
     [CallbackUrl]    VARCHAR (100)    NULL,
     [RequireRemarks] BIT              CONSTRAINT [DF_ApplicationModules_RequireRemarks] DEFAULT ((1)) NOT NULL,
-    [ApprovalTypeId] INT              NULL,
+    [ApprovalTypeId] INT              NOT NULL DEFAULT 1,
     [RequireAuthentication] BIT NOT NULL DEFAULT 1,
     [Created]        DATETIME         CONSTRAINT [DF_ApplicationModules_Created] DEFAULT (getdate()) NOT NULL,
     [CreatedBy]      VARCHAR (255)    NULL,
