@@ -5,7 +5,7 @@ SET IDENTITY_INSERT ApprovalTypes ON
 IF NOT EXISTS (SELECT Id FROM ApprovalTypes WHERE Id = 1)
 INSERT INTO ApprovalTypes (Id, ApproveText, RejectText) VALUES (1, 'Approve', 'Reject')
 
-IF NOT EXISTS (SELECT Id FROM ApprovalTypes WHERE Id = 1)
+IF NOT EXISTS (SELECT Id FROM ApprovalTypes WHERE Id = 2)
 INSERT INTO ApprovalTypes (Id, ApproveText, RejectText) VALUES (2, 'Accept', 'Decline')
 
 SET IDENTITY_INSERT ApprovalTypes OFF
