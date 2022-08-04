@@ -1,0 +1,20 @@
+name: PROD - Approval System - SQL Project
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-approvalapi-sqlproj:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - uses: azure/sql-action@v1.3
+        with:        
+          connection-string: ${{ secrets.APPROVALSYSTEMDB_CONNECTION_STRING_PROD }}
+          project-file: 'src/sqldb/ApprovalSystemDb/ApprovalSystemDb.sqlproj'
