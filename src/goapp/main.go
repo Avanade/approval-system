@@ -8,10 +8,13 @@ import (
 	rtPages "main/routes/pages"
 	rtApprovals "main/routes/pages/approvals"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/unrolled/secure"
+	"github.com/unrolled/secure/cspbuilder"
 
 	ev "main/pkg/envvar"
 
@@ -20,6 +23,31 @@ import (
 )
 
 func main() {
+	cspBuilder := cspbuilder.Builder{
+		Directives: map[string][]string{
+			cspbuilder.DefaultSrc: {"'self'"},
+			cspbuilder.ScriptSrc:  {"'self'", "'unsafe-inline'", "'unsafe-eval'"},
+			cspbuilder.StyleSrc:   {"'self'", "'unsafe-inline'"},
+			cspbuilder.ConnectSrc: {"'self'", "graph.microsoft.com", "login.microsoftonline.com"},
+			cspbuilder.FrameSrc:   {"'self'", "login.microsoftonline.com"},
+			cspbuilder.ImgSrc:     {"'self'", "data:"},
+		},
+	}
+
+	secureMiddleware := secure.New(secure.Options{
+		SSLRedirect:           true,                                            // Strict-Transport-Security
+		SSLHost:               os.Getenv("SSL_HOST"),                           // Strict-Transport-Security
+		SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"}, // Strict-Transport-Security
+		FrameDeny:             true,                                            // X-FRAME-OPTIONS
+		ContentTypeNosniff:    true,                                            // X-Content-Type-Options
+		BrowserXssFilter:      true,
+		ReferrerPolicy:        "strict-origin", // Referrer-Policy
+		ContentSecurityPolicy: cspBuilder.MustBuild(),
+		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
+		STSSeconds:            31536000,                        // Strict-Transport-Security
+		STSIncludeSubdomains:  true,                            // Strict-Transport-Security
+	})
+
 	// Set environment variables
 	err := godotenv.Load()
 	if err != nil {
@@ -43,6 +71,9 @@ func main() {
 	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
 
 	go checkFailedCallbacks()
+
+	mux.Use(secureMiddleware.Handler)
+	http.Handle("/", mux)
 
 	port := ev.GetEnvVar("PORT", "8080")
 	fmt.Printf("Now listening on port %v\n", port)
