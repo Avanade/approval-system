@@ -14,7 +14,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/unrolled/secure"
-	"github.com/unrolled/secure/cspbuilder"
 
 	ev "main/pkg/envvar"
 
@@ -23,16 +22,6 @@ import (
 )
 
 func main() {
-	cspBuilder := cspbuilder.Builder{
-		Directives: map[string][]string{
-			cspbuilder.DefaultSrc: {"'self'"},
-			cspbuilder.ScriptSrc:  {"'self'", "'unsafe-inline'", "'unsafe-eval'"},
-			cspbuilder.StyleSrc:   {"'self'", "'unsafe-inline'"},
-			cspbuilder.ConnectSrc: {"'self'", "graph.microsoft.com", "login.microsoftonline.com"},
-			cspbuilder.FrameSrc:   {"'self'", "login.microsoftonline.com"},
-			cspbuilder.ImgSrc:     {"'self'", "data:"},
-		},
-	}
 
 	secureMiddleware := secure.New(secure.Options{
 		SSLRedirect:           true,                                            // Strict-Transport-Security
@@ -42,7 +31,7 @@ func main() {
 		ContentTypeNosniff:    true,                                            // X-Content-Type-Options
 		BrowserXssFilter:      true,
 		ReferrerPolicy:        "strict-origin", // Referrer-Policy
-		ContentSecurityPolicy: cspBuilder.MustBuild(),
+		ContentSecurityPolicy: os.Getenv("CONTENT_SECURITY_POLICY"),
 		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
 		STSSeconds:            31536000,                        // Strict-Transport-Security
 		STSIncludeSubdomains:  true,                            // Strict-Transport-Security
