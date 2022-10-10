@@ -11,6 +11,7 @@ require (
 	github.com/gorilla/sessions v1.2.1
 	github.com/joho/godotenv v1.4.0
 	github.com/microsoft/go-mssqldb v0.13.2
+	github.com/unrolled/secure v1.13.0
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 )
 
