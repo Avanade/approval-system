@@ -10,3 +10,4 @@ AS
 	INNER JOIN ApplicationModules AM ON I.ApplicationModuleId = AM.Id
 	INNER JOIN Applications A ON AM.ApplicationId = A.Id
 	WHERE I.CreatedBy = @CreatedBy
+	ORDER BY I.Created DESC
