@@ -13,3 +13,4 @@ AS
 	INNER JOIN Applications A ON AM.ApplicationId = A.Id
 	INNER JOIN ApprovalTypes T ON AM.ApprovalTypeId = T.Id
 	WHERE I.Id = @Id
+	ORDER BY I.Created DESC
