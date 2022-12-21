@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	session "main/pkg/session"
+	rtApi "main/routes/apis"
 	rtAzure "main/routes/login/azure"
 	rtPages "main/routes/pages"
 	rtApprovals "main/routes/pages/approvals"
@@ -57,6 +58,10 @@ func main() {
 	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
 	mux.HandleFunc("/request", rtApprovals.ApprovalRequestHandler)
 	mux.HandleFunc("/process", rtApprovals.ProcessResponseHandler)
+
+	muxApi := mux.PathPrefix("/api").Subrouter()
+	muxApi.Handle("/items/type/{type:[0-2]+}/status/{status:[0-3]+}", loadAzAuthPage(rtApi.GetItems))
+
 	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
 
 	go checkFailedCallbacks()
