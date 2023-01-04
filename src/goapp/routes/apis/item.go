@@ -46,8 +46,15 @@ type Item struct {
 	RejectUrl       string `json:"rejectUrl"`
 }
 
+type Response struct {
+	Data []Item `json:"data"`
+	Total int `json:"total"`
+}
+
 func GetItems(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+
+	params := r.URL.Query()
 
 	session, errAuth := session.Store.Get(r, "auth-session")
 	if errAuth != nil {
@@ -76,10 +83,22 @@ func GetItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := GetItemsBy(user, ItemType(itemType), ItemStatus(itemStatus))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	var result Response
+
+	if params.Has("offset") && params.Has("filter") {
+		filter, _ := strconv.Atoi(params["filter"][0])
+		offset, _ := strconv.Atoi(params["offset"][0])
+		search := params["search"][0]
+		data, total, err := GetItemsBy(ItemType(itemType), ItemStatus(itemStatus), user, search, offset, filter)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		result = Response{
+			Data: data,
+			Total: total,
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -87,18 +106,19 @@ func GetItems(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func GetItemsBy(user string, itemType ItemType, itemStatus ItemStatus) ([]Item, error) {
+func GetItemsBy(itemType ItemType, itemStatus ItemStatus, user, search string, offset, filter int) ([]Item, int, error) {
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING"),
 	}
 
 	db, errInit := sql.Init(dbConnectionParam)
 	if errInit != nil {
-		return []Item{}, errInit
+		return []Item{}, 0, errInit
 	}
 	defer db.Close()
 
 	params := make(map[string]interface{})
+
 	if itemType != AllType {
 		params["ItemType"] = itemType
 		params["User"] = user
@@ -110,9 +130,25 @@ func GetItemsBy(user string, itemType ItemType, itemStatus ItemStatus) ([]Item, 
 			params["IsApproved"] = itemStatus
 		}
 	}
-	result, errExec := db.ExecuteStoredProcedureWithResult("PR_Items_Select", params)
-	if errExec != nil {
-		return []Item{}, errExec
+
+	params["Search"] = search
+
+	resultTotal, errResultTotal := db.ExecuteStoredProcedureWithResult("PR_Items_Total", params)
+	if errResultTotal != nil {
+		return []Item{}, 0, errResultTotal
+	}
+
+	params["Offset"] = offset
+	params["Filter"] = filter
+
+	total, errTotal := strconv.Atoi(fmt.Sprint(resultTotal[0]["Total"]))
+	if errTotal != nil {
+		return []Item{}, 0, errTotal
+	}
+
+	result, errResult := db.ExecuteStoredProcedureWithResult("PR_Items_Select", params)
+	if errResult != nil {
+		return []Item{}, 0, errResult
 	}
 
 	var items []Item
@@ -156,5 +192,5 @@ func GetItemsBy(user string, itemType ItemType, itemStatus ItemStatus) ([]Item, 
 		items = append(items, item)
 	}
 
-	return items, nil
+	return items, total, nil
 }

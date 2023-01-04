@@ -14,168 +14,141 @@
 
 <div id="pageTitle">Approval Requests You Created</div>
 
-<div x-data="initHome()" class="px-4">
+<div class="px-4" x-data="initHome()">
   <nav class="flex space-x-4 mb-3" aria-label="Tabs">
     <div class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer" x-bind:class="activeTab == tabs[0] ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'" x-on:click="onChangeTabs(0)"> Pending Request</div>
     <div class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer" x-bind:class="activeTab == tabs[1] ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'" x-on:click="onChangeTabs(1)"> Closed Request</div>
   </nav>
   <div x-show="activeTab == tabs[0]">
-    <div class="italic" x-show="!pending">You have no pending request.</div>
-    <div class="bg-white shadow overflow-hidden sm:rounded-md" x-show="pending">
-      <ul role="list" class="divide-y divide-gray-300">
-        <template x-for="item in pending">
-          <li x-on:click="item.show = !item.show">
-            <a class="block hover:bg-gray-50">
-              <div class="px-4 py-4 sm:px-6 cursor-pointer">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-medium text-gray-800 truncate" x-text="item.subject"></p>
-                </div>
-                <div class="mt-2 sm:flex sm:justify-between">
-                  <div class="sm:flex">
-                    <p class="flex items-center text-sm text-gray-500" x-data="{ app: 'Application: ' + item.application}" x-text="app">
-                    </p>
-                    <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6" x-data="{ mod: 'Module: ' + item.module}" x-text="mod">
-                    </p>
-                  </div>
-                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                    </svg>
-                    <p>
-                      Requested on
-                      <time x-data="{date: new Date(item.created)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
-                    </p>
-                  </div>
-                </div>
-                <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
-                  <div x-html="item.body" class="text-sm"></div>
-                </div>
-              </div>
-            </a>
-          </li>
-        </template>
-      </ul>
+    <div x-data="list({
+      callback: pendingCallback,
+      renderItem: pendingRenderItem
+    })">
+      <div x-html="template"></div>
     </div>
   </div>
   <div x-show="activeTab == tabs[1]">
-    <div class="italic" x-show="!approved && !rejected">You have no closed request.</div>
-    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-3" x-show="approved">
-      <h2 class="font-medium p-3 text-center text-green-800">Approved Requests</h2>
-      <ul role="list" class="divide-y divide-gray-300">
-        <template x-for="item in approved">
-          <li x-on:click="item.show = !item.show">
-            <a class="block hover:bg-gray-50">
-              <div class="px-4 py-4 sm:px-6 cursor-pointer">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-medium text-gray-800 truncate" x-text="item.subject"></p>
-                  <div class="ml-2 flex-shrink-0 flex">
-                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" x-bind:class="item.isApproved? 'bg-green-100 text-green-800':'bg-red-100 text-red-800'" x-text="item.isApproved ? 'Approved' : 'Rejected'"></p>
-                  </div>
-                </div>
-                <div class="mt-2 sm:flex sm:justify-between">
-                  <div class="sm:flex">
-                    <p class="flex items-center text-sm text-gray-500" x-data="{ app: 'Application: ' + item.application}" x-text="app">
-                    </p>
-                    <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6" x-data="{ mod: 'Module: ' + item.module}" x-text="mod">
-                    </p>
-                  </div>
-                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                    </svg>
-                    <p>
-                      Responded on
-                      <time x-data="{date: new Date(item.dateResponded)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
-                    </p>
-                  </div>
-                </div>
-                <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
-                  <div x-html="item.body" class="text-sm"></div>
-                  <div class="border-[1px] mt-2 p-3 rounded-md">
-                    <div class="text-sm font-medium text-gray-800 truncate pb-2">Remarks</div>
-                    <div x-text="item.approverRemarks? item.approverRemarks:'none'" class="text-sm"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </li>
-        </template>
-      </ul>
+    <h2 class="text-lg p-3 text-green-800 border-b">Approved Requests</h2>
+    <div class="p-5" x-data="list({
+      callback: approvedCallback,
+      renderItem: closedRenderItem
+    })">
+      <div x-html="template"></div>
     </div>
-    <div class="bg-white shadow overflow-hidden sm:rounded-md mt-3" x-show="rejected">
-      <h2 class="font-medium p-3 text-center text-red-800">Rejected Requests</h2>
-      <ul role="list" class="divide-y divide-gray-300">
-        <template x-for="item in rejected">
-          <li x-on:click="item.show = !item.show">
-            <a class="block hover:bg-gray-50">
-              <div class="px-4 py-4 sm:px-6 cursor-pointer">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-medium text-gray-800 truncate" x-text="item.subject"></p>
-                  <div class="ml-2 flex-shrink-0 flex">
-                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" x-bind:class="item.isApproved? 'bg-green-100 text-green-800':'bg-red-100 text-red-800'" x-text="item.isApproved ? 'Approved' : 'Rejected'"></p>
-                  </div>
-                </div>
-                <div class="mt-2 sm:flex sm:justify-between">
-                  <div class="sm:flex">
-                    <p class="flex items-center text-sm text-gray-500" x-data="{ app: 'Application: ' + item.application}" x-text="app">
-                    </p>
-                    <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6" x-data="{ mod: 'Module: ' + item.module}" x-text="mod">
-                    </p>
-                  </div>
-                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                    </svg>
-                    <p>
-                      Responded on
-                      <time x-data="{date: new Date(item.dateResponded)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
-                    </p>
-                  </div>
-                </div>
-                <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
-                  <div x-html="item.body" class="text-sm"></div>
-                  <div class="border-[1px] mt-2 p-3 rounded-md">
-                    <div class="text-sm font-medium text-gray-800 truncate pb-2">Remarks</div>
-                    <div x-text="item.approverRemarks? item.approverRemarks:'none'" class="text-sm"></div>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </li>
-        </template>
-      </ul>
+    <h2 class="text-lg p-3 text-red-800 border-b">Rejected Requests</h2>
+    <div class="p-5" x-data="list({
+      callback: rejectedCallback,
+      renderItem: closedRenderItem
+    })">
+      <div x-html="template"></div>
     </div>
   </div>
 </div>
 
+<script src="/public/components/list.js"></script>
 <script type="text/javascript">
-  const initHome = () => {
+    const initHome = () => {
     return {
       tabs : ['pending', 'closed'],
-      pending : [],
-      approved : [],
-      rejected : [],
       activeTab : '',
       async init(){
         this.activeTab = this.tabs[0];
-
-        const requestItem = 0
-        const pending = 2
-        const approved = 1
-        const rejected = 0
-
-        this.pending = await getItemsBy(requestItem, pending)
-        this.approved = await getItemsBy(requestItem, approved)
-        this.rejected = await getItemsBy(requestItem, rejected)
       },
       onChangeTabs(tab){
-        console.log(tab)
         this.activeTab = this.tabs[tab];
       }
     }
   }
-  async function getItemsBy(type, status){
-    const res = await fetch(`/api/items/type/${type}/status/${status}`)
+    //PENDING REQUEST
+    function pendingRenderItem(item){
+    return `<div x-on:click="item.show = !item.show">
+              <a class="block hover:bg-gray-50">
+                <div class="px-4 py-4 sm:px-6 cursor-pointer">
+                  <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-gray-800 truncate" x-text="item.subject"></p>
+                  </div>
+                  <div class="mt-2 sm:flex sm:justify-between">
+                    <div class="sm:flex">
+                      <p class="flex items-center text-sm text-gray-500" x-data="{ app: 'Application: ' + item.application}" x-text="app">
+                      </p>
+                      <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6" x-data="{ mod: 'Module: ' + item.module}" x-text="mod">
+                      </p>
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                      <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                      </svg>
+                      <p>
+                        Requested on
+                        <time x-data="{date: new Date(item.created)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                      </p>
+                    </div>
+                  </div>
+                  <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
+                    <div x-html="item.body" class="text-sm"></div>
+                  </div>
+                </div>
+              </a>
+            </div>`
+  }
+  
+  async function pendingCallback(e){
+    return await getItemsBy(0, 2, e)
+  }
+  
+  //CLOSED REQUEST
+  function closedRenderItem(item){
+    return `<div x-on:click="item.show = !item.show">
+              <a class="block hover:bg-gray-50">
+                <div class="px-4 py-4 sm:px-6 cursor-pointer">
+                  <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-gray-800 truncate" x-text="item.subject"></p>
+                    <div class="ml-2 flex-shrink-0 flex">
+                      <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" x-bind:class="item.isApproved? 'bg-green-100 text-green-800':'bg-red-100 text-red-800'" x-text="item.isApproved ? 'Approved' : 'Rejected'"></p>
+                    </div>
+                  </div>
+                  <div class="mt-2 sm:flex sm:justify-between">
+                    <div class="sm:flex">
+                      <p class="flex items-center text-sm text-gray-500" x-data="{ app: 'Application: ' + item.application}" x-text="app">
+                      </p>
+                      <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6" x-data="{ mod: 'Module: ' + item.module}" x-text="mod">
+                      </p>
+                    </div>
+                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                      <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                      </svg>
+                      <p>
+                        Responded on
+                        <time x-data="{date: new Date(item.dateResponded)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                      </p>
+                    </div>
+                  </div>
+                  <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
+                    <div x-html="item.body" class="text-sm"></div>
+                    <div class="border-[1px] mt-2 p-3 rounded-md">
+                      <div class="text-sm font-medium text-gray-800 truncate pb-2">Remarks</div>
+                      <div x-text="item.approverRemarks? item.approverRemarks:'none'" class="text-sm"></div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>`
+  }
+
+  async function approvedCallback(e){
+    return await getItemsBy(0, 1, e)
+  }
+  
+  async function rejectedCallback(e){
+    return await getItemsBy(0, 0, e)
+  }
+
+  async function getItemsBy(type, status, option){
+    const offset = option.filter * option.page;
+    const search = encodeURIComponent(option.search)
+
+    const res = await fetch(`/api/items/type/${type}/status/${status}?filter=${option.filter}&offset=${offset}&search=${search}`)
     const data = await res.json()
     return data
   }
