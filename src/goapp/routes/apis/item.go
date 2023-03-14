@@ -42,13 +42,13 @@ type Item struct {
 	Subject         string `json:"subject"`
 	ApproveText     string `json:"approveText"`
 	RejectText      string `json:"rejectText"`
-	ApproveUrl      string `json:"approverUrl"`
+	ApproveUrl      string `json:"approveUrl"`
 	RejectUrl       string `json:"rejectUrl"`
 }
 
 type Response struct {
-	Data []Item `json:"data"`
-	Total int `json:"total"`
+	Data  []Item `json:"data"`
+	Total int    `json:"total"`
 }
 
 func GetItems(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +96,7 @@ func GetItems(w http.ResponseWriter, r *http.Request) {
 		}
 
 		result = Response{
-			Data: data,
+			Data:  data,
 			Total: total,
 		}
 	}
