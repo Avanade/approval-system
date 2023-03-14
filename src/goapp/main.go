@@ -35,7 +35,8 @@ func main() {
 		ContentSecurityPolicy: os.Getenv("CONTENT_SECURITY_POLICY"),
 		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
 		STSSeconds:            31536000,                        // Strict-Transport-Security
-		STSIncludeSubdomains:  true,                            // Strict-Transport-Security
+		STSIncludeSubdomains:  true,                            // Strict-Transport-Security,
+		IsDevelopment:         false,
 	})
 
 	// Set environment variables

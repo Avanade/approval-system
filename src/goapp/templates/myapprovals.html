@@ -68,7 +68,7 @@
                       </svg>
                       <p>
                         Requested on
-                        <time x-data="{date: new Date(item.created)}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                        <time x-data="{date: new Date(item.created.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
                       </p>
                     </div>
                   </div>
