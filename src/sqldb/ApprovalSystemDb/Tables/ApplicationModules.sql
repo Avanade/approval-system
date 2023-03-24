@@ -7,6 +7,7 @@ CREATE TABLE [dbo].[ApplicationModules] (
     [ReassignCallbackUrl] [varchar](100) NULL,
     [RequireRemarks] BIT              CONSTRAINT [DF_ApplicationModules_RequireRemarks] DEFAULT ((1)) NOT NULL,
     [ApprovalTypeId] INT              NOT NULL DEFAULT 1,
+    [AllowReassign] [bit] NULL,
     [RequireAuthentication] BIT NOT NULL DEFAULT 1,
     [Created]        DATETIME         CONSTRAINT [DF_ApplicationModules_Created] DEFAULT (getdate()) NOT NULL,
     [CreatedBy]      VARCHAR (255)    NULL,

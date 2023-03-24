@@ -1,5 +1,3 @@
-
-
 CREATE PROCEDURE [dbo].[PR_Items_Update_ApproverEmail]
 	@Id uniqueidentifier,
 	@ApproverEmail varchar(100),
