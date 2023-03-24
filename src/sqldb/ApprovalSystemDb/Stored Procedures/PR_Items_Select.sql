@@ -24,6 +24,7 @@ BEGIN
 		, I.Created
 		, T.ApproveText
 		, T.RejectText
+	    , isnull(AllowReassign,'') as AllowReassign
 	  FROM [dbo].[Items] i
 		INNER JOIN ApplicationModules am ON i.ApplicationModuleId = am.Id
 		INNER JOIN Applications a ON am.ApplicationId = a.Id

@@ -31,19 +31,21 @@ const (
 )
 
 type Item struct {
-	Application     string `json:"application"`
-	ApproverRemarks string `json:"approverRemarks"`
-	Body            string `json:"body"`
-	Created         string `json:"created"`
-	DateResponded   string `json:"dateResponded"`
-	DateSent        string `json:"dateSent"`
-	IsApproved      bool   `json:"isApproved"`
-	Module          string `json:"module"`
-	Subject         string `json:"subject"`
-	ApproveText     string `json:"approveText"`
-	RejectText      string `json:"rejectText"`
-	ApproveUrl      string `json:"approveUrl"`
-	RejectUrl       string `json:"rejectUrl"`
+	Application      string `json:"application"`
+	ApproverRemarks  string `json:"approverRemarks"`
+	Body             string `json:"body"`
+	Created          string `json:"created"`
+	DateResponded    string `json:"dateResponded"`
+	DateSent         string `json:"dateSent"`
+	IsApproved       bool   `json:"isApproved"`
+	Module           string `json:"module"`
+	Subject          string `json:"subject"`
+	ApproveText      string `json:"approveText"`
+	RejectText       string `json:"rejectText"`
+	ApproveUrl       string `json:"approveUrl"`
+	RejectUrl        string `json:"rejectUrl"`
+	AllowReassign    bool   `json:"allowReassign"`
+	AllowReassignUrl string `json:"allowReassignUrl"`
 }
 
 type Response struct {
@@ -155,11 +157,12 @@ func GetItemsBy(itemType ItemType, itemStatus ItemStatus, user, search string, o
 
 	for _, v := range result {
 		item := Item{
-			Application: v["Application"].(string),
-			Created:     v["Created"].(time.Time).String(),
-			Module:      v["Module"].(string),
-			ApproveText: v["ApproveText"].(string),
-			RejectText:  v["RejectText"].(string),
+			Application:   v["Application"].(string),
+			Created:       v["Created"].(time.Time).String(),
+			Module:        v["Module"].(string),
+			ApproveText:   v["ApproveText"].(string),
+			RejectText:    v["RejectText"].(string),
+			AllowReassign: v["AllowReassign"].(bool),
 		}
 
 		if v["ApproverRemarks"] != nil {
@@ -183,6 +186,8 @@ func GetItemsBy(itemType ItemType, itemStatus ItemStatus, user, search string, o
 		} else {
 			item.ApproveUrl = fmt.Sprintf("/response/%s/%s/%s/1", v["ApplicationId"], v["ApplicationModuleId"], v["ItemId"])
 			item.RejectUrl = fmt.Sprintf("/response/%s/%s/%s/0", v["ApplicationId"], v["ApplicationModuleId"], v["ItemId"])
+			item.AllowReassignUrl = fmt.Sprintf("/responseReassigned/%s/%s/%s/1", v["ApplicationId"], v["ApplicationModuleId"], v["ItemId"])
+
 		}
 
 		if v["Subject"] != nil {

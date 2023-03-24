@@ -36,8 +36,7 @@ func handleError(err error) {
 		fmt.Printf("ERROR: %+v", err)
 	}
 }
-
-func ResponseHandler(w http.ResponseWriter, r *http.Request) {
+func ResponseReassignedeHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		var username string
@@ -54,7 +53,6 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 		appModuleGuid := params["appModuleGuid"]
 		itemGuid := params["itemGuid"]
 		isApproved := params["isApproved"]
-
 
 		sqlParamsIsAuth := map[string]interface{}{
 			"ApplicationId":       appGuid,
@@ -90,7 +88,78 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 				template.UseTemplate(&w, r, "AlreadyProcessed", data)
 			} else {
 				resItems, err := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", sqlParamsItems)
-				
+
+				handleErrorReturn(w, err)
+				requireRemarks := resIsAuth[0]["RequireRemarks"]
+				data := map[string]interface{}{
+					"ApplicationId":       appGuid,
+					"ApplicationModuleId": appModuleGuid,
+					"ItemId":              itemGuid,
+					"ApproverEmail":       username,
+					"IsApproved":          isApproved,
+					"Data":                resItems[0],
+					"RequireRemarks":      requireRemarks,
+				}
+				template.UseTemplate(&w, r, "responsereassign", data)
+			}
+
+		}
+	}
+	//template.UseTemplate(&w, r, "responsereassign", nil)
+}
+func ResponseHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		var username string
+		sessionaz, _ := session.Store.Get(r, "auth-session")
+		iprofile := sessionaz.Values["profile"]
+
+		if iprofile != nil {
+			profile := iprofile.(map[string]interface{})
+			username = profile["preferred_username"].(string)
+		}
+		params := mux.Vars(r)
+
+		appGuid := params["appGuid"]
+		appModuleGuid := params["appModuleGuid"]
+		itemGuid := params["itemGuid"]
+		isApproved := params["isApproved"]
+
+		sqlParamsIsAuth := map[string]interface{}{
+			"ApplicationId":       appGuid,
+			"ApplicationModuleId": appModuleGuid,
+			"ItemId":              itemGuid,
+			"ApproverEmail":       username,
+		}
+
+		sqlParamsItems := map[string]interface{}{
+			"Id": itemGuid,
+		}
+
+		db := connectSql()
+		defer db.Close()
+		resIsAuth, err := db.ExecuteStoredProcedureWithResult("PR_RESPONSE_IsAuthorized", sqlParamsIsAuth)
+		handleErrorReturn(w, err)
+
+		isAuth := resIsAuth[0]["IsAuthorized"]
+		if isAuth == "0" {
+			template.UseTemplate(&w, r, "Unauthorized", nil)
+		} else {
+			isProcessed := resIsAuth[0]["IsApproved"]
+			if isProcessed != nil {
+				var text string
+				if isProcessed == true {
+					text = "approved"
+				} else {
+					text = "rejected"
+				}
+				data := map[string]interface{}{
+					"response": text,
+				}
+				template.UseTemplate(&w, r, "AlreadyProcessed", data)
+			} else {
+				resItems, err := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", sqlParamsItems)
+
 				handleErrorReturn(w, err)
 				requireRemarks := resIsAuth[0]["RequireRemarks"]
 				data := map[string]interface{}{
@@ -180,7 +249,9 @@ func postCallback(itemId string) {
 	approvalDate := res[0]["DateResponded"].(time.Time)
 
 	var callbackUrl string
+
 	callbackUrl = res[0]["CallbackUrl"].(string)
+
 	if callbackUrl != "" {
 		postParams := TypPostParams{
 			ItemId:       itemId,
@@ -190,6 +261,7 @@ func postCallback(itemId string) {
 		}
 
 		ch := make(chan *http.Response)
+
 		// var res *http.Response
 
 		go getHttpPostResponseStatus(callbackUrl, postParams, ch)
@@ -202,6 +274,7 @@ func postCallback(itemId string) {
 				isCallbackFailed = false
 			}
 		}
+
 		params := map[string]interface{}{
 			"ItemId":           itemId,
 			"IsCallbackFailed": isCallbackFailed,
@@ -226,4 +299,60 @@ type TypPostParams struct {
 	IsApproved   bool   `json:"isApproved"`
 	Remarks      string `json:"remarks"`
 	ResponseDate string `json:"responseDate"`
+}
+type TypReeassignParams struct {
+	Id            string `json:"Id"`
+	ApproverEmail string `json:"ApproverEmail"`
+	Username      string `json:"Username"`
+}
+
+func PostReassignCallback(userEmail string, user string, itemId string) {
+
+	db := connectSql()
+	defer db.Close()
+
+	queryParams := map[string]interface{}{
+		"Id": itemId,
+	}
+	res, err := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", queryParams)
+	handleError(err)
+
+	var ReassignCallbackUrl string
+
+	ReassignCallbackUrl = res[0]["ReassignCallbackUrl"].(string)
+	if ReassignCallbackUrl != "" {
+		postParams := TypReeassignParams{
+			Id:            itemId,
+			ApproverEmail: userEmail,
+			Username:      user,
+		}
+
+		ch2 := make(chan *http.Response)
+		// var res *http.Response
+
+		getHttpPostResponseStatus(ReassignCallbackUrl, postParams, ch2)
+		res := <-ch2
+
+		isCallbackFailed := true
+		if res != nil {
+			if res.StatusCode == 200 {
+				isCallbackFailed = false
+			}
+		}
+		fmt.Println(isCallbackFailed)
+		// res2 := <-ch2
+		// isCallbackFailed := true
+		// if res2 != nil {
+		// 	if res2.StatusCode == 200 {
+		// 		isCallbackFailed = false
+		// 	}
+		// }
+		// params := map[string]interface{}{
+		// 	"ItemId":           itemId,
+		// 	"IsCallbackFailed": isCallbackFailed,
+		// }
+		// db.ExecuteStoredProcedure("PR_Items_Update_Callback", params)
+
+	}
+
 }
