@@ -4,6 +4,7 @@ CREATE TABLE [dbo].[ApplicationModules] (
     [Name]           VARCHAR (100)    NOT NULL,
     [IsActive]       BIT              CONSTRAINT [DF_ApplicationModules_IsActive] DEFAULT ((1)) NOT NULL,
     [CallbackUrl]    VARCHAR (100)    NULL,
+    [ReassignCallbackUrl] [varchar](100) NULL,
     [RequireRemarks] BIT              CONSTRAINT [DF_ApplicationModules_RequireRemarks] DEFAULT ((1)) NOT NULL,
     [ApprovalTypeId] INT              NOT NULL DEFAULT 1,
     [RequireAuthentication] BIT NOT NULL DEFAULT 1,
