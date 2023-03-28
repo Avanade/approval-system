@@ -108,7 +108,7 @@ func ResponseReassignedeHandler(w http.ResponseWriter, r *http.Request) {
 
 		}
 	}
-	//template.UseTemplate(&w, r, "responsereassign", nil)
+
 }
 func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -353,18 +353,6 @@ func PostReassignCallback(userEmail string, user string, itemId string, Applicat
 			}
 		}
 		fmt.Println(isCallbackFailed)
-		// res2 := <-ch2
-		// isCallbackFailed := true
-		// if res2 != nil {
-		// 	if res2.StatusCode == 200 {
-		// 		isCallbackFailed = false
-		// 	}
-		// }
-		// params := map[string]interface{}{
-		// 	"ItemId":           itemId,
-		// 	"IsCallbackFailed": isCallbackFailed,
-		// }
-		// db.ExecuteStoredProcedure("PR_Items_Update_Callback", params)
 
 	}
 
