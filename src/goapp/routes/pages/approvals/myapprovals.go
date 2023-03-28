@@ -77,7 +77,7 @@ func ReAssignApproverHandler(w http.ResponseWriter, r *http.Request) {
 	u := session.Values["profile"]
 	profile, ok := u.(map[string]interface{})
 	if !ok {
-		//http.Error(w, errAuth.Error(), http.StatusInternalServerError)
+
 		return
 	}
 	user := fmt.Sprintf("%s", profile["preferred_username"])
@@ -114,7 +114,6 @@ func ReAssignApproverHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//go PostReassignCallback(approverEmail, user, id)
 	go PostReassignCallback(approverEmail, user, id, ApplicationId, ApplicationModuleId, itemId, ApproveText, RejectText)
 	return
 }
