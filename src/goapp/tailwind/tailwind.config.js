@@ -1,7 +1,15 @@
+
 module.exports = {
-  content: ["../**/*.{html,js}"],
-  theme: {
-    extend: {},
+   content: ["../**/*.{html,js}"],
+    theme: {extend: {},
+  
   },
-  plugins: [],
-}
+  
+  plugins: [
+  require('@tailwindcss/forms'),
+  require('@tailwindcss/typography'),
+  require('@tailwindcss/aspect-ratio'),
+  
+  ],
+  
+  }

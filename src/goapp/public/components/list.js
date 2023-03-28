@@ -71,6 +71,15 @@ const list = ({
     },
     previousPageEnabled(){
         return this.page > 0
+    }, 
+    checkItemLenght(){
+        if (!this.items  ){
+            return false
+        }
+        if (this.items.length == 0 ){
+            return false
+        }
+        return  true
     },
     //RENDER
     render(item){
@@ -93,7 +102,7 @@ const list = ({
                 <div class="sm:col-span-3">
                     <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
                     <div class="mt.-1">
-                        <input @keyup.enter="onSearchSubmitHandler" type="text" name="search" id="search" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" x-model="search">
+                        <input @keyup.enter="onSearchSubmitHandler" type="text" name="search" id="search"  class="block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-2    sm:text-sm border-gray-300 rounded-md"   x-model="search">
                     </div>
                 </div>
             </div>
@@ -119,7 +128,7 @@ const list = ({
             <template x-if="!items">
                 <p class="text-center my-5">NO RESULT FOUND</p>
             </template>
-            <template x-if="items.length != 0">
+            <template x-if="checkItemLenght ">
                 <ul role="list" class="divide-y divide-gray-300 my-3">
                     <template x-for="item in items">
                         <li x-html="render(item)">

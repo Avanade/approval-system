@@ -51,8 +51,9 @@
                 />
               </div>
               <nav class="mt-5 px-2 space-y-1">
-              {{ $page := .Header.Page}}
+              {{ $page := .Header.Page}} 
               {{ range $menu := .Header.Menu }}
+         
               <a
                 href="{{ $menu.Url }}"
                 {{ if eq $menu.Url $page  }}

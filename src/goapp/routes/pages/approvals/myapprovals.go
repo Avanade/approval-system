@@ -6,8 +6,11 @@ import (
 	"main/pkg/session"
 	"main/pkg/sql"
 	template "main/pkg/template"
+
 	"net/http"
 	"os"
+
+	"github.com/gorilla/mux"
 )
 
 func MyApprovalsHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,14 +71,61 @@ func MyApprovalsHandler(w http.ResponseWriter, r *http.Request) {
 	template.UseTemplate(&w, r, "myapprovals", string(b))
 }
 
+func ReAssignApproverHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := session.Store.Get(r, "auth-session")
+	var profile map[string]interface{}
+	u := session.Values["profile"]
+	profile, ok := u.(map[string]interface{})
+	if !ok {
+
+		return
+	}
+	user := fmt.Sprintf("%s", profile["preferred_username"])
+	// Connect to database
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING"),
+	}
+
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+	params := mux.Vars(r)
+
+	id := params["itemGuid"]
+	approverEmail := params["approver"]
+
+	ApplicationId := params["ApplicationId"]
+	ApplicationModuleId := params["ApplicationModuleId"]
+	itemId := params["itemId"]
+	ApproveText := params["ApproveText"]
+	RejectText := params["RejectText"]
+	param := map[string]interface{}{
+
+		"Id":            id,
+		"ApproverEmail": approverEmail,
+		"Username":      user,
+	}
+
+	_, err2 := db.ExecuteStoredProcedure("PR_Items_Update_ApproverEmail", param)
+	if err2 != nil {
+		return
+	}
+
+	go PostReassignCallback(approverEmail, user, id, ApplicationId, ApplicationModuleId, itemId, ApproveText, RejectText)
+	return
+}
 func itemMapper(item map[string]interface{}, isApproved bool) TypItem {
 	var approveUrl string
 	var rejectUrl string
-
+	var reassignUrl string
 	if !isApproved {
 		approveUrl = fmt.Sprintf("/response/%s/%s/%s/1", item["ApplicationId"], item["ApplicationModuleId"], item["ItemId"])
 		rejectUrl = fmt.Sprintf("/response/%s/%s/%s/0", item["ApplicationId"], item["ApplicationModuleId"], item["ItemId"])
 	}
+	reassignUrl = fmt.Sprintf("/responseReassigned/%s/%s/%s/1/%s/%s", item["ApplicationId"], item["ApplicationModuleId"], item["ItemId"], item["ApproveText"], item["RejectText"])
 
 	return TypItem{
 		Application:     item["Application"],
@@ -91,6 +141,7 @@ func itemMapper(item map[string]interface{}, isApproved bool) TypItem {
 		RejectText:      item["RejectText"],
 		ApproveUrl:      approveUrl,
 		RejectUrl:       rejectUrl,
+		ReAssignUrl:     reassignUrl,
 		Show:            false,
 	}
 }
@@ -115,5 +166,6 @@ type TypItem struct {
 	ItemId          interface{}
 	ApproveUrl      interface{}
 	RejectUrl       interface{}
+	ReAssignUrl     interface{}
 	Show            bool
 }
