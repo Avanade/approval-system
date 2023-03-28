@@ -9,12 +9,10 @@ import (
 	rtPages "main/routes/pages"
 	rtApprovals "main/routes/pages/approvals"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/unrolled/secure"
 
 	ev "main/pkg/envvar"
 
@@ -24,20 +22,20 @@ import (
 
 func main() {
 
-	secureMiddleware := secure.New(secure.Options{
-		SSLRedirect:           true,                                            // Strict-Transport-Security
-		SSLHost:               os.Getenv("SSL_HOST"),                           // Strict-Transport-Security
-		SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"}, // Strict-Transport-Security
-		FrameDeny:             true,                                            // X-FRAME-OPTIONS
-		ContentTypeNosniff:    true,                                            // X-Content-Type-Options
-		BrowserXssFilter:      true,
-		ReferrerPolicy:        "strict-origin", // Referrer-Policy
-		ContentSecurityPolicy: os.Getenv("CONTENT_SECURITY_POLICY"),
-		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
-		STSSeconds:            31536000,                        // Strict-Transport-Security
-		STSIncludeSubdomains:  true,                            // Strict-Transport-Security,
-		IsDevelopment:         false,
-	})
+	// secureMiddleware := secure.New(secure.Options{
+	// 	SSLRedirect:           true,                                            // Strict-Transport-Security
+	// 	SSLHost:               os.Getenv("SSL_HOST"),                           // Strict-Transport-Security
+	// 	SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"}, // Strict-Transport-Security
+	// 	FrameDeny:             true,                                            // X-FRAME-OPTIONS
+	// 	ContentTypeNosniff:    true,                                            // X-Content-Type-Options
+	// 	BrowserXssFilter:      true,
+	// 	ReferrerPolicy:        "strict-origin", // Referrer-Policy
+	// 	ContentSecurityPolicy: os.Getenv("CONTENT_SECURITY_POLICY"),
+	// 	PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
+	// 	STSSeconds:            31536000,                        // Strict-Transport-Security
+	// 	STSIncludeSubdomains:  true,                            // Strict-Transport-Security,
+	// 	IsDevelopment:         false,
+	// })
 
 	// Set environment variables
 	err := godotenv.Load()
@@ -53,7 +51,7 @@ func main() {
 	mux.Handle("/", loadAzAuthPage(rtApprovals.MyRequestsHandler))
 	mux.Handle("/myapprovals", loadAzAuthPage(rtApprovals.MyApprovalsHandler))
 	mux.Handle("/response/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", loadAzAuthPage(rtApprovals.ResponseHandler))
-	mux.Handle("/responseReassigned/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", loadAzAuthPage(rtApprovals.ResponseReassignedeHandler))
+	mux.Handle("/responseReassigned/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}/{ApproveText}/{RejectText}", loadAzAuthPage(rtApprovals.ResponseReassignedeHandler))
 	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")
 	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
 	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
@@ -63,13 +61,13 @@ func main() {
 	muxApi := mux.PathPrefix("/api").Subrouter()
 	muxApi.Handle("/items/type/{type:[0-2]+}/status/{status:[0-3]+}", loadAzAuthPage(rtApi.GetItems))
 	muxApi.Handle("/search/users/{search}", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
-	muxApi.Handle("/responseReassignedAPI/{itemGuid}/{approver}", loadAzAuthPage(rtApprovals.ReAssignApproverHandler))
+	muxApi.Handle("/responseReassignedAPI/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{itemId}/{ApproveText}/{RejectText}", loadAzAuthPage(rtApprovals.ReAssignApproverHandler))
 
 	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
 
 	go checkFailedCallbacks()
 
-	mux.Use(secureMiddleware.Handler)
+	//	mux.Use(secureMiddleware.Handler)
 	http.Handle("/", mux)
 
 	port := ev.GetEnvVar("PORT", "8080")

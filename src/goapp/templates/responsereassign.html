@@ -129,6 +129,8 @@
                 applicationModuleId: "{{.ApplicationModuleId}}",
                 itemId:              "{{.ItemId}}",
                 approverEmail:       "{{.ApproverEmail}}",
+                ApproveText:              "{{.ApproveText}}",
+                RejectText:       "{{.RejectText}}",
                 remarks: "",
                 isApproved: "{{.IsApproved}}",
                 name : '',
@@ -155,9 +157,9 @@
             },
             submit(){
               this.showResult("submitted", "Processing", "Please wait while processing your request.")
-              const res =   fetch(`/api/responseReassignedAPI/${this.form.itemId}/${this.form.approver[0].id}`).then(r=>{
+              const res =   fetch(`/api/responseReassignedAPI/${this.form.itemId}/${this.form.approver[0].id}/${this.form.applicationId}/${this.form.applicationModuleId}/${this.form.itemId}/${this.form.ApproveText}/${this.form.RejectText}`).then(r=>{
                      // Redirect to Home
-                console.log(r.status)
+         
                      switch (r.status) {
                        case 200:
                          this.showResult("success", "Successful", "Your response has been submitted.")

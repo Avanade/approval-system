@@ -53,7 +53,8 @@ func ResponseReassignedeHandler(w http.ResponseWriter, r *http.Request) {
 		appModuleGuid := params["appModuleGuid"]
 		itemGuid := params["itemGuid"]
 		isApproved := params["isApproved"]
-
+		ApproveText := params["ApproveText"]
+		RejectText := params["RejectText"]
 		sqlParamsIsAuth := map[string]interface{}{
 			"ApplicationId":       appGuid,
 			"ApplicationModuleId": appModuleGuid,
@@ -99,6 +100,8 @@ func ResponseReassignedeHandler(w http.ResponseWriter, r *http.Request) {
 					"IsApproved":          isApproved,
 					"Data":                resItems[0],
 					"RequireRemarks":      requireRemarks,
+					"ApproveText":         ApproveText,
+					"RejectText":          RejectText,
 				}
 				template.UseTemplate(&w, r, "responsereassign", data)
 			}
@@ -301,12 +304,17 @@ type TypPostParams struct {
 	ResponseDate string `json:"responseDate"`
 }
 type TypReeassignParams struct {
-	Id            string `json:"Id"`
-	ApproverEmail string `json:"ApproverEmail"`
-	Username      string `json:"Username"`
+	Id                  string `json:"Id"`
+	ApproverEmail       string `json:"ApproverEmail"`
+	Username            string `json:"Username"`
+	ApplicationId       string `json:"ApplicationId"`
+	ApplicationModuleId string `json:"ApplicationModuleId"`
+	ItemId              string `json:"ItemId"`
+	ApproveText         string `json:"ApproveText"`
+	RejectText          string `json:"RejectText"`
 }
 
-func PostReassignCallback(userEmail string, user string, itemId string) {
+func PostReassignCallback(userEmail string, user string, itemId string, ApplicationId string, ApplicationModuleId string, ItemId string, ApproveText string, RejectText string) {
 
 	db := connectSql()
 	defer db.Close()
@@ -322,9 +330,14 @@ func PostReassignCallback(userEmail string, user string, itemId string) {
 	ReassignCallbackUrl = res[0]["ReassignCallbackUrl"].(string)
 	if ReassignCallbackUrl != "" {
 		postParams := TypReeassignParams{
-			Id:            itemId,
-			ApproverEmail: userEmail,
-			Username:      user,
+			Id:                  itemId,
+			ApproverEmail:       userEmail,
+			Username:            user,
+			ApplicationId:       ApplicationId,
+			ApplicationModuleId: ApplicationModuleId,
+			ItemId:              ItemId,
+			ApproveText:         ApproveText,
+			RejectText:          RejectText,
 		}
 
 		ch2 := make(chan *http.Response)

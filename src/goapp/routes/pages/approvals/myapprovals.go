@@ -97,6 +97,11 @@ func ReAssignApproverHandler(w http.ResponseWriter, r *http.Request) {
 	id := params["itemGuid"]
 	approverEmail := params["approver"]
 
+	ApplicationId := params["ApplicationId"]
+	ApplicationModuleId := params["ApplicationModuleId"]
+	itemId := params["itemId"]
+	ApproveText := params["ApproveText"]
+	RejectText := params["RejectText"]
 	param := map[string]interface{}{
 
 		"Id":            id,
@@ -109,8 +114,8 @@ func ReAssignApproverHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go PostReassignCallback(approverEmail, user, id)
-
+	//go PostReassignCallback(approverEmail, user, id)
+	go PostReassignCallback(approverEmail, user, id, ApplicationId, ApplicationModuleId, itemId, ApproveText, RejectText)
 	return
 }
 func itemMapper(item map[string]interface{}, isApproved bool) TypItem {
@@ -121,7 +126,7 @@ func itemMapper(item map[string]interface{}, isApproved bool) TypItem {
 		approveUrl = fmt.Sprintf("/response/%s/%s/%s/1", item["ApplicationId"], item["ApplicationModuleId"], item["ItemId"])
 		rejectUrl = fmt.Sprintf("/response/%s/%s/%s/0", item["ApplicationId"], item["ApplicationModuleId"], item["ItemId"])
 	}
-	reassignUrl = fmt.Sprintf("/responseReassigned/%s/%s/%s/1", item["ApplicationId"], item["ApplicationModuleId"], item["ItemId"])
+	reassignUrl = fmt.Sprintf("/responseReassigned/%s/%s/%s/1/%s/%s", item["ApplicationId"], item["ApplicationModuleId"], item["ItemId"], item["ApproveText"], item["RejectText"])
 
 	return TypItem{
 		Application:     item["Application"],

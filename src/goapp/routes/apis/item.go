@@ -156,6 +156,7 @@ func GetItemsBy(itemType ItemType, itemStatus ItemStatus, user, search string, o
 	var items []Item
 
 	for _, v := range result {
+
 		item := Item{
 			Application:   v["Application"].(string),
 			Created:       v["Created"].(time.Time).String(),
@@ -186,7 +187,7 @@ func GetItemsBy(itemType ItemType, itemStatus ItemStatus, user, search string, o
 		} else {
 			item.ApproveUrl = fmt.Sprintf("/response/%s/%s/%s/1", v["ApplicationId"], v["ApplicationModuleId"], v["ItemId"])
 			item.RejectUrl = fmt.Sprintf("/response/%s/%s/%s/0", v["ApplicationId"], v["ApplicationModuleId"], v["ItemId"])
-			item.AllowReassignUrl = fmt.Sprintf("/responseReassigned/%s/%s/%s/1", v["ApplicationId"], v["ApplicationModuleId"], v["ItemId"])
+			item.AllowReassignUrl = fmt.Sprintf("/responseReassigned/%s/%s/%s/1/%s/%s", v["ApplicationId"], v["ApplicationModuleId"], v["ItemId"], v["ApproveText"].(string), v["RejectText"].(string))
 
 		}
 
