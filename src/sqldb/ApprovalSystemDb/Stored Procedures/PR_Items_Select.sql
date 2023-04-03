@@ -44,7 +44,7 @@ BEGIN
 			OR
 			(@IsApproved IS NULL AND i.IsApproved IS NULL)
 		)
-	ORDER BY Subject ASC
+	ORDER BY I.Created DESC
 	OFFSET @Offset ROWS 
 	FETCH NEXT @Filter ROWS ONLY
 END
