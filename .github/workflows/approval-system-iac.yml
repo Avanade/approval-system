@@ -148,12 +148,12 @@ jobs:
             ;;
             "uat")
           cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
-          ${{vars.IAC_PARAMETERS_TEST}}
+          ${{vars.IAC_PARAMETERS_UAT}}
           EOL
             ;;
             "prod")
           cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
-          ${{vars.IAC_PARAMETERS_TEST}}
+          ${{vars.IAC_PARAMETERS_PROD}}
           EOL
             ;;
           esac
