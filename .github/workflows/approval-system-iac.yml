@@ -142,17 +142,20 @@ jobs:
         run: |
           case ${{ github.event.inputs.selected_environment }} in
             "test")
-              echo "IAC_PARAMETERS=${{vars.IAC_PARAMETERS_TEST}}" >> $GITHUB_ENV
+              cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
+                ${{vars.IAC_PARAMETERS_TEST}}
+              EOL
             ;;
             "uat")
-              echo "IAC_PARAMETERS=${{vars.IAC_PARAMETERS_UAT}}" >> $GITHUB_ENV
+              cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
+                ${{vars.IAC_PARAMETERS_TEST}}
+              EOL
             ;;
             "prod")
-              echo "IAC_PARAMETERS=${{vars.IAC_PARAMETERS_PROD}}" >> $GITHUB_ENV
+              cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
+                ${{vars.IAC_PARAMETERS_TEST}}
+              EOL
             ;;
-            cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
-              ${{env.IAC_PARAMATERS}}
-            EOL
           esac
 
       - name: SUBSTITUTE VARIABLES
