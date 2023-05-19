@@ -22,7 +22,7 @@
 
                 "DOCKER_ENABLE_CI":"true",
                 "WEBSITES_ENABLE_APP_SERVICE_STORAGE":"false",
-                "CONTENT_SECURITY_POLICY":"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' graph.microsoft.com login.microsoftonline.com api.github.com prod-01.uksouth.logic.azure.com ava-gh-mgmt-test.azurewebsites.net; frame-src 'self' login.microsoftonline.com; img-src 'self' data:;",
+                "CONTENT_SECURITY_POLICY":"default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' graph.microsoft.com login.microsoftonline.com api.github.com prod-01.uksouth.logic.azure.com ava-gh-mgmt-test.azurewebsites.net; frame-src 'self' login.microsoftonline.com; img-src 'self' data:;"
             }
         }
     }
