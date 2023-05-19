@@ -142,16 +142,16 @@ jobs:
         run: |
           case ${{ github.event.inputs.selected_environment }} in
             "test")
-              IAC_PARAMETERS='${{vars.IAC_PARAMETERS_TEST}}'
+              echo "IAC_PARAMETERS=${{vars.IAC_PARAMETERS_TEST}}" >> $GITHUB_ENV
             ;;
             "uat")
-              IAC_PARAMETERS='${{vars.IAC_PARAMETERS_UAT}}'
+              echo "IAC_PARAMETERS=${{vars.IAC_PARAMETERS_UAT}}" >> $GITHUB_ENV
             ;;
             "prod")
-              IAC_PARAMETERS='${{vars.IAC_PARAMETERS_PROD}}'
+              echo "IAC_PARAMETERS=${{vars.IAC_PARAMETERS_PROD}}" >> $GITHUB_ENV
             ;;
             cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
-              $IAC_PARAMETERS
+              ${{env.IAC_PARAMATERS}}
             EOL
           esac
 
