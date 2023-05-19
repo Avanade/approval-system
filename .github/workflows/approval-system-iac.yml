@@ -142,19 +142,19 @@ jobs:
         run: |
           case ${{ github.event.inputs.selected_environment }} in
             "test")
-              cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
-                ${{vars.IAC_PARAMETERS_TEST}}
-              EOL
+          cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
+          ${{vars.IAC_PARAMETERS_TEST}}
+          EOL
             ;;
             "uat")
-              cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
-                ${{vars.IAC_PARAMETERS_TEST}}
-              EOL
+          cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
+          ${{vars.IAC_PARAMETERS_TEST}}
+          EOL
             ;;
             "prod")
-              cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
-                ${{vars.IAC_PARAMETERS_TEST}}
-              EOL
+          cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
+          ${{vars.IAC_PARAMETERS_TEST}}
+          EOL
             ;;
           esac
 
