@@ -1,0 +1,46 @@
+name: Deploy IAC Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      selected_environment:
+        type: choice
+        description: SELECT ENVIRONMENT
+        required: true
+        default: test
+        options: 
+        - prod
+        - uat
+        - test
+      disable_data_loss:
+        type: boolean
+        description: Block on possible data loss
+        required: true
+        default: true
+      db_infra:
+        type: boolean
+        description: Run deployment of SQL Server resource
+        required: true
+        default: true
+      db_project:
+        type: boolean
+        description: Run build and publish the SQL Project
+        required: true
+        default: true
+      app_infra:
+        type: boolean
+        description: Run deployment of AppServicePlan and AppService
+        required: true
+        default: true
+
+env:
+    PROJECT_NAME: ava-approval-system
+    ACTIVE_ENV: ${{github.event.inputs.selected_environment}}
+
+jobs:
+    deploy-server-and-database:
+        runs-on: ubuntu-latest
+        outputs:
+            database_name: ${{ steps.create_database.outputs.database_name }}
+        steps:
+            - uses: actions/checkout@v2

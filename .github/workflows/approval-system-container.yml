@@ -1,0 +1,27 @@
+name:  Docker - Approval System Container
+
+on:
+    workflow_dispatch:
+        inputs:
+            selected_environment:
+                type: choice
+                description: SELECT ENVIRONMENT
+                required: true
+                default: test
+                options: 
+                - prod
+                - uat
+                - test
+
+env:
+    APPSERVICE_NAME: ${{github.event.inputs.selected_environment}}-approval-system-app
+
+defaults:
+    run:
+        working-directory: src/goapp
+
+jobs:
+    build-goapp-container:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
