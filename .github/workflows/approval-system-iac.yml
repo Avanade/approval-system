@@ -138,6 +138,23 @@ jobs:
             ;;
           esac
 
+      - name: SET THE IAC PARAMETERS
+        run: |
+          case ${{ github.event.inputs.selected_environment }} in
+            "test")
+              IAC_PARAMETERS='${{vars.IAC_PARAMETERS_TEST}}'
+            ;;
+            "uat")
+              IAC_PARAMETERS='${{vars.IAC_PARAMETERS_UAT}}'
+            ;;
+            "prod")
+              IAC_PARAMETERS='${{vars.IAC_PARAMETERS_PROD}}'
+            ;;
+            cat > ./.bicep/webapp/${{ github.event.inputs.selected_environment }}-parameters.json <<EOL
+              $IAC_PARAMETERS
+            EOL
+          esac
+
       - name: SUBSTITUTE VARIABLES
         uses: microsoft/variable-substitution@v1 
         with:
