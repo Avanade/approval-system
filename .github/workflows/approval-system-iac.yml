@@ -1,4 +1,5 @@
 name: Deploy IAC Workflow
+run-name:  Deploy IAC Workflow [${{inputs.selected_environment}}]
 
 on:
   workflow_dispatch:
