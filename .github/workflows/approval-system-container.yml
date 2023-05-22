@@ -1,4 +1,5 @@
 name:  Docker - Approval System Container
+run-name: Docker - Approval System Container [${{inputs.selected_environment}}]
 
 on:
     workflow_dispatch:
