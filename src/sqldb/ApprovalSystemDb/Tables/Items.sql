@@ -15,6 +15,7 @@ CREATE TABLE [dbo].[Items] (
     [CreatedBy]           VARCHAR (255)    NULL,
     [Modified]            DATETIME         CONSTRAINT [DF_Items_Modified] DEFAULT (getdate()) NOT NULL,
     [ModifiedBy]          VARCHAR (255)    NULL,
+    [RespondedBy]         VARCHAR(100),
     CONSTRAINT [PK_Items] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_Items_ApplicationModules] FOREIGN KEY ([ApplicationModuleId]) REFERENCES [dbo].[ApplicationModules] ([Id])
 );

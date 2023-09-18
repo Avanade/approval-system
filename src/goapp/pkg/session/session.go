@@ -1,21 +1,22 @@
 package session
 
 import (
-	"strings"
 	"context"
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
+	"main/pkg/sql"
 	"math"
 	"net/http"
 	"os"
+	"strings"
 	"time"
-	"main/pkg/sql"
 
 	auth "main/pkg/authentication"
+
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
-	"github.com/gorilla/mux"
 )
 
 var (
@@ -30,7 +31,7 @@ func InitializeSession() {
 
 func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	var url string
-	url = fmt.Sprintf("%v",r.URL)
+	url = fmt.Sprintf("%v", r.URL)
 	if strings.HasPrefix(url, "/response/") {
 		authReq := true
 		params := mux.Vars(r)
@@ -43,9 +44,9 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 			return
 		}
 	}
-	
+
 	// Check session if there is saved user profile
-	url = fmt.Sprintf("/loginredirect?redirect=%v",r.URL)
+	url = fmt.Sprintf("/loginredirect?redirect=%v", r.URL)
 	session, err := Store.Get(r, "auth-session")
 	if err != nil {
 		c := http.Cookie{
@@ -110,6 +111,18 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 		}
 		next(w, r)
 	}
+}
+
+func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	// Check header if authenticated
+	_, err := auth.VerifyAccessToken(r)
+	// RETURN ERROR
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// RETURN SUCCESS
+	next(w, r)
 }
 
 func GetState(w http.ResponseWriter, r *http.Request) (string, error) {

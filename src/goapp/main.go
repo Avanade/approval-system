@@ -36,7 +36,7 @@ func main() {
 		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
 		STSSeconds:            31536000,                        // Strict-Transport-Security
 		STSIncludeSubdomains:  true,                            // Strict-Transport-Security,
-		IsDevelopment:         false,
+		IsDevelopment:         true,
 	})
 
 	// Set environment variables
@@ -65,6 +65,9 @@ func main() {
 	muxApi.Handle("/search/users/{search}", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
 	muxApi.Handle("/responseReassignedAPI/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{itemId}/{ApproveText}/{RejectText}", loadAzAuthPage(rtApprovals.ReAssignApproverHandler))
 
+	// mux.Handle("/utility/fillout/approvalrequest/approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
+	mux.HandleFunc("/utility/fillout/approvalrequest/approvers", rtApi.FillOutApprovalRequestApprovers)
+
 	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
 
 	go checkFailedCallbacks()
@@ -82,6 +85,13 @@ func main() {
 func loadAzAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
 	return negroni.New(
 		negroni.HandlerFunc(session.IsAuthenticated),
+		negroni.Wrap(http.HandlerFunc(f)),
+	)
+}
+
+func loadGuidAuthApi(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
+	return negroni.New(
+		negroni.HandlerFunc(session.IsGuidAuthenticated),
 		negroni.Wrap(http.HandlerFunc(f)),
 	)
 }
