@@ -13,6 +13,7 @@ BEGIN
 		INNER JOIN ApplicationModules am ON i.ApplicationModuleId = am.Id
 		INNER JOIN Applications a ON am.ApplicationId = a.Id
 		INNER JOIN ApprovalTypes t ON t.Id = am.ApprovalTypeId
+		INNER JOIN ApprovalRequestApprovers ara ON i.Id = ara.ItemId
 	  WHERE
 		Subject LIKE '%'+@Search+'%' AND
 		(
@@ -20,7 +21,14 @@ BEGIN
 			OR 
 			(@ItemType = 0 AND (@User IS NULL OR i.CreatedBy = @User))
 			OR
-			(@ItemType = 1 AND (@User IS NULL OR i.ApproverEmail = @User))
+			(
+				@ItemType = 1 AND (
+					@User IS NULL OR (
+						ara.ApproverEmail = @User OR
+						i.ApproverEmail = @User
+					)
+				)
+			)
 		) AND
 		(
 			(@IsApproved = -1 OR i.IsApproved = @IsApproved) 

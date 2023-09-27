@@ -65,8 +65,7 @@ func main() {
 	muxApi.Handle("/search/users/{search}", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
 	muxApi.Handle("/responseReassignedAPI/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{itemId}/{ApproveText}/{RejectText}", loadAzAuthPage(rtApprovals.ReAssignApproverHandler))
 
-	// mux.Handle("/utility/fillout/approvalrequest/approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
-	mux.HandleFunc("/utility/fillout/approvalrequest/approvers", rtApi.FillOutApprovalRequestApprovers)
+	mux.Handle("/utility/fillout/approvalrequest/approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
 
 	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
 

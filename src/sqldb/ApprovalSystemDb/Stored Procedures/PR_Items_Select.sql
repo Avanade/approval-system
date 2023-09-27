@@ -39,7 +39,14 @@ BEGIN
 			OR 
 			(@ItemType = 0 AND (@User IS NULL OR i.CreatedBy = @User))
 			OR
-			(@ItemType = 1 AND (@User IS NULL OR ara.ApproverEmail = @User))
+			(
+				@ItemType = 1 AND (
+					@User IS NULL OR (
+						ara.ApproverEmail = @User OR
+						i.ApproverEmail = @User
+					)
+				)
+			)
 		) AND
 		(
 			(@IsApproved = -1 OR i.IsApproved = @IsApproved) 
