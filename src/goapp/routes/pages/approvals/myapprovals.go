@@ -73,6 +73,11 @@ func MyApprovalsHandler(w http.ResponseWriter, r *http.Request) {
 
 func ReAssignApproverHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := session.Store.Get(r, "auth-session")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var profile map[string]interface{}
 	u := session.Values["profile"]
 	profile, ok := u.(map[string]interface{})
@@ -111,11 +116,11 @@ func ReAssignApproverHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, err2 := db.ExecuteStoredProcedure("PR_Items_Update_ApproverEmail", param)
 	if err2 != nil {
+		http.Error(w, err2.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	go PostReassignCallback(approverEmail, user, id, ApplicationId, ApplicationModuleId, itemId, ApproveText, RejectText)
-	return
 }
 func itemMapper(item map[string]interface{}, isApproved bool) TypItem {
 	var approveUrl string
