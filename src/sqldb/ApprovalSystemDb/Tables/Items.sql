@@ -1,9 +1,9 @@
 CREATE TABLE [dbo].[Items] (
     [Id]                  UNIQUEIDENTIFIER CONSTRAINT [DF_Items_Id] DEFAULT (newid()) NOT NULL,
     [ApplicationModuleId] UNIQUEIDENTIFIER NOT NULL,
-    [ApproverEmail]       VARCHAR (100)    NOT NULL,
+    [ApproverEmail]       VARCHAR (100)    NULL, -- OBSOLETE
     [Subject]             VARCHAR (100)    NULL,
-    [Body]             VARCHAR (8000)    NULL,
+    [Body]                VARCHAR (8000)    NULL,
     [DateSent]            DATETIME         NULL,
     [DateResponded]       DATETIME         NULL,
     [IsApproved]          BIT              NULL,
