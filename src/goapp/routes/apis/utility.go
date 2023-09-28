@@ -16,6 +16,9 @@ func FillOutApprovalRequestApprovers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, item := range items {
+		if item["ApproverEmail"] == nil {
+			continue
+		}
 		id := item["Id"].(string)
 		err = InsertApprovalRequestApprover(ApprovalRequestApprover{
 			ItemId:        id,
