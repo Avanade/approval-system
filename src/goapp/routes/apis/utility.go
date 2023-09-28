@@ -23,16 +23,12 @@ func FillOutApprovalRequestApprovers(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
 		}
 
 		if item["DateResponded"] != nil {
 			err = UpdateItemById(id, item["ApproverEmail"].(string))
 			if err != nil {
 				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
 			}
 		}
 	}
