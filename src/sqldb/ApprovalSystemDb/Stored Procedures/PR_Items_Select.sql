@@ -10,11 +10,11 @@ CREATE PROCEDURE [dbo].[PR_Items_Select]
 AS
 BEGIN
 	SELECT
-		 dbo.UidToString(a.Id) AS ApplicationId
+		DISTINCT dbo.UidToString(i.Id) AS ItemId
+		, dbo.UidToString(a.Id) AS ApplicationId
 		, a.Name AS Application
 		, dbo.UidToString(am.Id) AS ApplicationModuleId
 		, am.Name AS Module
-		, dbo.UidToString(i.Id) AS ItemId
 		, i.RespondedBy
 		, Subject
 		, Body
@@ -43,7 +43,7 @@ BEGIN
 				@ItemType = 1 AND (
 					@User IS NULL OR (
 						ara.ApproverEmail = @User OR
-						i.ApproverEmail = @User
+						i.ApproverEmail = @User -- OBSOLETE
 					)
 				)
 			)
