@@ -28,7 +28,7 @@ func FillOutApprovalRequestApprovers(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 		}
 
-		if item["DateResponded"] != nil {
+		if item["DateResponded"] != nil && item["ApproverEmail"] != nil {
 			err = UpdateItemById(id, item["ApproverEmail"].(string))
 			if err != nil {
 				log.Println(err.Error())
