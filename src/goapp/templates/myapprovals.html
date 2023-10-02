@@ -164,7 +164,7 @@
             }" class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
               <p> Approver/s: <span x-text="approvers"><span></p>
             </div>
-            <div class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+            <div x-show="item.respondedBy" class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
               <p> Responded by: <span x-text="item.respondedBy"><span></p>
             </div>
           </div>
