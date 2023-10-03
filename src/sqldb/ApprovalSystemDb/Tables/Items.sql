@@ -1,9 +1,9 @@
 CREATE TABLE [dbo].[Items] (
     [Id]                  UNIQUEIDENTIFIER CONSTRAINT [DF_Items_Id] DEFAULT (newid()) NOT NULL,
     [ApplicationModuleId] UNIQUEIDENTIFIER NOT NULL,
-    [ApproverEmail]       VARCHAR (100)    NOT NULL,
+    [ApproverEmail]       VARCHAR (100)    NULL, -- OBSOLETE
     [Subject]             VARCHAR (100)    NULL,
-    [Body]             VARCHAR (8000)    NULL,
+    [Body]                VARCHAR (8000)    NULL,
     [DateSent]            DATETIME         NULL,
     [DateResponded]       DATETIME         NULL,
     [IsApproved]          BIT              NULL,
@@ -15,6 +15,7 @@ CREATE TABLE [dbo].[Items] (
     [CreatedBy]           VARCHAR (255)    NULL,
     [Modified]            DATETIME         CONSTRAINT [DF_Items_Modified] DEFAULT (getdate()) NOT NULL,
     [ModifiedBy]          VARCHAR (255)    NULL,
+    [RespondedBy]         VARCHAR(100),
     CONSTRAINT [PK_Items] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_Items_ApplicationModules] FOREIGN KEY ([ApplicationModuleId]) REFERENCES [dbo].[ApplicationModules] ([Id])
 );

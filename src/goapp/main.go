@@ -23,6 +23,11 @@ import (
 )
 
 func main() {
+	// Set environment variables
+	err := godotenv.Load()
+	if err != nil {
+		log.Print(err.Error())
+	}
 
 	secureMiddleware := secure.New(secure.Options{
 		SSLRedirect:           true,                                            // Strict-Transport-Security
@@ -36,14 +41,8 @@ func main() {
 		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
 		STSSeconds:            31536000,                        // Strict-Transport-Security
 		STSIncludeSubdomains:  true,                            // Strict-Transport-Security,
-		IsDevelopment:         false,
+		IsDevelopment:         os.Getenv("IS_DEVELOPMENT") == "true",
 	})
-
-	// Set environment variables
-	err := godotenv.Load()
-	if err != nil {
-		log.Print(err.Error())
-	}
 
 	// Create session and GitHubClient
 	session.InitializeSession()
@@ -65,6 +64,8 @@ func main() {
 	muxApi.Handle("/search/users/{search}", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
 	muxApi.Handle("/responseReassignedAPI/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{itemId}/{ApproveText}/{RejectText}", loadAzAuthPage(rtApprovals.ReAssignApproverHandler))
 
+	muxApi.Handle("/utility/fillout/approvalrequest/approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
+
 	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
 
 	go checkFailedCallbacks()
@@ -82,6 +83,13 @@ func main() {
 func loadAzAuthPage(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
 	return negroni.New(
 		negroni.HandlerFunc(session.IsAuthenticated),
+		negroni.Wrap(http.HandlerFunc(f)),
+	)
+}
+
+func loadGuidAuthApi(f func(w http.ResponseWriter, r *http.Request)) *negroni.Negroni {
+	return negroni.New(
+		negroni.HandlerFunc(session.IsGuidAuthenticated),
 		negroni.Wrap(http.HandlerFunc(f)),
 	)
 }

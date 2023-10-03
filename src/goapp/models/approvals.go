@@ -1,12 +1,13 @@
 package models
 
 type TypRequestApproval struct {
-	ApplicationId       string `json:"applicationId"`
-	ApplicationModuleId string `json:"applicationModuleId"`
-	RequesterEmail      string `json:"requesterEmail"`
-	Email               string `json:"email"`
-	Subject             string `json:"subject"`
-	Body                string `json:"body"`
+	ApplicationId       string   `json:"applicationId"`
+	ApplicationModuleId string   `json:"applicationModuleId"`
+	RequesterEmail      string   `json:"requesterEmail"`
+	Email               string   `json:"email"` // Obsolete
+	Emails              []string `json:"emails"`
+	Subject             string   `json:"subject"`
+	Body                string   `json:"body"`
 }
 
 type TypRequestProcess struct {
