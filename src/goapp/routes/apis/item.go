@@ -31,21 +31,23 @@ const (
 )
 
 type Item struct {
-	Application      string `json:"application"`
-	ApproverRemarks  string `json:"approverRemarks"`
-	Body             string `json:"body"`
-	Created          string `json:"created"`
-	DateResponded    string `json:"dateResponded"`
-	DateSent         string `json:"dateSent"`
-	IsApproved       bool   `json:"isApproved"`
-	Module           string `json:"module"`
-	Subject          string `json:"subject"`
-	ApproveText      string `json:"approveText"`
-	RejectText       string `json:"rejectText"`
-	ApproveUrl       string `json:"approveUrl"`
-	RejectUrl        string `json:"rejectUrl"`
-	AllowReassign    bool   `json:"allowReassign"`
-	AllowReassignUrl string `json:"allowReassignUrl"`
+	Application      string   `json:"application"`
+	ApproverRemarks  string   `json:"approverRemarks"`
+	Body             string   `json:"body"`
+	Created          string   `json:"created"`
+	DateResponded    string   `json:"dateResponded"`
+	DateSent         string   `json:"dateSent"`
+	IsApproved       bool     `json:"isApproved"`
+	Module           string   `json:"module"`
+	Subject          string   `json:"subject"`
+	ApproveText      string   `json:"approveText"`
+	RejectText       string   `json:"rejectText"`
+	ApproveUrl       string   `json:"approveUrl"`
+	RejectUrl        string   `json:"rejectUrl"`
+	AllowReassign    bool     `json:"allowReassign"`
+	AllowReassignUrl string   `json:"allowReassignUrl"`
+	RespondedBy      string   `json:"respondedBy"`
+	Approvers        []string `json:"approvers"`
 }
 
 type Response struct {
@@ -193,6 +195,21 @@ func GetItemsBy(itemType ItemType, itemStatus ItemStatus, user, search string, o
 
 		if v["Subject"] != nil {
 			item.Subject = v["Subject"].(string)
+		}
+
+		if v["RespondedBy"] != nil {
+			item.RespondedBy = v["RespondedBy"].(string)
+		}
+
+		ApproverRequestApproversParams := make(map[string]interface{})
+		ApproverRequestApproversParams["ItemId"] = v["ItemId"].(string)
+		approvers, errApprovers := db.ExecuteStoredProcedureWithResult("PR_ApprovalRequestApprovers_Select_ByItemId", ApproverRequestApproversParams)
+		if errApprovers != nil {
+			return []Item{}, 0, errApprovers
+		}
+
+		for _, approver := range approvers {
+			item.Approvers = append(item.Approvers, approver["ApproverEmail"].(string))
 		}
 
 		items = append(items, item)

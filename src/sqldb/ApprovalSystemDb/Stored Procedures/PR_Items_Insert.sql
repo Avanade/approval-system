@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[PR_Items_Insert]
 	@ApplicationModuleId uniqueidentifier,
-	@ApproverEmail varchar(100),
+	@ApproverEmail varchar(100) = NULL,
 	@Subject varchar(100),
 	@Body varchar(8000),
 	@RequesterEmail varchar(100)

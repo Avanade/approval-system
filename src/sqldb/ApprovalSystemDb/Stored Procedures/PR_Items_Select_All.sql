@@ -3,7 +3,8 @@ AS
 BEGIN
     SELECT
         CONVERT(VARCHAR(36),Id) AS Id,
-        ApproverEmail
+        ApproverEmail,
+        DateResponded
     FROM 
         [dbo].[Items]
 END

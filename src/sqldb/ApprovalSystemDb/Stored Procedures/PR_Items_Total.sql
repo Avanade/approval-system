@@ -8,23 +8,35 @@ CREATE PROCEDURE [dbo].[PR_Items_Total]
 AS
 BEGIN
 	SELECT
-		COUNT(i.Id) AS Total
-	  FROM [dbo].[Items] i
-		INNER JOIN ApplicationModules am ON i.ApplicationModuleId = am.Id
-		INNER JOIN Applications a ON am.ApplicationId = a.Id
-		INNER JOIN ApprovalTypes t ON t.Id = am.ApprovalTypeId
-	  WHERE
-		Subject LIKE '%'+@Search+'%' AND
-		(
-			@ItemType IS NULL 
-			OR 
-			(@ItemType = 0 AND (@User IS NULL OR i.CreatedBy = @User))
-			OR
-			(@ItemType = 1 AND (@User IS NULL OR i.ApproverEmail = @User))
-		) AND
-		(
-			(@IsApproved = -1 OR i.IsApproved = @IsApproved) 
-			OR
-			(@IsApproved IS NULL AND i.IsApproved IS NULL)
-		)
+		COUNT(*) AS Total
+	FROM (
+		SELECT
+			DISTINCT i.Id
+		FROM [dbo].[Items] i
+			INNER JOIN ApplicationModules am ON i.ApplicationModuleId = am.Id
+			INNER JOIN Applications a ON am.ApplicationId = a.Id
+			INNER JOIN ApprovalTypes t ON t.Id = am.ApprovalTypeId
+			INNER JOIN ApprovalRequestApprovers ara ON i.Id = ara.ItemId
+		WHERE
+			Subject LIKE '%'+@Search+'%' AND
+			(
+				@ItemType IS NULL 
+				OR 
+				(@ItemType = 0 AND (@User IS NULL OR i.CreatedBy = @User))
+				OR
+				(
+					@ItemType = 1 AND (
+						@User IS NULL OR (
+							ara.ApproverEmail = @User OR
+							i.ApproverEmail = @User -- OBSOLETE
+						)
+					)
+				)
+			) AND
+			(
+				(@IsApproved = -1 OR i.IsApproved = @IsApproved) 
+				OR
+				(@IsApproved IS NULL AND i.IsApproved IS NULL)
+			)
+		) AS Items
 END
