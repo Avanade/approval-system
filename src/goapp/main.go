@@ -23,6 +23,11 @@ import (
 )
 
 func main() {
+	// Set environment variables
+	err := godotenv.Load()
+	if err != nil {
+		log.Print(err.Error())
+	}
 
 	secureMiddleware := secure.New(secure.Options{
 		SSLRedirect:           true,                                            // Strict-Transport-Security
@@ -36,14 +41,8 @@ func main() {
 		PermissionsPolicy:     "fullscreen=(), geolocation=()", // Permissions-Policy
 		STSSeconds:            31536000,                        // Strict-Transport-Security
 		STSIncludeSubdomains:  true,                            // Strict-Transport-Security,
-		IsDevelopment:         true,
+		IsDevelopment:         os.Getenv("IS_DEVELOPMENT") == "true",
 	})
-
-	// Set environment variables
-	err := godotenv.Load()
-	if err != nil {
-		log.Print(err.Error())
-	}
 
 	// Create session and GitHubClient
 	session.InitializeSession()
