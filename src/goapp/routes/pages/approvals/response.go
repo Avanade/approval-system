@@ -205,7 +205,7 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 		handleErrorReturn(w, err)
 		authReq := true
 		authReq = session.IsAuthRequired(req.ApplicationModuleId)
-		if authReq == false {
+		if !authReq {
 			verification[0]["IsValid"] = "1"
 		}
 
@@ -251,9 +251,7 @@ func postCallback(itemId string) {
 	handleError(err)
 	approvalDate := res[0]["DateResponded"].(time.Time)
 
-	var callbackUrl string
-
-	callbackUrl = res[0]["CallbackUrl"].(string)
+	callbackUrl := res[0]["CallbackUrl"].(string)
 
 	if callbackUrl != "" {
 		postParams := TypPostParams{
@@ -261,6 +259,7 @@ func postCallback(itemId string) {
 			IsApproved:   res[0]["IsApproved"].(bool),
 			Remarks:      res[0]["ApproverRemarks"].(string),
 			ResponseDate: approvalDate.Format("2006-01-02T15:04:05.000Z"),
+			RespondedBy:  res[0]["RespondedBy"].(string),
 		}
 
 		ch := make(chan *http.Response)
@@ -290,6 +289,10 @@ func postCallback(itemId string) {
 
 func getHttpPostResponseStatus(url string, data interface{}, ch chan *http.Response) {
 	jsonReq, err := json.Marshal(data)
+	if err != nil {
+		ch <- nil
+	}
+
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(jsonReq))
 	if err != nil {
 		ch <- nil
@@ -302,6 +305,7 @@ type TypPostParams struct {
 	IsApproved   bool   `json:"isApproved"`
 	Remarks      string `json:"remarks"`
 	ResponseDate string `json:"responseDate"`
+	RespondedBy  string `json:"respondedBy"`
 }
 type TypReeassignParams struct {
 	Id                  string `json:"Id"`
@@ -325,9 +329,7 @@ func PostReassignCallback(userEmail string, user string, itemId string, Applicat
 	res, err := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", queryParams)
 	handleError(err)
 
-	var ReassignCallbackUrl string
-
-	ReassignCallbackUrl = res[0]["ReassignCallbackUrl"].(string)
+	ReassignCallbackUrl := res[0]["ReassignCallbackUrl"].(string)
 	if ReassignCallbackUrl != "" {
 		postParams := TypReeassignParams{
 			Id:                  itemId,

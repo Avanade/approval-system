@@ -12,13 +12,18 @@ IF EXISTS (
 	FROM Applications A
 	INNER JOIN ApplicationModules AM ON A.Id = AM.ApplicationId
 	INNER JOIN Items I ON AM.Id = I.ApplicationModuleId
+	INNER JOIN ApprovalRequestApprovers ARA ON I.Id = ARA.ItemId
 	WHERE
 	A.IsActive = 1
 	AND AM.IsActive = 1
 	AND A.Id = @ApplicationId
 	AND AM.Id = @ApplicationModuleId
 	AND I.Id = @ItemId
-	AND I.ApproverEmail = @ApproverEmail
+	AND (
+		I.ApproverEmail = @ApproverEmail  -- OBSOLETE
+		OR
+		ARA.ApproverEmail = @ApproverEmail
+	)
 	AND I.IsApproved IS NULL)
 	
 	BEGIN

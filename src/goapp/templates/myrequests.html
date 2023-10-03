@@ -84,6 +84,13 @@
                       </p>
                     </div>
                   </div>
+                  <div class="mt-2 sm:flex sm:justify-between">
+                    <div x-data="{
+                      approvers: item.approvers.toString()
+                    }" class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                      <p> Approver/s: <span x-text="approvers"><span></p>
+                    </div>
+                  </div>
                   <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
                     <div x-html="item.body" class="text-sm"></div>
                   </div>
@@ -122,6 +129,16 @@
                         Responded on
                         <time x-data="{date: new Date(item.dateResponded.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
                       </p>
+                    </div>
+                  </div>
+                  <div class="mt-2 sm:flex sm:justify-between">
+                    <div x-data="{
+                      approvers: item.approvers.toString()
+                    }" class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                      <p> Approver/s: <span x-text="approvers"><span></p>
+                    </div>
+                    <div x-show="item.respondedBy" class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                      <p> Responded by: <span x-text="item.respondedBy"><span></p>
                     </div>
                   </div>
                   <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">

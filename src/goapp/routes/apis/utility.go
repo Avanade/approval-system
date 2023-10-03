@@ -16,23 +16,22 @@ func FillOutApprovalRequestApprovers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, item := range items {
+		if item["ApproverEmail"] == nil {
+			continue
+		}
 		id := item["Id"].(string)
-		// err = InsertApprovalRequestApprover(ApprovalRequestApprover{
-		// 	ItemId:        id,
-		// 	ApproverEmail: item["ApproverEmail"].(string),
-		// })
-		// if err != nil {
-		// 	log.Println(err.Error())
-		// 	http.Error(w, err.Error(), http.StatusBadRequest)
-		// 	return
-		// }
+		err = InsertApprovalRequestApprover(ApprovalRequestApprover{
+			ItemId:        id,
+			ApproverEmail: item["ApproverEmail"].(string),
+		})
+		if err != nil {
+			log.Println(err.Error())
+		}
 
-		if item["DateResponded"] != nil {
+		if item["DateResponded"] != nil && item["ApproverEmail"] != nil {
 			err = UpdateItemById(id, item["ApproverEmail"].(string))
 			if err != nil {
 				log.Println(err.Error())
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
 			}
 		}
 	}
@@ -56,6 +55,7 @@ func GetAllItems() ([]map[string]interface{}, error) {
 }
 
 func InsertApprovalRequestApprover(approvalRequestApprover ApprovalRequestApprover) error {
+
 	db := ConnectDb()
 	defer db.Close()
 

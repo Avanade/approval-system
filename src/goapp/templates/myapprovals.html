@@ -88,6 +88,13 @@
                       </p>
                     </div>
                   </div>
+                  <div class="mt-2 sm:flex sm:justify-between">
+                    <div x-data="{
+                      approvers: item.approvers.toString()
+                    }" class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                      <p> Approver/s: <span x-text="approvers"><span></p>
+                    </div>
+                  </div>
                   <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
                     <div x-html="item.body" class="text-sm"></div>
                     <div>
@@ -151,6 +158,16 @@
               </p>
             </div>
           </div>
+          <div class="mt-2 sm:flex sm:justify-between">
+            <div x-data="{
+              approvers: item.approvers.toString()
+            }" class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+              <p> Approver/s: <span x-text="approvers"><span></p>
+            </div>
+            <div x-show="item.respondedBy" class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+              <p> Responded by: <span x-text="item.respondedBy"><span></p>
+            </div>
+          </div>
           <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
             <div x-html="item.body" class="text-sm"></div>
             <div class="border-[1px] mt-2 p-3 rounded-md">
@@ -177,7 +194,7 @@
 
     const res = await fetch(`/api/items/type/${type}/status/${status}?filter=${option.filter}&offset=${offset}&search=${search}`)
     const data = await res.json()
- 
+    console.log(data)
     return data
   }
    

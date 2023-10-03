@@ -10,5 +10,6 @@ AS
 		ApproverRemarks = @ApproverRemarks,
 		DateResponded = GETDATE(),
 		Modified = GETDATE(),
-		ModifiedBy = @Username
+		ModifiedBy = @Username,
+		RespondedBy = @Username
 	WHERE Id = @Id

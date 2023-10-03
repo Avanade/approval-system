@@ -10,11 +10,12 @@ CREATE PROCEDURE [dbo].[PR_Items_Select]
 AS
 BEGIN
 	SELECT
-		 dbo.UidToString(a.Id) AS ApplicationId
+		DISTINCT dbo.UidToString(i.Id) AS ItemId
+		, dbo.UidToString(a.Id) AS ApplicationId
 		, a.Name AS Application
 		, dbo.UidToString(am.Id) AS ApplicationModuleId
 		, am.Name AS Module
-		, dbo.UidToString(i.Id) AS ItemId
+		, i.RespondedBy
 		, Subject
 		, Body
 		, DateSent
@@ -29,6 +30,7 @@ BEGIN
 		INNER JOIN ApplicationModules am ON i.ApplicationModuleId = am.Id
 		INNER JOIN Applications a ON am.ApplicationId = a.Id
 		INNER JOIN ApprovalTypes t ON t.Id = am.ApprovalTypeId
+		INNER JOIN ApprovalRequestApprovers ara ON i.Id = ara.ItemId
 	  WHERE
 		Subject LIKE '%'+@Search+'%'
 		AND
@@ -37,7 +39,14 @@ BEGIN
 			OR 
 			(@ItemType = 0 AND (@User IS NULL OR i.CreatedBy = @User))
 			OR
-			(@ItemType = 1 AND (@User IS NULL OR i.ApproverEmail = @User))
+			(
+				@ItemType = 1 AND (
+					@User IS NULL OR (
+						ara.ApproverEmail = @User OR
+						i.ApproverEmail = @User -- OBSOLETE
+					)
+				)
+			)
 		) AND
 		(
 			(@IsApproved = -1 OR i.IsApproved = @IsApproved) 
