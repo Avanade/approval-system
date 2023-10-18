@@ -5,6 +5,7 @@ CREATE TABLE [dbo].[ApplicationModules] (
     [IsActive]       BIT              CONSTRAINT [DF_ApplicationModules_IsActive] DEFAULT ((1)) NOT NULL,
     [CallbackUrl]    VARCHAR (100)    NULL,
     [ReassignCallbackUrl] [varchar](100) NULL,
+    [ExportUrl]      VARCHAR (255)    NULL,
     [RequireRemarks] BIT              CONSTRAINT [DF_ApplicationModules_RequireRemarks] DEFAULT ((1)) NOT NULL,
     [ApprovalTypeId] INT              NOT NULL DEFAULT 1,
     [AllowReassign] [bit] NULL,
@@ -17,4 +18,3 @@ CREATE TABLE [dbo].[ApplicationModules] (
     CONSTRAINT [FK_ApplicationModules_Applications] FOREIGN KEY ([ApplicationId]) REFERENCES [dbo].[Applications] ([Id]),
     CONSTRAINT [FK_ApplicationModules_ApprovalTypes] FOREIGN KEY ([ApprovalTypeId]) REFERENCES [dbo].[ApprovalTypes] ([Id])
 );
-
