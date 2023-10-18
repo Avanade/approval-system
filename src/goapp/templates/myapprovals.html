@@ -56,7 +56,7 @@
         this.activeTab = this.tabs[tab];
       },
       exportMyApprovals(username, exportUrls){
-        window.location.href = exportUrls[0].replace('{username}', username); 
+        window.open(exportUrls[0].replace('{username}', username), '_blank') 
       }
     }
   }
