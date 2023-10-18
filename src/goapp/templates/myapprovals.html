@@ -2,6 +2,15 @@
 <div id="pageTitle">Approval Requests Assigned To You</div>
 
 <div class="px-4" x-data="initHome()">
+  <div class="relative w-full">
+    <div class="absolute inline-block text-left right-0">
+      <button
+        class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded" 
+        x-on:click="exportMyApprovals(profile.username, data.ExportUrls)">
+        EXPORT PROJECT APPROVALS
+      </button> 
+    </div>
+  </div>
   <nav class="flex space-x-4 mb-3" aria-label="Tabs">
     <div class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer" x-bind:class="activeTab == tabs[0] ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'" x-on:click="onChangeTabs(0)"> Pending Request</div>
     <div class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer" x-bind:class="activeTab == tabs[1] ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'" x-on:click="onChangeTabs(1)"> Closed Request</div>
@@ -34,16 +43,20 @@
 
 <script src="/public/components/list.js"></script>
 <script type="text/javascript">
-    const initHome = () => {
+  const initHome = () => {
     return {
       tabs : ['pending', 'closed'],
       activeTab : '',
       currentSelected: -1,
+      data: JSON.parse('{{ . }}'),
       async init(){
         this.activeTab = this.tabs[0];
       },
       onChangeTabs(tab){
         this.activeTab = this.tabs[tab];
+      },
+      exportMyApprovals(username, exportUrls){
+        window.location.href = exportUrls[0].replace('{username}', username); 
       }
     }
   }
@@ -194,10 +207,7 @@
 
     const res = await fetch(`/api/items/type/${type}/status/${status}?filter=${option.filter}&offset=${offset}&search=${search}`)
     const data = await res.json()
-    console.log(data)
     return data
   }
-   
-
 </script>
 {{ end }}
