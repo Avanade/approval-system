@@ -97,13 +97,20 @@ func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Send email to approver
-			emailData := email.TypEmailMessage{
-				To:      to,
+			m := email.Message{
 				Subject: req.Subject,
-				Body:    emailBody,
+				Body: email.Body{
+					Content: emailBody,
+					Type:    email.HtmlMessageType,
+				},
+				ToRecipients: []email.Recipient{
+					{
+						Email: to,
+					},
+				},
 			}
 
-			_, err = email.SendEmail(emailData)
+			err = email.SendEmail(m, true)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -216,13 +223,20 @@ func ApprovalRequestHandlerObsolete(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Send email to approver
-		emailData := email.TypEmailMessage{
-			To:      req.Email,
+		m := email.Message{
 			Subject: req.Subject,
-			Body:    emailBody,
+			Body: email.Body{
+				Content: emailBody,
+				Type:    email.HtmlMessageType,
+			},
+			ToRecipients: []email.Recipient{
+				{
+					Email: req.Email,
+				},
+			},
 		}
 
-		_, err = email.SendEmail(emailData)
+		err = email.SendEmail(m, true)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
