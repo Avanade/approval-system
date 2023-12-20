@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	session "main/pkg/session"
-	rtApi "main/routes/apis"
-	rtAzure "main/routes/login/azure"
 	rtPages "main/routes/pages"
 	rtApprovals "main/routes/pages/approvals"
 	"net/http"
@@ -48,23 +46,10 @@ func main() {
 	session.InitializeSession()
 
 	mux := mux.NewRouter()
-	mux.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
-	mux.Handle("/", loadAzAuthPage(rtApprovals.MyRequestsHandler))
-	mux.Handle("/myapprovals", loadAzAuthPage(rtApprovals.MyApprovalsHandler))
-	mux.Handle("/response/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", loadAzAuthPage(rtApprovals.ResponseHandler))
-	mux.Handle("/responseReassigned/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}/{ApproveText}/{RejectText}", loadAzAuthPage(rtApprovals.ResponseReassignedeHandler))
-	mux.HandleFunc("/loginredirect", rtPages.LoginRedirectHandler).Methods("GET")
-	mux.HandleFunc("/login/azure", rtAzure.LoginHandler)
-	mux.HandleFunc("/login/azure/callback", rtAzure.CallbackHandler)
-	mux.HandleFunc("/logout/azure", rtAzure.LogoutHandler)
-	mux.HandleFunc("/request", rtApprovals.ApprovalRequestHandler)
-	mux.HandleFunc("/process", rtApprovals.ProcessResponseHandler)
-	muxApi := mux.PathPrefix("/api").Subrouter()
-	muxApi.Handle("/items/type/{type:[0-2]+}/status/{status:[0-3]+}", loadAzAuthPage(rtApi.GetItems))
-	muxApi.Handle("/search/users/{search}", loadAzAuthPage(rtApi.SearchUserFromActiveDirectory))
-	muxApi.Handle("/responseReassignedAPI/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{itemId}/{ApproveText}/{RejectText}", loadAzAuthPage(rtApprovals.ReAssignApproverHandler))
 
-	muxApi.Handle("/utility/fillout/approvalrequest/approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
+	setPageRoutes(mux)
+	setApiRoutes(mux)
+	setUtilityRoutes(mux)
 
 	mux.NotFoundHandler = loadAzAuthPage(rtPages.NotFoundHandler)
 
