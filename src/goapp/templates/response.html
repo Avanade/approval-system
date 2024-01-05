@@ -110,7 +110,7 @@
             },
             submit(){
                 this.showResult("submitted", "Processing", "Please wait while processing your request.")
-                fetch('/process', {
+                fetch('/api/process', {
                     method: 'post',
                     body: JSON.stringify(this.form),
                     headers: {

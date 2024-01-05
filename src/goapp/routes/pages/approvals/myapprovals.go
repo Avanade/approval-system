@@ -139,7 +139,7 @@ func itemMapper(item map[string]interface{}, isApproved bool) TypItem {
 		approveUrl = fmt.Sprintf("/response/%s/%s/%s/1", item["ApplicationId"], item["ApplicationModuleId"], item["ItemId"])
 		rejectUrl = fmt.Sprintf("/response/%s/%s/%s/0", item["ApplicationId"], item["ApplicationModuleId"], item["ItemId"])
 	}
-	reassignUrl = fmt.Sprintf("/responseReassigned/%s/%s/%s/1/%s/%s", item["ApplicationId"], item["ApplicationModuleId"], item["ItemId"], item["ApproveText"], item["RejectText"])
+	reassignUrl = fmt.Sprintf("/responsereassigned/%s/%s/%s/1/%s/%s", item["ApplicationId"], item["ApplicationModuleId"], item["ItemId"], item["ApproveText"], item["RejectText"])
 
 	return TypItem{
 		Application:     item["Application"],
