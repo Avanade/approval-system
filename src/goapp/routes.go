@@ -34,5 +34,5 @@ func setApiRoutes(mux *mux.Router) {
 
 func setUtilityRoutes(mux *mux.Router) {
 	muxUtility := mux.PathPrefix("/utility").Subrouter()
-	muxUtility.Handle("/fillout/approvalrequest/approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
+	muxUtility.Handle("/fillout-approvalrequest-approvers", loadGuidAuthApi(rtApi.FillOutApprovalRequestApprovers)).Methods("GET")
 }
