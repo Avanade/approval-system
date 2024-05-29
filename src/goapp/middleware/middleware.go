@@ -10,8 +10,10 @@ type Middleware func(http.HandlerFunc) http.HandlerFunc
 func AzureAuth() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			session.IsAuthenticated(w, r)
-			f(w, r)
+			isAuth := session.IsAuthenticated(w, r)
+			if isAuth {
+				f(w, r)
+			}
 		}
 	}
 }

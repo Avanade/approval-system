@@ -29,7 +29,7 @@ func InitializeSession() {
 	gob.Register(map[string]interface{}{})
 }
 
-func IsAuthenticated(w http.ResponseWriter, r *http.Request) {
+func IsAuthenticated(w http.ResponseWriter, r *http.Request) bool {
 	var url string
 	url = fmt.Sprintf("%v", r.URL)
 	if strings.HasPrefix(url, "/response/") {
@@ -40,7 +40,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) {
 
 		authReq = IsAuthRequired(appModuleGuid)
 		if authReq == false {
-			return
+			return true
 		}
 	}
 
@@ -53,13 +53,14 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) {
 			MaxAge: -1}
 		http.SetCookie(w, &c)
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-		return
+		return false
 	}
 	// fmt.Println(session)
 	if _, ok := session.Values["profile"]; !ok {
 
 		// Asks user to login if there is no saved user profile
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		return false
 
 	} else {
 		// If there is a user profile saved
@@ -67,7 +68,7 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			return false
 		}
 
 		// Retrieve current token data
@@ -104,10 +105,11 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request) {
 
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
+					return false
 				}
 			}
 		}
+		return true
 	}
 }
 
