@@ -40,6 +40,6 @@ func setUtilityRoutes() {
 }
 
 func serve() {
-	port := ev.GetEnvVar("PORT", "8081")
+	port := ev.GetEnvVar("PORT", "8080")
 	httpRouter.SERVE(port)
 }
