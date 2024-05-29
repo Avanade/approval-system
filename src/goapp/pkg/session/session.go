@@ -29,7 +29,7 @@ func InitializeSession() {
 	gob.Register(map[string]interface{}{})
 }
 
-func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func IsAuthenticated(w http.ResponseWriter, r *http.Request) {
 	var url string
 	url = fmt.Sprintf("%v", r.URL)
 	if strings.HasPrefix(url, "/response/") {
@@ -40,7 +40,6 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 
 		authReq = IsAuthRequired(appModuleGuid)
 		if authReq == false {
-			next(w, r)
 			return
 		}
 	}
@@ -109,11 +108,10 @@ func IsAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFu
 				}
 			}
 		}
-		next(w, r)
 	}
 }
 
-func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request) {
 	// Check header if authenticated
 	_, err := auth.VerifyAccessToken(r)
 	// RETURN ERROR
@@ -121,8 +119,6 @@ func IsGuidAuthenticated(w http.ResponseWriter, r *http.Request, next http.Handl
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// RETURN SUCCESS
-	next(w, r)
 }
 
 func GetState(w http.ResponseWriter, r *http.Request) (string, error) {
