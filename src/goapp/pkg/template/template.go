@@ -6,6 +6,7 @@ import (
 	"main/models"
 	session "main/pkg/session"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -21,8 +22,8 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 
 	if profile == nil {
 		profile = map[string]interface{}{
-			"name": "",
-			"preferred_username":"",
+			"name":               "",
+			"preferred_username": "",
 		}
 	}
 
@@ -32,10 +33,22 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	menu = append(menu, models.TypMenu{Name: "My Approvals", Url: "/myapprovals", IconPath: "/public/icons/approvals.svg"})
 	masterPageData := models.TypHeaders{Menu: menu, Page: getUrlPath(r.URL.Path)}
 
+	//Footers
+	var footers []models.Footer
+	footerString := os.Getenv("LINK_FOOTERS")
+	res := strings.Split(footerString, ";")
+	for _, footer := range res {
+		f := strings.Split(footer, ">")
+		footers = append(footers, models.Footer{Text: f[0], Url: f[1]})
+	}
+
 	data := models.TypPageData{
-		Header:  masterPageData,
-		Profile: profile,
-		Content: pageData}
+		Header:           masterPageData,
+		Profile:          profile,
+		Content:          pageData,
+		Footers:          footers,
+		OrganizationName: os.Getenv("ORGANIZATION_NAME"),
+	}
 
 	tmpl := template.Must(
 		template.ParseFiles("templates/master.html", "templates/buttons.html",
