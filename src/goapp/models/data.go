@@ -1,9 +1,16 @@
 package models
 
 type TypPageData struct {
-	Header  interface{}
-	Profile interface{}
-	Content interface{}
+	Header           interface{}
+	Profile          interface{}
+	Content          interface{}
+	Footers          []Footer
+	OrganizationName string
+}
+
+type Footer struct {
+	Text string
+	Url  string
 }
 
 type TypHeaders struct {

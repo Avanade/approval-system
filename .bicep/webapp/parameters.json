@@ -38,7 +38,9 @@
                 "EMAIL_TENANT_ID" : "",
                 "EMAIL_CLIENT_ID" : "",
                 "EMAIL_CLIENT_SECRET" : "",
-                "EMAIL_USER_ID" : ""
+                "EMAIL_USER_ID" : "",
+                "LINK_FOOTERS": "",
+                "ORGANIZATION_NAME": ""
             }
         }
     }
