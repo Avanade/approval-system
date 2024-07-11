@@ -26,14 +26,21 @@
                 "CLIENT_ID": "",
                 "CLIENT_SECRET": "",
                 "HOME_URL": "",
-                "EMAIL_ENDPOINT": "",
                 "DOCKER_REGISTRY_SERVER_URL": "",
                 "DOCKER_REGISTRY_SERVER_PASSWORD": "",
                 "DOCKER_REGISTRY_SERVER_USERNAME": "",
                 "APPROVALSYSTEMDB_CONNECTION_STRING": "",
                 "DOCKER_ENABLE_CI": "",
                 "WEBSITES_ENABLE_APP_SERVICE_STORAGE": "",
-                "CONTENT_SECURITY_POLICY": ""
+                "CONTENT_SECURITY_POLICY": "",
+                "EMAIL_SUPPORT":"",
+                "EMAIL_ENABLED" : "",
+                "EMAIL_TENANT_ID" : "",
+                "EMAIL_CLIENT_ID" : "",
+                "EMAIL_CLIENT_SECRET" : "",
+                "EMAIL_USER_ID" : "",
+                "LINK_FOOTERS": "",
+                "ORGANIZATION_NAME": ""
             }
         }
     }

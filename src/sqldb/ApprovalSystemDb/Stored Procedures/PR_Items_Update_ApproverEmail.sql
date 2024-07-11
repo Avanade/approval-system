@@ -3,9 +3,19 @@ CREATE PROCEDURE [dbo].[PR_Items_Update_ApproverEmail]
 	@ApproverEmail varchar(100),
  	@Username VARCHAR(100)
 AS
-	UPDATE Items
+BEGIN
+	UPDATE 
+		[dbo].[ApprovalRequestApprovers]
 	SET
-		ApproverEmail = @ApproverEmail,
+		ApproverEmail = @ApproverEmail
+	WHERE 
+		ItemId = @Id AND ApproverEmail = @Username;
+
+	UPDATE 
+		[dbo].[Items]
+	SET
  		Modified = GETDATE(),
 		ModifiedBy = @Username
-	WHERE Id = @Id
+	WHERE 
+		Id = @Id;
+END
