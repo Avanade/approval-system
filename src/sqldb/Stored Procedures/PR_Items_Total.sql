@@ -27,16 +27,17 @@ BEGIN
 				(
 					@ItemType = 1 AND (
 						@User IS NULL OR (
-							ara.ApproverEmail = @User OR
-							i.ApproverEmail = @User -- OBSOLETE
+							ara.ApproverEmail = @User
 						)
 					)
 				)
 			) AND
 			(
-				(@IsApproved = -1 OR i.IsApproved = @IsApproved) 
-				OR
-				(@IsApproved IS NULL AND i.IsApproved IS NULL)
+				(@IsApproved = 0 AND i.IsApproved IS NULL) OR -- Pending
+				(@IsApproved = 1 AND i.IsApproved = 1) OR -- Approved
+				(@IsApproved = 2 AND i.IsApproved = 0) OR -- Rejected
+				(@IsApproved = 3 AND i.IsApproved IS NOT NULL) -- Closed (Rejected, Approved)
+				-- If the value of IsApproved is 4 then select all
 			)
 		) AS Items
 END

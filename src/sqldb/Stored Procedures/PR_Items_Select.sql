@@ -5,7 +5,7 @@ CREATE PROCEDURE [dbo].[PR_Items_Select]
 	@Filter INT = 10,
 	@ItemType bit = NULL, -- NULL - ALL / 0 - REQUESTOR / 1 - APPROVER
 	@User varchar(100) = NULL,
-	@IsApproved int = -1 -- -1 - ALL / NULL - PENDING / 0 - REJECTED / 1 - APPROVED
+	@IsApproved int = 4
 )
 AS
 BEGIN
@@ -37,21 +37,16 @@ BEGIN
 		(
 			@ItemType IS NULL 
 			OR 
-			(@ItemType = 0 AND (@User IS NULL OR i.CreatedBy = @User))
+			(@ItemType = 0 AND (@User IS NULL OR i.CreatedBy = @User)) -- Items by Requestor
 			OR
-			(
-				@ItemType = 1 AND (
-					@User IS NULL OR (
-						ara.ApproverEmail = @User OR
-						i.ApproverEmail = @User -- OBSOLETE
-					)
-				)
-			)
+			(@ItemType = 1 AND (@User IS NULL OR ara.ApproverEmail = @User)) -- Items by Approver
 		) AND
 		(
-			(@IsApproved = -1 OR i.IsApproved = @IsApproved) 
-			OR
-			(@IsApproved IS NULL AND i.IsApproved IS NULL)
+			(@IsApproved = 0 AND i.IsApproved IS NULL) OR -- Pending
+			(@IsApproved = 1 AND i.IsApproved = 1) OR -- Approved
+			(@IsApproved = 2 AND i.IsApproved = 0) OR -- Rejected
+			(@IsApproved = 3 AND i.IsApproved IS NOT NULL) -- Closed (Rejected, Approved)
+			-- If the value of IsApproved is 4 then select all
 		)
 	ORDER BY I.Created DESC
 	OFFSET @Offset ROWS 
