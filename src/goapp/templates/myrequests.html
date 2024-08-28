@@ -28,18 +28,35 @@
     </div>
   </div>
   <div x-show="activeTab == tabs[1]">
-    <h2 class="text-lg p-3 text-green-800 border-b">Approved Requests</h2>
     <div class="p-5" x-data="list({
-      callback: approvedCallback,
+      enabledSearch: false,
+      otherState: { responseType: 'All'},
+      callback: closedCallback,
       renderItem: closedRenderItem
     })">
-      <div x-html="template"></div>
-    </div>
-    <h2 class="text-lg p-3 text-red-800 border-b">Rejected Requests</h2>
-    <div class="p-5" x-data="list({
-      callback: rejectedCallback,
-      renderItem: closedRenderItem
-    })">
+      <nav class="bg-white flex items-center justify-between" aria-label="header">
+        <div class="sm:block">
+          <div class="content-start">
+              <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Response</label>
+              <select @change="() => {
+                load()
+              }" 
+              x-model="state.other.responseType" id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                  <option>All</option>
+                  <option>Rejected</option>
+                  <option>Approved</option>
+              </select>
+            </div>
+        </div>
+        <div class="flex justify-between sm:justify-end">
+            <div class="sm:col-span-3">
+              <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
+                <div class="mt.-1">
+                  <input @keyup.enter="onSearchSubmitHandler" type="text" name="search" id="search"  class="block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-2    sm:text-sm border-gray-300 rounded-md"   x-model="state.search">
+                </div>
+            </div>
+        </div>
+      </nav>
       <div x-html="template"></div>
     </div>
   </div>
@@ -59,8 +76,8 @@
       }
     }
   }
-    //PENDING REQUEST
-    function pendingRenderItem(item){
+  //PENDING REQUEST
+  function pendingRenderItem(item){
     return `<div x-on:click="item.show = !item.show">
               <a class="block hover:bg-gray-50">
                 <div class="px-4 py-4 sm:px-6 cursor-pointer">
@@ -100,7 +117,7 @@
   }
   
   async function pendingCallback(e){
-    return await getItemsBy(0, 2, e)
+    return await getItemsBy(0, 0, e.filter, e.page, e.search)
   }
   
   //CLOSED REQUEST
@@ -153,19 +170,17 @@
             </div>`
   }
 
-  async function approvedCallback(e){
-    return await getItemsBy(0, 1, e)
-  }
-  
-  async function rejectedCallback(e){
-    return await getItemsBy(0, 0, e)
+  async function closedCallback(e){
+    const responses = [{name: 'All', value: 3}, {name: 'Rejected', value: 2}, {name: 'Approved', value: 1}]
+    selectedResponseType = responses.find((obj) => { return obj.name == e.other.responseType}).value
+    return await getItemsBy(0, selectedResponseType, e.filter, e.page, e.search)
   }
 
-  async function getItemsBy(type, status, option){
-    const offset = option.filter * option.page;
-    const search = encodeURIComponent(option.search)
+  async function getItemsBy(type, status, filter, page, search){
+    const offset = filter * page;
+    search = encodeURIComponent(search)
 
-    const res = await fetch(`/api/items/type/${type}/status/${status}?filter=${option.filter}&offset=${offset}&search=${search}`)
+    const res = await fetch(`/api/items/type/${type}/status/${status}?filter=${filter}&offset=${offset}&search=${search}`)
     const data = await res.json()
     return data
   }

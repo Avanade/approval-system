@@ -24,10 +24,11 @@ const (
 type ItemStatus int8
 
 const (
-	Disapproved ItemStatus = iota
+	Pending ItemStatus = iota
 	Approved
-	Pending
-	AllStatus
+	Rejected
+	Closed // Disapproved, Approved
+	All    // Disapproved, Approved, Pending
 )
 
 type Item struct {
@@ -75,13 +76,13 @@ func GetItems(w http.ResponseWriter, r *http.Request) {
 	}
 	user := fmt.Sprintf("%s", profile["preferred_username"])
 
-	itemType, errItemType := strconv.ParseInt(vars["type"], 10, 64)
+	itemType, errItemType := strconv.ParseInt(vars["type"], 10, 8)
 	if errItemType != nil {
 		http.Error(w, errItemType.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	itemStatus, errItemStatus := strconv.ParseInt(vars["status"], 10, 64)
+	itemStatus, errItemStatus := strconv.ParseInt(vars["status"], 10, 8)
 	if errItemStatus != nil {
 		http.Error(w, errItemStatus.Error(), http.StatusInternalServerError)
 		return
@@ -127,14 +128,8 @@ func GetItemsBy(itemType ItemType, itemStatus ItemStatus, user, search string, o
 		params["ItemType"] = itemType
 		params["User"] = user
 	}
-	if itemStatus != AllStatus {
-		if itemStatus == Pending {
-			params["IsApproved"] = nil
-		} else {
-			params["IsApproved"] = itemStatus
-		}
-	}
 
+	params["IsApproved"] = itemStatus
 	params["Search"] = search
 
 	resultTotal, errResultTotal := db.ExecuteStoredProcedureWithResult("PR_Items_Total", params)
