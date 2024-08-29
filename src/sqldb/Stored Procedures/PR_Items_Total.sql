@@ -3,7 +3,8 @@ CREATE PROCEDURE [dbo].[PR_Items_Total]
 	@Search VARCHAR(50) = '',
 	@ItemType bit = NULL, -- NULL - ALL / 0 - REQUESTOR / 1 - APPROVER,
 	@User varchar(100) = NULL,
-	@IsApproved int = -1 -- -1 - ALL / NULL - PENDING / 0 - REJECTED / 1 - APPROVED
+	@IsApproved int = 4,
+	@RequestType varchar(100) = NULL
 )
 AS
 BEGIN
@@ -38,6 +39,10 @@ BEGIN
 				(@IsApproved = 2 AND i.IsApproved = 0) OR -- Rejected
 				(@IsApproved = 3 AND i.IsApproved IS NOT NULL) -- Closed (Rejected, Approved)
 				-- If the value of IsApproved is 4 then select all
+			) AND
+			(
+				@RequestType IS NULL OR
+				(@RequestType IS NOT NULL AND i.ApplicationModuleId = @RequestType)
 			)
 		) AS Items
 END

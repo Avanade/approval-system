@@ -94,7 +94,14 @@ func GetItems(w http.ResponseWriter, r *http.Request) {
 		filter, _ := strconv.Atoi(params["filter"][0])
 		offset, _ := strconv.Atoi(params["offset"][0])
 		search := params["search"][0]
-		data, total, err := GetItemsBy(ItemType(itemType), ItemStatus(itemStatus), user, search, offset, filter)
+		requestType := ""
+		if params["requestType"] != nil {
+			if params["requestType"][0] != "" {
+				requestType = params["requestType"][0]
+			}
+		}
+
+		data, total, err := GetItemsBy(ItemType(itemType), ItemStatus(itemStatus), requestType, user, search, offset, filter)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -111,7 +118,7 @@ func GetItems(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func GetItemsBy(itemType ItemType, itemStatus ItemStatus, user, search string, offset, filter int) ([]Item, int, error) {
+func GetItemsBy(itemType ItemType, itemStatus ItemStatus, requestType, user, search string, offset, filter int) ([]Item, int, error) {
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING"),
 	}
@@ -129,6 +136,9 @@ func GetItemsBy(itemType ItemType, itemStatus ItemStatus, user, search string, o
 		params["User"] = user
 	}
 
+	if requestType != "" {
+		params["RequestType"] = requestType
+	}
 	params["IsApproved"] = itemStatus
 	params["Search"] = search
 
@@ -211,4 +221,51 @@ func GetItemsBy(itemType ItemType, itemStatus ItemStatus, user, search string, o
 	}
 
 	return items, total, nil
+}
+
+type RequestType struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+func GetRequestTypes(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	result, err := GetRequestType()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
+}
+
+func GetRequestType() ([]RequestType, error) {
+	dbConnectionParam := sql.ConnectionParam{
+		ConnectionString: os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING"),
+	}
+
+	db, err := sql.Init(dbConnectionParam)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	result, err := db.ExecuteStoredProcedureWithResult("PR_ApplicationModules_Select", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var requestTypes []RequestType
+
+	for _, v := range result {
+		requestType := RequestType{
+			Id:   fmt.Sprintf("%v", v["Id"]),
+			Name: fmt.Sprintf("%v", v["Name"]),
+		}
+		requestTypes = append(requestTypes, requestType)
+	}
+
+	return requestTypes, nil
 }
