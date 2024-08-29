@@ -17,9 +17,35 @@
   </nav>
   <div x-show="activeTab == tabs[0]"> 
     <div x-data="list({
+      enabledSearch: false,
+      otherState: { responseType: 'All', requestType: {id : '', name: 'All'} },
       callback: pendingCallback,
       renderItem: pendingRenderItem
     })">
+      <nav class="bg-white flex items-center justify-between" aria-label="header">
+        <div class="sm:block">
+          <div class="content-start">
+              <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
+              <select @change="(e) => {
+                state.other.requestType = requestTypes.find((obj) => { return e.target.value == obj.name})
+                load()
+              }" 
+              id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                  <template x-for="item in requestTypes" :key="item.id">
+                    <option x-text="item.name"></option>
+                  </template>
+              </select>
+            </div>
+        </div>
+        <div class="flex justify-between sm:justify-end">
+            <div class="sm:col-span-3">
+              <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
+                <div class="mt.-1">
+                  <input @keyup.enter="onSearchSubmitHandler" type="text" name="search" id="search"  class="block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-2    sm:text-sm border-gray-300 rounded-md"   x-model="state.search">
+                </div>
+            </div>
+        </div>
+      </nav>
       <div x-html="template"></div>
     </div>
   </div>
@@ -174,7 +200,7 @@
   }
   
   async function pendingCallback(e){
-    return await getItemsBy(1, 0, '', e.filter, e.page, e.search)
+    return await getItemsBy(1, 0, e.other.requestType.id, e.filter, e.page, e.search)
   }
   
   //CLOSED REQUEST
