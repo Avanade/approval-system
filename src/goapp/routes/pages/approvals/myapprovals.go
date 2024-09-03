@@ -62,12 +62,17 @@ func MyApprovalsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	exportUrls, err := db.ExecuteStoredProcedureWithResult("PR_ApplicationModules_SelectExport_ById", nil)
+	application, err := db.ExecuteStoredProcedureWithResult("PR_Applications_Select_ById", nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
-		for _, v := range exportUrls {
-			homeData.ExportUrls = append(homeData.ExportUrls, v["ExportUrl"].(string))
+		if len(application) > 0 {
+			if application[0]["ExportUrl"] != nil {
+				homeData.ExportUrl = application[0]["ExportUrl"].(string)
+			}
+			if application[0]["OrganizationTypeUrl"] != nil {
+				homeData.OrganizationTypeUrl = application[0]["OrganizationTypeUrl"].(string)
+			}
 		}
 	}
 
@@ -161,9 +166,10 @@ func itemMapper(item map[string]interface{}, isApproved bool) TypItem {
 }
 
 type TypHomeData struct {
-	Approved   []TypItem
-	Pending    []TypItem
-	ExportUrls []string
+	Approved            []TypItem
+	Pending             []TypItem
+	ExportUrl           string
+	OrganizationTypeUrl string
 }
 
 type TypItem struct {

@@ -4,7 +4,8 @@ CREATE PROCEDURE [dbo].[PR_Items_Total]
 	@ItemType bit = NULL, -- NULL - ALL / 0 - REQUESTOR / 1 - APPROVER,
 	@User varchar(100) = NULL,
 	@IsApproved int = 4,
-	@RequestType varchar(100) = NULL
+	@RequestType varchar(100) = NULL,
+	@Organization varchar(100) = NULL
 )
 AS
 BEGIN
@@ -18,8 +19,8 @@ BEGIN
 			INNER JOIN Applications a ON am.ApplicationId = a.Id
 			INNER JOIN ApprovalTypes t ON t.Id = am.ApprovalTypeId
 			INNER JOIN ApprovalRequestApprovers ara ON i.Id = ara.ItemId
+			INNER JOIN STRING_SPLIT(@Search, ' ') AS ss ON (i.Subject LIKE '%'+ss.value+'%' OR i.CreatedBy LIKE '%'+ss.value+'%')
 		WHERE
-			Subject LIKE '%'+@Search+'%' AND
 			(
 				@ItemType IS NULL 
 				OR 
@@ -43,6 +44,10 @@ BEGIN
 			(
 				@RequestType IS NULL OR
 				(@RequestType IS NOT NULL AND i.ApplicationModuleId = @RequestType)
+			) AND
+			(
+				@Organization IS NULL OR
+				(@Organization IS NOT NULL AND i.Body LIKE '%'+@Organization+'%')
 			)
 		) AS Items
 END

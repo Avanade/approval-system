@@ -101,7 +101,14 @@ func GetItems(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		data, total, err := GetItemsBy(ItemType(itemType), ItemStatus(itemStatus), requestType, user, search, offset, filter)
+		organization := ""
+		if params["organization"] != nil {
+			if params["organization"][0] != "" {
+				organization = params["organization"][0]
+			}
+		}
+
+		data, total, err := GetItemsBy(ItemType(itemType), ItemStatus(itemStatus), requestType, organization, user, search, offset, filter)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -118,7 +125,7 @@ func GetItems(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func GetItemsBy(itemType ItemType, itemStatus ItemStatus, requestType, user, search string, offset, filter int) ([]Item, int, error) {
+func GetItemsBy(itemType ItemType, itemStatus ItemStatus, requestType, organization, user, search string, offset, filter int) ([]Item, int, error) {
 	dbConnectionParam := sql.ConnectionParam{
 		ConnectionString: os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING"),
 	}
@@ -139,6 +146,11 @@ func GetItemsBy(itemType ItemType, itemStatus ItemStatus, requestType, user, sea
 	if requestType != "" {
 		params["RequestType"] = requestType
 	}
+
+	if organization != "" {
+		params["Organization"] = organization
+	}
+
 	params["IsApproved"] = itemStatus
 	params["Search"] = search
 
