@@ -89,20 +89,6 @@
         </div>
         <div class="sm:block">
           <div class="content-start">
-              <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
-              <select @change="(e) => {
-                state.other.organization = e.target.value
-                load()
-              }" 
-              id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                  <template x-for="item in organizations">
-                    <option x-text="item"></option>
-                  </template>
-              </select>
-            </div>
-        </div>
-        <div class="sm:block">
-          <div class="content-start">
               <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
               <select @change="(e) => {
                 state.other.requestType = requestTypes.find((obj) => { return e.target.value == obj.name})
