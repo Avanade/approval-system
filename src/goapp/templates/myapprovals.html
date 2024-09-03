@@ -18,7 +18,7 @@
   <div x-show="activeTab == tabs[0]"> 
     <div x-data="list({
       enabledSearch: false,
-      otherState: { responseType: 'All', requestType: {id : '', name: 'All'} },
+      otherState: { responseType: 'All', requestType: {id : '', name: 'All'}, organization: 'All' },
       callback: pendingCallback,
       renderItem: pendingRenderItem
     })">
@@ -28,6 +28,7 @@
               <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
               <select @change="(e) => {
                 state.other.requestType = requestTypes.find((obj) => { return e.target.value == obj.name})
+                state.other.organization = 'All'
                 load()
               }" 
               id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
@@ -35,8 +36,24 @@
                     <option x-text="item.name"></option>
                   </template>
               </select>
-            </div>
+          </div>
         </div>
+        <template x-if="isRequestTypeWithOrg(state.other.requestType.name)">
+          <div class="sm:block">
+            <div class="content-start">
+                <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
+                <select @change="(e) => {
+                  load()
+                }"
+                x-model="state.other.organization" 
+                id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                    <template x-for="item in organizations">
+                      <option x-text="item"></option>
+                    </template>
+                </select>
+              </div>
+          </div>
+        </template>
         <div class="flex justify-between sm:justify-end">
             <div class="sm:col-span-3">
               <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
@@ -89,6 +106,7 @@
               <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
               <select @change="(e) => {
                 state.other.requestType = requestTypes.find((obj) => { return e.target.value == obj.name})
+                state.other.organization = 'All'
                 load()
               }" 
               id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
@@ -96,8 +114,24 @@
                     <option x-text="item.name"></option>
                   </template>
               </select>
-            </div>
+          </div>
         </div>
+        <template x-if="isRequestTypeWithOrg(state.other.requestType.name)">
+          <div class="sm:block">
+            <div class="content-start">
+                <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
+                <select @change="(e) => {
+                  state.other.organization = e.target.value
+                  load()
+                }" 
+                id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                    <template x-for="item in organizations">
+                      <option x-text="item"></option>
+                    </template>
+                </select>
+              </div>
+          </div>
+        </template>
         <div class="flex justify-between sm:justify-end">
             <div class="sm:col-span-3">
               <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
@@ -128,6 +162,11 @@
         this.requestTypes = [...this.requestTypes, ...requestTypes]
         organizations = await getOrganizationType(this.data.OrganizationTypeUrl)
         this.organizations = [...this.organizations, ...organizations]
+      },
+      isRequestTypeWithOrg(requestType) {
+        const withOrg = ['OrgAccess', 'Organization', 'GitHubCopilot']
+        console.log(requestType, withOrg.includes(requestType))
+        return withOrg.includes(requestType)
       },
       onChangeTabs(tab){
         this.activeTab = this.tabs[tab];
