@@ -6,7 +6,7 @@
     <div class="absolute inline-block text-left right-0">
       <button
         class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded" 
-        x-on:click="exportMyApprovals(profile.username, data.ExportUrls)">
+        x-on:click="exportMyApprovals(profile.username, data.ExportUrl)">
         Export Project Approvals
       </button> 
     </div>
@@ -52,7 +52,7 @@
   <div x-show="activeTab == tabs[1]">
     <div class="p-5" x-data="list({
       enabledSearch: false,
-      otherState: { responseType: 'All', requestType: {id : '', name: 'All'} },
+      otherState: { responseType: 'All', requestType: {id : '', name: 'All'}, organization: 'All' },
       callback: closedCallback,
       renderItem: closedRenderItem
     })">
@@ -67,6 +67,20 @@
                   <option>All</option>
                   <option>Rejected</option>
                   <option>Approved</option>
+              </select>
+            </div>
+        </div>
+        <div class="sm:block">
+          <div class="content-start">
+              <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
+              <select @change="(e) => {
+                state.other.organization = e.target.value
+                load()
+              }" 
+              id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                  <template x-for="item in organizations">
+                    <option x-text="item"></option>
+                  </template>
               </select>
             </div>
         </div>
@@ -105,18 +119,21 @@
       tabs : ['pending', 'closed'],
       activeTab : '',
       requestTypes : [{id : '', name: 'All'}],
+      organizations : ['all'],
       currentSelected: -1,
       data: JSON.parse('{{ . }}'),
       async init(){
         this.activeTab = this.tabs[0];
         requestTypes = await getRequestTypes()
         this.requestTypes = [...this.requestTypes, ...requestTypes]
+        organizations = await getOrganizationType(this.data.OrganizationTypeUrl)
+        this.organizations = [...this.organizations, ...organizations]
       },
       onChangeTabs(tab){
         this.activeTab = this.tabs[tab];
       },
       exportMyApprovals(username, exportUrls){
-        window.open(exportUrls[0].replace('{username}', username), '_blank') 
+        window.open(exportUrl.replace('{username}', username), '_blank') 
       }
     }
   }
@@ -200,7 +217,7 @@
   }
   
   async function pendingCallback(e){
-    return await getItemsBy(1, 0, e.other.requestType.id, e.filter, e.page, e.search)
+    return await getItemsBy(1, 0, e.other.requestType.id, '', e.filter, e.page, e.search)
   }
   
   //CLOSED REQUEST
@@ -256,14 +273,15 @@
   async function closedCallback(e){
     const responses = [{name: 'All', value: 3}, {name: 'Rejected', value: 2}, {name: 'Approved', value: 1}]
     selectedResponseType = responses.find((obj) => { return obj.name == e.other.responseType}).value
-    return await getItemsBy(1, selectedResponseType, e.other.requestType.id, e.filter, e.page, e.search)
+    return await getItemsBy(1, selectedResponseType, e.other.requestType.id, e.other.organization, e.filter, e.page, e.search)
   }
 
-  async function getItemsBy(type, status, requestType, filter, page, search){
+  async function getItemsBy(type, status, requestType, organization, filter, page, search){
     const offset = filter * page;
     search = encodeURIComponent(search)
     requestTypeParam = requestType == '' ? '' : '&requestType=' + requestType
-    const res = await fetch(`/api/items/type/${type}/status/${status}?filter=${filter}&offset=${offset}&search=${search}${requestTypeParam}`)
+    organizationParam = organization == 'All' ? '' : '&organization=' + organization
+    const res = await fetch(`/api/items/type/${type}/status/${status}?filter=${filter}&offset=${offset}&search=${search}${requestTypeParam}${organizationParam}`)
     const data = await res.json()
     return data
   }
@@ -271,6 +289,12 @@
 
   async function getRequestTypes(){
     const res = await fetch(`/api/request/types`)
+    const data = await res.json()
+    return data
+  }
+
+  async function getOrganizationType(url){
+    const res = await fetch(url)
     const data = await res.json()
     return data
   }
