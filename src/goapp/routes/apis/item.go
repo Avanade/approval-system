@@ -49,6 +49,7 @@ type Item struct {
 	AllowReassignUrl string   `json:"allowReassignUrl"`
 	RespondedBy      string   `json:"respondedBy"`
 	Approvers        []string `json:"approvers"`
+	RequestedBy      string   `json:"requestedBy"`
 }
 
 type Response struct {
@@ -183,6 +184,7 @@ func GetItemsBy(itemType ItemType, itemStatus ItemStatus, requestType, organizat
 			ApproveText:   v["ApproveText"].(string),
 			RejectText:    v["RejectText"].(string),
 			AllowReassign: v["AllowReassign"].(bool),
+			RequestedBy:   v["RequestedBy"].(string),
 		}
 
 		if v["ApproverRemarks"] != nil {
