@@ -27,6 +27,7 @@ BEGIN
 		, I.Created
 		, T.ApproveText
 		, T.RejectText
+		, i.CreatedBy AS RequestedBy
 	    , isnull(AllowReassign,'') as AllowReassign
 		, COUNT(*) AS Score
 	  FROM [dbo].[Items] i
@@ -74,7 +75,8 @@ BEGIN
 		I.Created,
 		T.ApproveText,
 		T.RejectText,
-		AllowReassign
+		AllowReassign,
+		i.CreatedBy
 	ORDER BY Score, I.Created DESC
 	OFFSET @Offset ROWS 
 	FETCH NEXT @Filter ROWS ONLY

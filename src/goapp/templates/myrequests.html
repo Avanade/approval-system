@@ -169,34 +169,62 @@
                 <div class="px-4 py-4 sm:px-6 cursor-pointer">
                   <div class="flex items-center justify-between">
                     <p class="text-sm font-medium text-gray-800 truncate" x-text="item.subject"></p>
-                  </div>
-                  <div class="mt-2 sm:flex sm:justify-between">
-                    <div class="sm:flex">
-                      <p class="flex items-center text-sm text-gray-500" x-data="{ app: 'Application: ' + item.application}" x-text="app">
-                      </p>
-                      <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6" x-data="{ mod: 'Module: ' + item.module}" x-text="mod">
-                      </p>
+                    <div class="relative mt-1">
+                      <button 
+                          x-show="item.allowReassign" 
+                          @click.stop @click.outside="item.show2 = false "
+                          x-on:click="item.show2 = !item.show2" 
+                          type="button"
+                          class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
+                              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z">
+                              </path>
+                          </svg>
+                      </button>
+                      <ul x-show=item.show2
+                          class="absolute z-10 mt-1 max-h-60 right-0 top-1 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                          id="options" role="listbox" style="">
+                          <a x-bind:href="item.allowReassignUrl">
+                              <li @click.stop
+                                  class="hover:bg-[#fff2eb] relative cursor-pointer select-none py-2 pl-3 pr-9 text-gray-900"
+                                  id="option-0" role="option" tabindex="-1">
+                                  <span class="block truncate">Reassign </span>
+                              </li>
+                          </a>
+                      </ul>
                     </div>
-                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                      <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                      </svg>
-                      <p>
-                        Requested on
-                        <time x-data="{date: new Date(item.created.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
-                      </p>
-                    </div>
                   </div>
-                  <div class="mt-2 sm:flex sm:justify-between">
-                    <div x-data="{
-                      approvers: item.approvers.toString()
-                    }" class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                      <p> Approver/s: <span x-text="approvers"><span></p>
+                  <div class="grid grid-cols-2 text-sm text-sm text-gray-500">
+                      <div><p x-data="{ app: 'Application: ' + item.application}" x-text="app"></p></div>
+                      <div>
+                        <p>
+                          Requested on 
+                          <time x-data="{date: new Date(item.created.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}"
+                                x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                        </p>
+                      </div>
+                      <div><p x-data="{ mod: 'Module: ' + item.module}" x-text="mod"></p></div>
+                      <div class="flex items-center">
+                        <p>Approver/s: <span x-text="item.approvers[0]"></span></p> 
+                        <template x-if="item.approvers.length > 1">
+                          <div x-data="popup({
+                            content: renderApprovers(item.approvers),
+                            placement: 'top',
+                            popupClass: 'shadow-md'
+                          })" @mouseover="showPopup" @mouseover.away="hidePopup">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            <div x-html="template"></div>
+                          </div>
+                        </template>
+                      </div>
                     </div>
-                  </div>
-                  <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
+                </div>
+                <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
                     <div x-html="item.body" class="text-sm"></div>
-                  </div>
                 </div>
               </a>
             </div>`
@@ -214,42 +242,44 @@
                   <div class="flex items-center justify-between">
                     <p class="text-sm font-medium text-gray-800 truncate" x-text="item.subject"></p>
                     <div class="ml-2 flex-shrink-0 flex">
-                      <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" x-bind:class="item.isApproved? 'bg-green-100 text-green-800':'bg-red-100 text-red-800'" x-text="item.isApproved ? 'Approved' : 'Rejected'"></p>
+                      <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                        x-bind:class="item.isApproved? 'bg-green-100 text-green-800':'bg-red-100 text-red-800'"
+                        x-text="item.isApproved ? 'Approved' : 'Rejected'"></p>
                     </div>
                   </div>
-                  <div class="mt-2 sm:flex sm:justify-between">
-                    <div class="sm:flex">
-                      <p class="flex items-center text-sm text-gray-500" x-data="{ app: 'Application: ' + item.application}" x-text="app">
-                      </p>
-                      <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6" x-data="{ mod: 'Module: ' + item.module}" x-text="mod">
-                      </p>
+                  <div class="grid grid-cols-2 text-sm text-sm text-gray-500">
+                      <div><p x-data="{ app: 'Application: ' + item.application}" x-text="app"></p></div>
+                      <div><p x-data="{ mod: 'Module: ' + item.module}" x-text="mod"></p></div>
+                      <div><p x-data="{ respondedBy: 'Responded by: ' + item.respondedBy}" x-text="respondedBy"></p></div>
+                      <div @click.stop class="flex items-center">
+                        <p>Approver/s: <span x-text="item.approvers[0]"></span></p> 
+                        <template x-if="item.approvers.length > 1">
+                          <div x-data="popup({
+                            content: renderApprovers(item.approvers),
+                            placement: 'top',
+                            popupClass: 'shadow-md'
+                          })" @mouseover="showPopup" @mouseover.away="hidePopup">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            <div x-html="template"></div>
+                          </div>
+                        </template>
+                      </div>
+                      <div>
+                        <p>
+                          Responded on 
+                          <time x-data="{date: new Date(item.dateResponded.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}"
+                                x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                        </p>
+                      </div>
                     </div>
-                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                      <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                      </svg>
-                      <p>
-                        Responded on
-                        <time x-data="{date: new Date(item.dateResponded.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}" x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
-                      </p>
-                    </div>
-                  </div>
-                  <div class="mt-2 sm:flex sm:justify-between">
-                    <div x-data="{
-                      approvers: item.approvers.toString()
-                    }" class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                      <p> Approver/s: <span x-text="approvers"><span></p>
-                    </div>
-                    <div x-show="item.respondedBy" class="sm:flex mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                      <p> Responded by: <span x-text="item.respondedBy"><span></p>
-                    </div>
-                  </div>
-                  <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
-                    <div x-html="item.body" class="text-sm"></div>
-                    <div class="border-[1px] mt-2 p-3 rounded-md">
-                      <div class="text-sm font-medium text-gray-800 truncate pb-2">Remarks</div>
-                      <div x-text="item.approverRemarks? item.approverRemarks:'none'" class="text-sm"></div>
-                    </div>
+                </div>
+                <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
+                  <div x-html="item.body" class="text-sm"></div>
+                  <div class="border-[1px] mt-2 p-3 rounded-md">
+                    <div class="text-sm font-medium text-gray-800 truncate pb-2">Remarks</div>
+                    <div x-text="item.approverRemarks? item.approverRemarks:'none'" class="text-sm"></div>
                   </div>
                 </div>
               </a>
