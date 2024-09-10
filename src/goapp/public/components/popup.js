@@ -11,7 +11,6 @@ const popup = ({
             this.content = content
             this.appendPlacementClass(placement.toLowerCase())
             this.popupClass += popupClass
-            console.log(this.popupClass)
         },
         hidePopup(){
             this.popupClass = this.popupClass.replace('block', 'hidden')
