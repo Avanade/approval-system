@@ -59,19 +59,23 @@ func MyRequestsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	paramsApplication := make(map[string]interface{})
-	paramsApplication["Id"] = items[0]["ApplicationId"]
+	if items != nil {
+		if items[0]["ApplicationId"] != nil {
+			paramsApplication := make(map[string]interface{})
+			paramsApplication["Id"] = items[0]["ApplicationId"]
 
-	application, err := db.ExecuteStoredProcedureWithResult("PR_Applications_Select_ById", paramsApplication)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	} else {
-		if len(application) > 0 {
-			if application[0]["ExportUrl"] != nil {
-				homeData.ExportUrl = application[0]["ExportUrl"].(string)
-			}
-			if application[0]["OrganizationTypeUrl"] != nil {
-				homeData.OrganizationTypeUrl = application[0]["OrganizationTypeUrl"].(string)
+			application, err := db.ExecuteStoredProcedureWithResult("PR_Applications_Select_ById", paramsApplication)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			} else {
+				if len(application) > 0 {
+					if application[0]["ExportUrl"] != nil {
+						homeData.ExportUrl = application[0]["ExportUrl"].(string)
+					}
+					if application[0]["OrganizationTypeUrl"] != nil {
+						homeData.OrganizationTypeUrl = application[0]["OrganizationTypeUrl"].(string)
+					}
+				}
 			}
 		}
 	}
