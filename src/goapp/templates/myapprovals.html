@@ -152,7 +152,6 @@
       },
       isRequestTypeWithOrg(requestType) {
         const withOrg = ['OrgAccess', 'Organization', 'GitHubCopilot']
-        console.log(requestType, withOrg.includes(requestType))
         return withOrg.includes(requestType)
       },
       onChangeTabs(tab){
