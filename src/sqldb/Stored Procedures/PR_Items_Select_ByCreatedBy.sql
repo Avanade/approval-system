@@ -2,7 +2,7 @@ CREATE PROCEDURE [dbo].[PR_Items_Select_ByCreatedBy]
 	@CreatedBy varchar(255)
 AS
 	SELECT
-		A.[Name] [Application],
+		dbo.UidToString(A.Id) [ApplicationId], A.[Name] [Application],
 		AM.[Name] [Module],
 		[Subject], Body, DateSent,
 		DateResponded, IsApproved, ApproverRemarks, I.CreatedBy, I.Created

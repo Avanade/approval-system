@@ -27,7 +27,7 @@ func setPageRoutes() {
 }
 
 func setApiRoutes() {
-
+	httpRouter.GET("/api/request/types", m.Chain(rtApi.GetRequestTypes, m.AzureAuth()))
 	httpRouter.POST("/api/request", rtApprovals.ApprovalRequestHandler)
 	httpRouter.POST("/api/process", rtApprovals.ProcessResponseHandler)
 	httpRouter.GET("/api/items/type/{type:[0-2]+}/status/{status:[0-3]+}", m.Chain(rtApi.GetItems, m.AzureAuth()))
