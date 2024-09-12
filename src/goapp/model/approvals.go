@@ -1,4 +1,4 @@
-package models
+package model
 
 type TypRequestApproval struct {
 	ApplicationId       string   `json:"applicationId"`

@@ -3,7 +3,7 @@ package route
 import (
 	"encoding/json"
 	"fmt"
-	"main/models"
+	"main/model"
 	"main/pkg/email"
 	"main/pkg/sql"
 	"net/http"
@@ -15,7 +15,7 @@ import (
 func ApprovalRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Decode payload
-	var req models.TypRequestApproval
+	var req model.TypRequestApproval
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
