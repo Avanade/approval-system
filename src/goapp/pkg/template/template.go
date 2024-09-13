@@ -3,7 +3,7 @@ package template
 import (
 	"fmt"
 	"html/template"
-	"main/model"
+	"main/models"
 	session "main/pkg/session"
 	"net/http"
 	"os"
@@ -28,21 +28,21 @@ func UseTemplate(w *http.ResponseWriter, r *http.Request, page string, pageData 
 	}
 
 	// Data on master page
-	var menu []model.TypMenu
-	menu = append(menu, model.TypMenu{Name: "My Requests", Url: "/", IconPath: "/public/icons/projects.svg"})
-	menu = append(menu, model.TypMenu{Name: "My Approvals", Url: "/myapprovals", IconPath: "/public/icons/approvals.svg"})
-	masterPageData := model.TypHeaders{Menu: menu, Page: getUrlPath(r.URL.Path)}
+	var menu []models.TypMenu
+	menu = append(menu, models.TypMenu{Name: "My Requests", Url: "/", IconPath: "/public/icons/projects.svg"})
+	menu = append(menu, models.TypMenu{Name: "My Approvals", Url: "/myapprovals", IconPath: "/public/icons/approvals.svg"})
+	masterPageData := models.TypHeaders{Menu: menu, Page: getUrlPath(r.URL.Path)}
 
 	//Footers
-	var footers []model.Footer
+	var footers []models.Footer
 	footerString := os.Getenv("LINK_FOOTERS")
 	res := strings.Split(footerString, ";")
 	for _, footer := range res {
 		f := strings.Split(footer, ">")
-		footers = append(footers, model.Footer{Text: f[0], Url: f[1]})
+		footers = append(footers, models.Footer{Text: f[0], Url: f[1]})
 	}
 
-	data := model.TypPageData{
+	data := models.TypPageData{
 		Header:           masterPageData,
 		Profile:          profile,
 		Content:          pageData,

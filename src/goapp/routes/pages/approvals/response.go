@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"main/model"
+	"main/models"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	template "main/pkg/template"
@@ -185,7 +185,7 @@ func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		// Decode payload
-		var req model.TypRequestProcess
+		var req models.TypRequestProcess
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 

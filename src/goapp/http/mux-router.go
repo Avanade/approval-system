@@ -29,14 +29,6 @@ func (*muxRouter) POST(uri string, f func(resp http.ResponseWriter, req *http.Re
 	muxDispatcher.HandleFunc(uri, f).Methods("POST")
 }
 
-func (*muxRouter) PUT(uri string, f func(resp http.ResponseWriter, req *http.Request)) {
-	muxDispatcher.HandleFunc(uri, f).Methods("PUT")
-}
-
-func (*muxRouter) DELETE(uri string, f func(resp http.ResponseWriter, req *http.Request)) {
-	muxDispatcher.HandleFunc(uri, f).Methods("DELETE")
-}
-
 func (*muxRouter) SERVE(port string) {
 	secureOptions := secure.Options{
 		SSLRedirect:           true,                                            // Strict-Transport-Security
