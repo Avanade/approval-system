@@ -21,6 +21,17 @@ type Item struct {
 	RequestedBy      string   `json:"requestedBy"`
 }
 
+type ItemOptions struct {
+	ItemType     int64
+	ItemStatus   int64
+	Offset       int
+	Filter       int
+	Search       string
+	RequestType  string
+	Organization string
+	User         string
+}
+
 type Response struct {
 	Data  []Item `json:"data"`
 	Total int    `json:"total"`

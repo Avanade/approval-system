@@ -19,26 +19,26 @@ func NewItemRepository(db repository.Database) ItemRepository {
 	}
 }
 
-func (r *itemRepository) GetItemsBy(itemType model.ItemType, itemStatus model.ItemStatus, requestType, organization, user, search string, offset, filter int) ([]model.Item, error) {
+func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item, error) {
 	var params []interface{}
 
-	if itemType != model.AllType {
-		params = append(params, sql.Named("ItemType", itemType))
-		params = append(params, sql.Named("User", user))
+	if model.ItemType(itemOptions.ItemType) != model.AllType {
+		params = append(params, sql.Named("ItemType", itemOptions.ItemType))
+		params = append(params, sql.Named("User", itemOptions.User))
 	}
 
-	if requestType != "" {
-		params = append(params, sql.Named("RequestType", requestType))
+	if itemOptions.RequestType != "" {
+		params = append(params, sql.Named("RequestType", itemOptions.RequestType))
 	}
 
-	if organization != "" {
-		params = append(params, sql.Named("Organization", organization))
+	if itemOptions.Organization != "" {
+		params = append(params, sql.Named("Organization", itemOptions.Organization))
 	}
 
-	params = append(params, sql.Named("IsApproved", itemStatus))
-	params = append(params, sql.Named("Search", search))
-	params = append(params, sql.Named("Offset", offset))
-	params = append(params, sql.Named("Filter", filter))
+	params = append(params, sql.Named("IsApproved", itemOptions.ItemStatus))
+	params = append(params, sql.Named("Search", itemOptions.Search))
+	params = append(params, sql.Named("Offset", itemOptions.Offset))
+	params = append(params, sql.Named("Filter", itemOptions.Filter))
 
 	resList, err := r.Query("PR_Items_Select", params...)
 	if err != nil {
@@ -117,24 +117,24 @@ func (r *itemRepository) GetItemsBy(itemType model.ItemType, itemStatus model.It
 	return items, nil
 }
 
-func (r *itemRepository) GetTotalItemsBy(itemType model.ItemType, itemStatus model.ItemStatus, requestType, organization, user, search string) (int, error) {
+func (r *itemRepository) GetTotalItemsBy(itemOptions model.ItemOptions) (int, error) {
 	var params []interface{}
 
-	if itemType != model.AllType {
-		params = append(params, sql.Named("ItemType", itemType))
-		params = append(params, sql.Named("User", user))
+	if model.ItemType(itemOptions.ItemType) != model.AllType {
+		params = append(params, sql.Named("ItemType", itemOptions.ItemType))
+		params = append(params, sql.Named("User", itemOptions.User))
 	}
 
-	if requestType != "" {
-		params = append(params, sql.Named("RequestType", requestType))
+	if itemOptions.RequestType != "" {
+		params = append(params, sql.Named("RequestType", itemOptions.RequestType))
 	}
 
-	if organization != "" {
-		params = append(params, sql.Named("Organization", organization))
+	if itemOptions.Organization != "" {
+		params = append(params, sql.Named("Organization", itemOptions.Organization))
 	}
 
-	params = append(params, sql.Named("IsApproved", itemStatus))
-	params = append(params, sql.Named("Search", search))
+	params = append(params, sql.Named("IsApproved", itemOptions.ItemStatus))
+	params = append(params, sql.Named("Search", itemOptions.Search))
 
 	rowTotal, err := r.Query("PR_Items_Total", params...)
 	if err != nil {
