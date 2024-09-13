@@ -1,4 +1,4 @@
-package model
+package models
 
 type TypPageData struct {
 	Header           interface{}
