@@ -24,5 +24,6 @@ jobs:
                 username: ${{ secrets.CONTAINER_REGISTRY_SERVER_USERNAME }}
                 password: ${{ secrets.CONTAINER_REGISTRY_SERVER_PASSWORD }}
             - run: |
+                touch .env
                 docker build . -t ${{ secrets.CONTAINER_REGISTRY_SERVER }}/${{vars.APPSERVICE_NAME}}:${{ github.sha }} -t ${{ secrets.CONTAINER_REGISTRY_SERVER }}/${{vars.APPSERVICE_NAME}}:latest
                 docker push ${{ secrets.CONTAINER_REGISTRY_SERVER }}/${{vars.APPSERVICE_NAME}}
