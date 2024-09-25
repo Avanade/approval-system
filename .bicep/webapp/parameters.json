@@ -34,6 +34,7 @@
                 "WEBSITES_ENABLE_APP_SERVICE_STORAGE": "",
                 "CONTENT_SECURITY_POLICY": "",
                 "EMAIL_SUPPORT":"",
+                "ENTERPRISE_OWNERS":"",
                 "EMAIL_ENABLED" : "",
                 "EMAIL_TENANT_ID" : "",
                 "EMAIL_CLIENT_ID" : "",
