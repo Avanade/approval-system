@@ -2,28 +2,28 @@ package item
 
 import (
 	"main/model"
-	repositoryItem "main/repository/item"
+	"main/repository"
 )
 
 type itemService struct {
-	repositoryItem repositoryItem.ItemRepository
+	Repository *repository.Repository
 }
 
-func NewItemService(repositoryItem repositoryItem.ItemRepository) ItemService {
+func NewItemService(repo *repository.Repository) ItemService {
 	return &itemService{
-		repositoryItem: repositoryItem,
+		Repository: repo,
 	}
 }
 
 func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, error) {
 	var result model.Response
 
-	total, err := s.repositoryItem.GetTotalItemsBy(itemOptions)
+	total, err := s.Repository.Item.GetTotalItemsBy(itemOptions)
 	if err != nil {
 		return model.Response{}, err
 	}
 
-	data, err := s.repositoryItem.GetItemsBy(itemOptions)
+	data, err := s.Repository.Item.GetItemsBy(itemOptions)
 	if err != nil {
 		return model.Response{}, err
 	}
@@ -34,4 +34,28 @@ func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, err
 	}
 
 	return result, nil
+}
+
+func (s *itemService) InsertItem(item model.TypItemInsert) (string, error) {
+	id, err := s.Repository.Item.InsertItem(item.ApplicationModuleId, item.Subject, item.Body, item.RequesterEmail)
+	if err != nil {
+		return "", err
+	}
+	return id, nil
+}
+
+func (s *itemService) InsertApprovalRequestApprover(approver model.ApprovalRequestApprover) error {
+	err := s.Repository.Item.InsertApprovalRequestApprover(approver)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *itemService) UpdateItemDateSent(itemId string) error {
+	err := s.Repository.Item.UpdateItemDateSent(itemId)
+	if err != nil {
+		return err
+	}
+	return nil
 }

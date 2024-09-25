@@ -3,17 +3,17 @@ package item
 import (
 	"database/sql"
 	"fmt"
+	db "main/infrastructure/database"
 	"main/model"
-	"main/repository"
 	"strconv"
 	"time"
 )
 
 type itemRepository struct {
-	repository.Database
+	db.Database
 }
 
-func NewItemRepository(db repository.Database) ItemRepository {
+func NewItemRepository(db db.Database) ItemRepository {
 	return &itemRepository{
 		Database: db,
 	}
@@ -152,4 +152,49 @@ func (r *itemRepository) GetTotalItemsBy(itemOptions model.ItemOptions) (int, er
 	}
 
 	return total, nil
+}
+
+func (r *itemRepository) InsertItem(appModuleId, subject, body, requesterEmail string) (string, error) {
+	rowItem, err := r.Query("PR_Items_Insert",
+		sql.Named("ApplicationModuleId", appModuleId),
+		sql.Named("Subject", subject),
+		sql.Named("Body", body),
+		sql.Named("RequesterEmail", requesterEmail),
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	resultItem, err := r.RowsToMap(rowItem)
+	if err != nil {
+		return "", err
+	}
+
+	return resultItem[0]["Id"].(string), nil
+}
+
+func (r *itemRepository) InsertApprovalRequestApprover(approver model.ApprovalRequestApprover) error {
+	_, err := r.Query("PR_ApprovalRequestApprovers_Insert",
+		sql.Named("ItemId", approver.ItemId),
+		sql.Named("ApproverEmail", approver.ApproverEmail),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *itemRepository) UpdateItemDateSent(id string) error {
+	_, err := r.Query("PR_Items_Update_DateSent",
+		sql.Named("Id", id),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

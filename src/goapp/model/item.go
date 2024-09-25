@@ -1,6 +1,7 @@
 package model
 
 type Item struct {
+	Id               string   `json:"id"`
 	Application      string   `json:"application"`
 	ApproverRemarks  string   `json:"approverRemarks"`
 	Body             string   `json:"body"`
@@ -54,3 +55,17 @@ const (
 	Closed // Disapproved, Approved
 	All    // Disapproved, Approved, Pending
 )
+
+type TypItemInsert struct {
+	ApplicationId       string   `json:"applicationId"`
+	ApplicationModuleId string   `json:"applicationModuleId"`
+	RequesterEmail      string   `json:"requesterEmail"`
+	Emails              []string `json:"emails"`
+	Subject             string   `json:"subject"`
+	Body                string   `json:"body"`
+}
+
+type ApprovalRequestApprover struct {
+	ItemId        string
+	ApproverEmail string
+}
