@@ -17,7 +17,7 @@ var (
 	database      repository.Database  = repository.NewDatabase(configManager)
 
 	itemRepository repositoryItem.ItemRepository = repositoryItem.NewItemRepository(database)
-	itemService    serviceItem.ItemService       = serviceItem.NewItemService(itemRepository)
+	itemService    serviceItem.ItemService       = serviceItem.NewItemService(itemRepository, configManager)
 	itemController controllerItem.ItemController = controllerItem.NewItemController(itemService)
 
 	httpRouter router.Router = router.NewMuxRouter()

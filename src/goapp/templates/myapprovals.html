@@ -189,23 +189,27 @@
                 x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
             </p>
           </div>
-          <div class="flex items-center">
-            <p>Approver/s: <span x-text="item.approvers[0]"></span></p>
-            <template x-if="item.approvers.length > 1">
-              <div x-data="popup({
-                              content: renderApprovers(item.approvers),
-                              placement: 'top',
-                              popupClass: 'shadow-md'
-                            })" @mouseover="showPopup" @mouseover.away="hidePopup">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                  stroke="currentColor" class="w-4 h-4">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-                <div x-html="template"></div>
+          <template x-if="item.approvers != null">
+            <template x-if="item.approvers.length != 0">
+              <div class="flex items-center">
+                <p>Approver/s: <span x-text="item.approvers[0]"></span></p>
+                <template x-if="item.approvers.length > 1">
+                  <div x-data="popup({
+                                  content: renderApprovers(item.approvers),
+                                  placement: 'top',
+                                  popupClass: 'shadow-md'
+                                })" @mouseover="showPopup" @mouseover.away="hidePopup">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                      stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <div x-html="template"></div>
+                  </div>
+                </template>
               </div>
             </template>
-          </div>
+          </template>
         </div>
       </div>
       <div class="relative self-stretch w-5">
@@ -313,23 +317,27 @@
                             x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
                         </p>
                       </div>
-                      <div @click.stop class="flex items-center">
-                        <p>Approver/s: <span x-text="item.approvers[0]"></span></p>
-                        <template x-if="item.approvers.length > 1">
-                          <div x-data="popup({
-                                          content: renderApprovers(item.approvers),
-                                          placement: 'top',
-                                          popupClass: 'shadow-md'
-                                        })" @mouseover="showPopup" @mouseover.away="hidePopup">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                              stroke="currentColor" class="w-4 h-4">
-                              <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
-                            <div x-html="template"></div>
+                      <template x-if="item.approvers != null">
+                        <template x-if="item.approvers.length != 0">
+                          <div class="flex items-center">
+                            <p>Approver/s: <span x-text="item.approvers[0]"></span></p>
+                            <template x-if="item.approvers.length > 1">
+                              <div x-data="popup({
+                                              content: renderApprovers(item.approvers),
+                                              placement: 'top',
+                                              popupClass: 'shadow-md'
+                                            })" @mouseover="showPopup" @mouseover.away="hidePopup">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                  stroke="currentColor" class="w-4 h-4">
+                                  <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <div x-html="template"></div>
+                              </div>
+                            </template>
                           </div>
                         </template>
-                      </div>
+                      </template>
                       <div>
                         <p x-data="{ respondedBy: 'Responded by: ' + item.respondedBy}" x-text="respondedBy"></p>
                       </div>
