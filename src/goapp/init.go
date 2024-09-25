@@ -21,7 +21,7 @@ var (
 
 	svc = s.NewService(
 		s.NewApplicationModuleService(repo),
-		s.NewItemService(repo),
+		s.NewItemService(repo, conf),
 		s.NewEmailService(conf),
 	)
 

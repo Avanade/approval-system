@@ -32,9 +32,9 @@ func NewApplicationModuleService(repo *repository.Repository) ServiceOptionFunc 
 	}
 }
 
-func NewItemService(repo *repository.Repository) ServiceOptionFunc {
+func NewItemService(repo *repository.Repository, conf config.ConfigManager) ServiceOptionFunc {
 	return func(s *Service) {
-		s.Item = sItem.NewItemService(repo)
+		s.Item = sItem.NewItemService(repo, conf)
 	}
 }
 

@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -25,6 +26,15 @@ func (ecm *envConfigManager) GetDatabaseConnectionString() string {
 	return os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING")
 }
 
+func (ecm *envConfigManager) GetEnterpriseOwners() []string {
+	enterpriseOwners := os.Getenv("ENTERPRISE_OWNERS")
+	if enterpriseOwners == "" {
+		return nil
+	}
+	ownersArray := strings.Split(enterpriseOwners, ",")
+	return ownersArray
+}
+
 func (ecm *envConfigManager) GetEmailTenantID() string {
 	return os.Getenv("EMAIL_TENANT_ID")
 }
@@ -42,8 +52,5 @@ func (ecm *envConfigManager) GetEmailUserID() string {
 }
 
 func (ecm *envConfigManager) GetIsEmailEnabled() bool {
-	if os.Getenv("EMAIL_ENABLED") != "true" {
-		return false
-	}
-	return true
+	return os.Getenv("EMAIL_ENABLED") == "true"
 }
