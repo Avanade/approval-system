@@ -40,6 +40,7 @@ jobs:
           parameters.appServiceSettings.value.EMAIL_CLIENT_SECRET : ${{ secrets.EMAIL_CLIENT_SECRET }}
           parameters.appServiceSettings.value.ENTERPRISE_OWNERS : ${{ secrets.ENTERPRISE_OWNERS }}
           parameters.appServiceSettings.value.EMAIL_USER_ID : ${{ secrets.EMAIL_USER_ID }}
+          parameters.appServiceSettings.value.LINK_FOOTERS : ${{ vars.LINK_FOOTERS }}
           parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : ${{ secrets.CONTAINER_REGISTRY_SERVER_URL }}
           parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_USERNAME : ${{ secrets.CONTAINER_REGISTRY_SERVER_USERNAME }} 
           parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_PASSWORD : ${{ secrets.CONTAINER_REGISTRY_SERVER_PASSWORD }}
