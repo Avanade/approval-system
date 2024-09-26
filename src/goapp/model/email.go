@@ -2,13 +2,7 @@ package model
 
 import "html/template"
 
-type TypEmailMessage struct {
-	To      string
-	Subject string
-	Body    string
-}
-
-type TypEmailData struct {
+type ApprovalRequestEmailData struct {
 	Subject     string
 	Body        template.HTML
 	ApproveText string

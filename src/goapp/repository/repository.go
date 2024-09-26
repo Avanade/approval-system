@@ -3,12 +3,14 @@ package repository
 import (
 	"main/infrastructure/database"
 	rAppModule "main/repository/app-module"
+	rApprovalRequestApprover "main/repository/approval-request-approver"
 	rItem "main/repository/item"
 )
 
 type Repository struct {
-	ApplicationModule rAppModule.ApplicationModuleRepository
-	Item              rItem.ItemRepository
+	ApplicationModule       rAppModule.ApplicationModuleRepository
+	Item                    rItem.ItemRepository
+	ApprovalRequestApprover rApprovalRequestApprover.ApprovalRequestApproverRepository
 }
 
 type RepositoryOptionFunc func(*Repository)
@@ -32,5 +34,11 @@ func NewApplicationModule(db database.Database) RepositoryOptionFunc {
 func NewItem(db database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.Item = rItem.NewItemRepository(db)
+	}
+}
+
+func NewApprovalRequestApprover(db database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.ApprovalRequestApprover = rApprovalRequestApprover.NewApprovalRequestApproverRepository(db)
 	}
 }

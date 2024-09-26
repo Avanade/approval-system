@@ -111,7 +111,7 @@ func (c *itemController) GetItems(w http.ResponseWriter, r *http.Request) {
 
 func (c *itemController) CreateItem(w http.ResponseWriter, r *http.Request) {
 	// Decode payload
-	var req model.TypItemInsert
+	var req model.ItemInsertRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -140,7 +140,7 @@ func (c *itemController) CreateItem(w http.ResponseWriter, r *http.Request) {
 
 	// Insert approvers to database
 	for _, to := range req.Emails {
-		err := c.Service.Item.InsertApprovalRequestApprover(model.ApprovalRequestApprover{
+		err := c.Service.ApprovalRequestApprover.InsertApprovalRequestApprover(model.ApprovalRequestApprover{
 			ItemId:        id,
 			ApproverEmail: to,
 		})

@@ -56,7 +56,7 @@ const (
 	All    // Disapproved, Approved, Pending
 )
 
-type TypItemInsert struct {
+type ItemInsertRequest struct {
 	ApplicationId       string   `json:"applicationId"`
 	ApplicationModuleId string   `json:"applicationModuleId"`
 	RequesterEmail      string   `json:"requesterEmail"`

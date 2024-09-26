@@ -4,14 +4,16 @@ import (
 	"main/config"
 	"main/repository"
 	sApplicationModule "main/service/app-module"
+	sApprovalRequestApprover "main/service/approval-request-approver"
 	sEmail "main/service/email"
 	sItem "main/service/item"
 )
 
 type Service struct {
-	ApplicationModule sApplicationModule.ApplicationModuleService
-	Item              sItem.ItemService
-	Email             sEmail.EmailService
+	ApplicationModule       sApplicationModule.ApplicationModuleService
+	Item                    sItem.ItemService
+	Email                   sEmail.EmailService
+	ApprovalRequestApprover sApprovalRequestApprover.ApprovalRequestApproverService
 }
 
 type ServiceOptionFunc func(*Service)
@@ -41,5 +43,11 @@ func NewItemService(repo *repository.Repository, conf config.ConfigManager) Serv
 func NewEmailService(conf config.ConfigManager) ServiceOptionFunc {
 	return func(s *Service) {
 		s.Email = sEmail.NewSdkEmailService(conf)
+	}
+}
+
+func NewApprovalRequestApproverService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.ApprovalRequestApprover = sApprovalRequestApprover.NewApprovalRequestApproverService(repo)
 	}
 }

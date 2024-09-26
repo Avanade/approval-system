@@ -1,9 +1,11 @@
 package item
 
 import (
+	"fmt"
 	"main/config"
 	"main/model"
 	"main/repository"
+	"sync"
 )
 
 type itemService struct {
@@ -31,15 +33,30 @@ func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, err
 		return model.Response{}, err
 	}
 
-	for i := 0; i < len(data); i++ {
-		if data[i].Approvers == nil {
-			continue
-		}
-		if len(data[i].Approvers) == 0 {
-			continue
-		}
-		data[i].Approvers = s.removeEnterpriseOwnersInApprovers(data[i].Approvers)
+	var wg sync.WaitGroup
+	maxGoroutines := 10
+	guard := make(chan struct{}, maxGoroutines)
+
+	for _, item := range data {
+		guard <- struct{}{}
+		wg.Add(1)
+		go func(r *model.Item) {
+			approvers, err := s.Repository.Item.GetApproversByItemId(r.Id)
+			if err != nil {
+				fmt.Println("Error getting approvers of item id: ", r.Id)
+				return
+			}
+			r.Approvers = approvers
+
+			if len(r.Approvers) > 0 {
+				r.Approvers = s.removeEnterpriseOwnersInApprovers(r.Approvers)
+			}
+
+			<-guard
+			wg.Done()
+		}(&item)
 	}
+	wg.Wait()
 
 	result = model.Response{
 		Data:  data,
@@ -49,20 +66,12 @@ func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, err
 	return result, nil
 }
 
-func (s *itemService) InsertItem(item model.TypItemInsert) (string, error) {
+func (s *itemService) InsertItem(item model.ItemInsertRequest) (string, error) {
 	id, err := s.Repository.Item.InsertItem(item.ApplicationModuleId, item.Subject, item.Body, item.RequesterEmail)
 	if err != nil {
 		return "", err
 	}
 	return id, nil
-}
-
-func (s *itemService) InsertApprovalRequestApprover(approver model.ApprovalRequestApprover) error {
-	err := s.Repository.Item.InsertApprovalRequestApprover(approver)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (s *itemService) UpdateItemDateSent(itemId string) error {

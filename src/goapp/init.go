@@ -17,12 +17,14 @@ var (
 	repo = r.NewRepository(
 		r.NewApplicationModule(db),
 		r.NewItem(db),
+		r.NewApprovalRequestApprover(db),
 	)
 
 	svc = s.NewService(
 		s.NewApplicationModuleService(repo),
 		s.NewItemService(repo, conf),
 		s.NewEmailService(conf),
+		s.NewApprovalRequestApproverService(repo),
 	)
 
 	ctrl = c.NewController(

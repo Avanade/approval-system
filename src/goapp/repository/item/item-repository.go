@@ -55,6 +55,7 @@ func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item
 	for _, v := range result {
 
 		item := model.Item{
+			Id:            v["ItemId"].(string),
 			Application:   v["Application"].(string),
 			Created:       v["Created"].(time.Time).String(),
 			Module:        v["Module"].(string),
@@ -97,24 +98,29 @@ func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item
 			item.RespondedBy = v["RespondedBy"].(string)
 		}
 
-		rowApprovers, err := r.Query("PR_ApprovalRequestApprovers_Select_ByItemId", sql.Named("ItemId", v["ItemId"].(string)))
-		if err != nil {
-			return []model.Item{}, err
-		}
-
-		approvers, err := r.RowsToMap(rowApprovers)
-		if err != nil {
-			return []model.Item{}, err
-		}
-
-		for _, approver := range approvers {
-			item.Approvers = append(item.Approvers, approver["ApproverEmail"].(string))
-		}
-
 		items = append(items, item)
 	}
 
 	return items, nil
+}
+
+func (r *itemRepository) GetApproversByItemId(itemId string) ([]string, error) {
+	var result []string
+	rowApprovers, err := r.Query("PR_ApprovalRequestApprovers_Select_ByItemId", sql.Named("ItemId", itemId))
+	if err != nil {
+		return nil, err
+	}
+
+	approvers, err := r.RowsToMap(rowApprovers)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, approver := range approvers {
+		result = append(result, approver["ApproverEmail"].(string))
+	}
+
+	return result, nil
 }
 
 func (r *itemRepository) GetTotalItemsBy(itemOptions model.ItemOptions) (int, error) {
@@ -172,19 +178,6 @@ func (r *itemRepository) InsertItem(appModuleId, subject, body, requesterEmail s
 	}
 
 	return resultItem[0]["Id"].(string), nil
-}
-
-func (r *itemRepository) InsertApprovalRequestApprover(approver model.ApprovalRequestApprover) error {
-	_, err := r.Query("PR_ApprovalRequestApprovers_Insert",
-		sql.Named("ItemId", approver.ItemId),
-		sql.Named("ApproverEmail", approver.ApproverEmail),
-	)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (r *itemRepository) UpdateItemDateSent(id string) error {

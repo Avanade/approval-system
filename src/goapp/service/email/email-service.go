@@ -34,8 +34,8 @@ func NewSdkEmailService(config config.ConfigManager) EmailService {
 	}
 }
 
-func (s *sdkEmailService) SendApprovalRequestEmail(req *model.TypItemInsert, appModule *model.ApplicationModule, id string) error {
-	data := model.TypEmailData{
+func (s *sdkEmailService) SendApprovalRequestEmail(req *model.ItemInsertRequest, appModule *model.ApplicationModule, id string) error {
+	data := model.ApprovalRequestEmailData{
 		Subject:     req.Subject,
 		Body:        template.HTML(req.Body),
 		ApproveText: appModule.ApproveText,
