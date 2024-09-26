@@ -153,14 +153,14 @@ func (c *itemController) CreateItem(w http.ResponseWriter, r *http.Request) {
 	// Send email
 	err = c.Service.Email.SendApprovalRequestEmail(&req, appModule, id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = c.Service.Item.UpdateItemDateSent(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		fmt.Println("Error sending email: ", err)
+		err = nil
+	} else {
+		err = c.Service.Item.UpdateItemDateSent(id)
+		if err != nil {
+			fmt.Println("Error updating DateSent column ", err)
+			err = nil
+		}
 	}
 
 	// Prepare response
