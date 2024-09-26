@@ -74,6 +74,10 @@ func (s *itemService) UpdateItemDateSent(itemId string) error {
 }
 
 func (s *itemService) removeEnterpriseOwnersInApprovers(approvers []string) []string {
+	if len(approvers) == 1 {
+		return approvers
+	}
+
 	ownersArray := s.configManager.GetEnterpriseOwners()
 	if len(ownersArray) == 0 {
 		return approvers
