@@ -1,5 +1,7 @@
 package model
 
+import "html/template"
+
 type TypEmailMessage struct {
 	To      string
 	Subject string
@@ -8,7 +10,7 @@ type TypEmailMessage struct {
 
 type TypEmailData struct {
 	Subject     string
-	Body        string
+	Body        template.HTML
 	ApproveText string
 	RejectText  string
 	ApproveUrl  string
