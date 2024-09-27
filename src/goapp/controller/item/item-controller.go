@@ -1,6 +1,7 @@
 package item
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"main/model"
@@ -174,5 +175,75 @@ func (c *itemController) CreateItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonResp)
+}
 
+func (c *itemController) ProcessResponse(w http.ResponseWriter, r *http.Request) {
+	// Decode payload
+	var req model.ProcessResponseRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Validate payload
+	valid, err := c.Service.Item.ValidateItem(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !valid {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	// Update item response
+	err = c.Service.Item.UpdateItemResponse(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Post callback
+	c.postCallback(req.ItemId)
+
+	// Prepare response
+	w.WriteHeader(http.StatusOK)
+}
+
+func (c *itemController) postCallback(id string) {
+	item, err := c.Service.Item.GetItemById(id)
+	if err != nil {
+		fmt.Println("Error getting item by id: ", id)
+		return
+	}
+
+	if item.CallbackUrl == "" {
+		fmt.Println("No callback url found")
+		return
+	} else {
+		params := model.ResponseCallback{
+			ItemId:       id,
+			IsApproved:   item.IsApproved,
+			Remarks:      item.ApproverRemarks,
+			ResponseDate: item.DateResponded,
+			RespondedBy:  item.RespondedBy,
+		}
+
+		jsonReq, err := json.Marshal(params)
+		if err != nil {
+			return
+		}
+
+		res, err := http.Post(item.CallbackUrl, "application/json", bytes.NewBuffer(jsonReq))
+		if err != nil {
+			fmt.Println("Error posting callback: ", err)
+			return
+		}
+
+		isCallbackFailed := res.StatusCode != 200
+
+		err = c.Service.Item.UpdateItemCallback(id, isCallbackFailed)
+	}
 }

@@ -1,25 +1,27 @@
 package model
 
 type Item struct {
-	Id               string   `json:"id"`
-	Application      string   `json:"application"`
-	ApproverRemarks  string   `json:"approverRemarks"`
-	Body             string   `json:"body"`
-	Created          string   `json:"created"`
-	DateResponded    string   `json:"dateResponded"`
-	DateSent         string   `json:"dateSent"`
-	IsApproved       bool     `json:"isApproved"`
-	Module           string   `json:"module"`
-	Subject          string   `json:"subject"`
-	ApproveText      string   `json:"approveText"`
-	RejectText       string   `json:"rejectText"`
-	ApproveUrl       string   `json:"approveUrl"`
-	RejectUrl        string   `json:"rejectUrl"`
-	AllowReassign    bool     `json:"allowReassign"`
-	AllowReassignUrl string   `json:"allowReassignUrl"`
-	RespondedBy      string   `json:"respondedBy"`
-	Approvers        []string `json:"approvers"`
-	RequestedBy      string   `json:"requestedBy"`
+	Id                  string   `json:"id"`
+	Application         string   `json:"application"`
+	ApproverRemarks     string   `json:"approverRemarks"`
+	Body                string   `json:"body"`
+	Created             string   `json:"created"`
+	DateResponded       string   `json:"dateResponded"`
+	DateSent            string   `json:"dateSent"`
+	IsApproved          bool     `json:"isApproved"`
+	Module              string   `json:"module"`
+	Subject             string   `json:"subject"`
+	ApproveText         string   `json:"approveText"`
+	CallbackUrl         string   `json:"callbackUrl"`
+	ReassignCallbackUrl string   `json:"reassignCallbackUrl"`
+	RejectText          string   `json:"rejectText"`
+	ApproveUrl          string   `json:"approveUrl"`
+	RejectUrl           string   `json:"rejectUrl"`
+	AllowReassign       bool     `json:"allowReassign"`
+	AllowReassignUrl    string   `json:"allowReassignUrl"`
+	RespondedBy         string   `json:"respondedBy"`
+	Approvers           []string `json:"approvers"`
+	RequestedBy         string   `json:"requestedBy"`
 }
 
 type ItemOptions struct {
@@ -68,4 +70,22 @@ type ItemInsertRequest struct {
 type ApprovalRequestApprover struct {
 	ItemId        string
 	ApproverEmail string
+}
+
+type ProcessResponseRequest struct {
+	ApplicationId       string `json:"applicationId"`
+	ApplicationModuleId string `json:"applicationModuleId"`
+	ItemId              string `json:"itemId"`
+	ApproverEmail       string `json:"approverEmail"`
+	Remarks             string `json:"remarks"`
+	IsApproved          string `json:"isApproved"`
+	Username            string `json:"username"`
+}
+
+type ResponseCallback struct {
+	ItemId       string `json:"itemId"`
+	IsApproved   bool   `json:"isApproved"`
+	Remarks      string `json:"remarks"`
+	ResponseDate string `json:"responseDate"`
+	RespondedBy  string `json:"respondedBy"`
 }
