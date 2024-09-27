@@ -6,4 +6,6 @@ import (
 
 type ItemService interface {
 	GetAll(itemOptions model.ItemOptions) (model.Response, error)
+	InsertItem(item model.ItemInsertRequest) (string, error)
+	UpdateItemDateSent(itemId string) error
 }

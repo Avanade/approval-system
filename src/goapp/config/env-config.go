@@ -34,3 +34,23 @@ func (ecm *envConfigManager) GetEnterpriseOwners() []string {
 	ownersArray := strings.Split(enterpriseOwners, ",")
 	return ownersArray
 }
+
+func (ecm *envConfigManager) GetEmailTenantID() string {
+	return os.Getenv("EMAIL_TENANT_ID")
+}
+
+func (ecm *envConfigManager) GetEmailClientID() string {
+	return os.Getenv("EMAIL_CLIENT_ID")
+}
+
+func (ecm *envConfigManager) GetEmailClientSecret() string {
+	return os.Getenv("EMAIL_CLIENT_SECRET")
+}
+
+func (ecm *envConfigManager) GetEmailUserID() string {
+	return os.Getenv("EMAIL_USER_ID")
+}
+
+func (ecm *envConfigManager) GetIsEmailEnabled() bool {
+	return os.Getenv("EMAIL_ENABLED") == "true"
+}

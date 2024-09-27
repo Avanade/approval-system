@@ -9,4 +9,9 @@ type Config struct {
 type ConfigManager interface {
 	GetDatabaseConnectionString() string
 	GetEnterpriseOwners() []string
+	GetEmailTenantID() string
+	GetEmailClientID() string
+	GetEmailClientSecret() string
+	GetEmailUserID() string
+	GetIsEmailEnabled() bool
 }

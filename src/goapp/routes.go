@@ -23,9 +23,9 @@ func setPageRoutes() {
 
 func setApiRoutes() {
 	httpRouter.GET("/api/request/types", m.Chain(rtApi.GetRequestTypes, m.AzureAuth()))
-	httpRouter.POST("/api/request", rtApprovals.ApprovalRequestHandler)
+	httpRouter.POST("/api/request", ctrl.Item.CreateItem)
 	httpRouter.POST("/api/process", rtApprovals.ProcessResponseHandler)
-	httpRouter.GET("/api/items/type/{type:[0-2]+}/status/{status:[0-3]+}", m.Chain(itemController.GetItems, m.AzureAuth()))
+	httpRouter.GET("/api/items/type/{type:[0-2]+}/status/{status:[0-3]+}", m.Chain(ctrl.Item.GetItems, m.AzureAuth()))
 	httpRouter.GET("/api/search/users/{search}", m.Chain(rtApi.SearchUserFromActiveDirectory, m.AzureAuth()))
 	httpRouter.GET("/api/responsereassignedapi/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{itemId}/{ApproveText}/{RejectText}", m.Chain(rtApprovals.ReAssignApproverHandler, m.AzureAuth()))
 }

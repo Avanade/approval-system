@@ -2,23 +2,34 @@ package main
 
 import (
 	"main/config"
-	"main/repository"
+	"main/infrastructure/database"
 	"main/router"
 
-	repositoryItem "main/repository/item"
-
-	serviceItem "main/service/item"
-
-	controllerItem "main/controller/item"
+	c "main/controller"
+	r "main/repository"
+	s "main/service"
 )
 
 var (
-	configManager config.ConfigManager = config.NewEnvConfigManager()
-	database      repository.Database  = repository.NewDatabase(configManager)
+	conf config.ConfigManager = config.NewEnvConfigManager()
+	db   database.Database    = database.NewDatabase(conf)
 
-	itemRepository repositoryItem.ItemRepository = repositoryItem.NewItemRepository(database)
-	itemService    serviceItem.ItemService       = serviceItem.NewItemService(itemRepository, configManager)
-	itemController controllerItem.ItemController = controllerItem.NewItemController(itemService)
+	repo = r.NewRepository(
+		r.NewApplicationModule(db),
+		r.NewItem(db),
+		r.NewApprovalRequestApprover(db),
+	)
+
+	svc = s.NewService(
+		s.NewApplicationModuleService(repo),
+		s.NewItemService(repo, conf),
+		s.NewEmailService(conf),
+		s.NewApprovalRequestApproverService(repo),
+	)
+
+	ctrl = c.NewController(
+		c.NewItemController(svc),
+	)
 
 	httpRouter router.Router = router.NewMuxRouter()
 )

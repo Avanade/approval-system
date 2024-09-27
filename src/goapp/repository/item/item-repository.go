@@ -3,17 +3,17 @@ package item
 import (
 	"database/sql"
 	"fmt"
+	db "main/infrastructure/database"
 	"main/model"
-	"main/repository"
 	"strconv"
 	"time"
 )
 
 type itemRepository struct {
-	repository.Database
+	db.Database
 }
 
-func NewItemRepository(db repository.Database) ItemRepository {
+func NewItemRepository(db db.Database) ItemRepository {
 	return &itemRepository{
 		Database: db,
 	}
@@ -55,6 +55,7 @@ func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item
 	for _, v := range result {
 
 		item := model.Item{
+			Id:            v["ItemId"].(string),
 			Application:   v["Application"].(string),
 			Created:       v["Created"].(time.Time).String(),
 			Module:        v["Module"].(string),
@@ -95,20 +96,6 @@ func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item
 
 		if v["RespondedBy"] != nil {
 			item.RespondedBy = v["RespondedBy"].(string)
-		}
-
-		rowApprovers, err := r.Query("PR_ApprovalRequestApprovers_Select_ByItemId", sql.Named("ItemId", v["ItemId"].(string)))
-		if err != nil {
-			return []model.Item{}, err
-		}
-
-		approvers, err := r.RowsToMap(rowApprovers)
-		if err != nil {
-			return []model.Item{}, err
-		}
-
-		for _, approver := range approvers {
-			item.Approvers = append(item.Approvers, approver["ApproverEmail"].(string))
 		}
 
 		items = append(items, item)
@@ -152,4 +139,36 @@ func (r *itemRepository) GetTotalItemsBy(itemOptions model.ItemOptions) (int, er
 	}
 
 	return total, nil
+}
+
+func (r *itemRepository) InsertItem(appModuleId, subject, body, requesterEmail string) (string, error) {
+	rowItem, err := r.Query("PR_Items_Insert",
+		sql.Named("ApplicationModuleId", appModuleId),
+		sql.Named("Subject", subject),
+		sql.Named("Body", body),
+		sql.Named("RequesterEmail", requesterEmail),
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	resultItem, err := r.RowsToMap(rowItem)
+	if err != nil {
+		return "", err
+	}
+
+	return resultItem[0]["Id"].(string), nil
+}
+
+func (r *itemRepository) UpdateItemDateSent(id string) error {
+	_, err := r.Query("PR_Items_Update_DateSent",
+		sql.Named("Id", id),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

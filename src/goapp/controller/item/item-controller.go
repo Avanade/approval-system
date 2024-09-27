@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"main/model"
 	"main/pkg/session"
-	service "main/service/item"
+	"main/service"
 	"net/http"
 	"strconv"
 
@@ -13,12 +13,12 @@ import (
 )
 
 type itemController struct {
-	itemService service.ItemService
+	*service.Service
 }
 
-func NewItemController(itemService service.ItemService) ItemController {
+func NewItemController(svc *service.Service) ItemController {
 	return &itemController{
-		itemService: itemService,
+		Service: svc,
 	}
 }
 
@@ -97,7 +97,7 @@ func (c *itemController) GetItems(w http.ResponseWriter, r *http.Request) {
 		itemOptions.Organization = ""
 	}
 
-	result, err := c.itemService.GetAll(itemOptions)
+	result, err := c.Service.Item.GetAll(itemOptions)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -107,4 +107,72 @@ func (c *itemController) GetItems(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
+}
+
+func (c *itemController) CreateItem(w http.ResponseWriter, r *http.Request) {
+	// Decode payload
+	var req model.ItemInsertRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Get application module
+	appModule, err := c.Service.ApplicationModule.GetApplicationModuleByIdAndApplicationId(req.ApplicationId, req.ApplicationModuleId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Check if application module is valid
+	if appModule == nil {
+		http.Error(w, "Application module not found", http.StatusBadRequest)
+		return
+	}
+
+	// Add item to database
+	id, err := c.Service.Item.InsertItem(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Insert approvers to database
+	for _, to := range req.Emails {
+		err := c.Service.ApprovalRequestApprover.InsertApprovalRequestApprover(model.ApprovalRequestApprover{
+			ItemId:        id,
+			ApproverEmail: to,
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Send email
+	err = c.Service.Email.SendApprovalRequestEmail(&req, appModule, id)
+	if err != nil {
+		fmt.Println("Error sending email: ", err)
+		err = nil
+	} else {
+		err = c.Service.Item.UpdateItemDateSent(id)
+		if err != nil {
+			fmt.Println("Error updating DateSent column ", err)
+			err = nil
+		}
+	}
+
+	// Prepare response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	resp := make(map[string]string)
+	resp["itemId"] = fmt.Sprintf("%v", id)
+	jsonResp, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+
 }

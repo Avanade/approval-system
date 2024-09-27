@@ -1,45 +1,62 @@
 package item
 
 import (
+	"fmt"
 	"main/config"
 	"main/model"
-	repositoryItem "main/repository/item"
+	"main/repository"
+	"sync"
 )
 
 type itemService struct {
-	repositoryItem repositoryItem.ItemRepository
-	configManager  config.ConfigManager
+	Repository    *repository.Repository
+	configManager config.ConfigManager
 }
 
-func NewItemService(repositoryItem repositoryItem.ItemRepository, configManager config.ConfigManager) ItemService {
+func NewItemService(repo *repository.Repository, configManager config.ConfigManager) ItemService {
 	return &itemService{
-		repositoryItem: repositoryItem,
-		configManager:  configManager,
+		Repository:    repo,
+		configManager: configManager,
 	}
 }
 
 func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, error) {
 	var result model.Response
 
-	total, err := s.repositoryItem.GetTotalItemsBy(itemOptions)
+	total, err := s.Repository.Item.GetTotalItemsBy(itemOptions)
 	if err != nil {
 		return model.Response{}, err
 	}
 
-	data, err := s.repositoryItem.GetItemsBy(itemOptions)
+	data, err := s.Repository.Item.GetItemsBy(itemOptions)
 	if err != nil {
 		return model.Response{}, err
 	}
 
-	for i := 0; i < len(data); i++ {
-		if data[i].Approvers == nil {
-			continue
-		}
-		if len(data[i].Approvers) == 0 {
-			continue
-		}
-		data[i].Approvers = s.removeEnterpriseOwnersInApprovers(data[i].Approvers)
+	var wg sync.WaitGroup
+	maxGoroutines := 10
+	guard := make(chan struct{}, maxGoroutines)
+
+	for i := range data {
+		guard <- struct{}{}
+		wg.Add(1)
+		go func(r *model.Item) {
+			approvers, err := s.Repository.ApprovalRequestApprover.GetApproversByItemId(r.Id)
+			if err != nil {
+				fmt.Println("Error getting approvers of item id: ", r.Id)
+				return
+			}
+			r.Approvers = approvers
+
+			if len(r.Approvers) > 0 {
+				r.Approvers = s.removeEnterpriseOwnersInApprovers(r.Approvers)
+			}
+
+			<-guard
+			wg.Done()
+		}(&data[i])
 	}
+	wg.Wait()
 
 	result = model.Response{
 		Data:  data,
@@ -47,6 +64,22 @@ func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, err
 	}
 
 	return result, nil
+}
+
+func (s *itemService) InsertItem(item model.ItemInsertRequest) (string, error) {
+	id, err := s.Repository.Item.InsertItem(item.ApplicationModuleId, item.Subject, item.Body, item.RequesterEmail)
+	if err != nil {
+		return "", err
+	}
+	return id, nil
+}
+
+func (s *itemService) UpdateItemDateSent(itemId string) error {
+	err := s.Repository.Item.UpdateItemDateSent(itemId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *itemService) removeEnterpriseOwnersInApprovers(approvers []string) []string {
