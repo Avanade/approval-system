@@ -37,7 +37,7 @@ func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, err
 	maxGoroutines := 10
 	guard := make(chan struct{}, maxGoroutines)
 
-	for _, item := range data {
+	for i := range data {
 		guard <- struct{}{}
 		wg.Add(1)
 		go func(r *model.Item) {
@@ -54,7 +54,7 @@ func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, err
 
 			<-guard
 			wg.Done()
-		}(&item)
+		}(&data[i])
 	}
 	wg.Wait()
 
