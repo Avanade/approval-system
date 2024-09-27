@@ -41,7 +41,7 @@ func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, err
 		guard <- struct{}{}
 		wg.Add(1)
 		go func(r *model.Item) {
-			approvers, err := s.Repository.Item.GetApproversByItemId(r.Id)
+			approvers, err := s.Repository.ApprovalRequestApprover.GetApproversByItemId(r.Id)
 			if err != nil {
 				fmt.Println("Error getting approvers of item id: ", r.Id)
 				return

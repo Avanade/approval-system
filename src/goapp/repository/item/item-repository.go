@@ -104,25 +104,6 @@ func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item
 	return items, nil
 }
 
-func (r *itemRepository) GetApproversByItemId(itemId string) ([]string, error) {
-	var result []string
-	rowApprovers, err := r.Query("PR_ApprovalRequestApprovers_Select_ByItemId", sql.Named("ItemId", itemId))
-	if err != nil {
-		return nil, err
-	}
-
-	approvers, err := r.RowsToMap(rowApprovers)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, approver := range approvers {
-		result = append(result, approver["ApproverEmail"].(string))
-	}
-
-	return result, nil
-}
-
 func (r *itemRepository) GetTotalItemsBy(itemOptions model.ItemOptions) (int, error) {
 	var params []interface{}
 
