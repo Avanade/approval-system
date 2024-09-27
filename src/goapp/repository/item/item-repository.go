@@ -271,5 +271,5 @@ func (r *itemRepository) ValidateItem(appId, appModuleId, itemId, email string) 
 		return false, err
 	}
 
-	return result[0]["IsValid"].(bool), nil
+	return result[0]["IsValid"] == "1", nil
 }
