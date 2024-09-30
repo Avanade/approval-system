@@ -9,7 +9,6 @@ import (
 	"main/service"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -224,21 +223,11 @@ func (c *itemController) postCallback(id string) {
 		fmt.Println("No callback url found")
 		return
 	} else {
-		// Parse the datetime string into a time.Time object
-		responseDate, err := time.Parse(time.RFC3339, item.DateResponded)
-		if err != nil {
-			fmt.Printf("invalid datetime format: %v", err)
-			return
-		}
-
-		// Format the time.Time object into a string that the database can recognize
-		formattedResponseDate := responseDate.Format("2006-01-02 15:04:05")
-
 		params := model.ResponseCallback{
 			ItemId:       id,
 			IsApproved:   item.IsApproved,
 			Remarks:      item.ApproverRemarks,
-			ResponseDate: formattedResponseDate,
+			ResponseDate: item.DateResponded,
 			RespondedBy:  item.RespondedBy,
 		}
 

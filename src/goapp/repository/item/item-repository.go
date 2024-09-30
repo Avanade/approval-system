@@ -47,7 +47,7 @@ func (r *itemRepository) GetItemById(id string) (*model.Item, error) {
 	}
 
 	if result[0]["DateResponded"] != nil {
-		item.DateResponded = result[0]["DateResponded"].(time.Time).String()
+		item.DateResponded = result[0]["DateResponded"].(time.Time).Format("2006-01-02T15:04:05.000Z")
 	}
 
 	if result[0]["DateSent"] != nil {
