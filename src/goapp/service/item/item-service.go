@@ -5,6 +5,7 @@ import (
 	"main/config"
 	"main/model"
 	"main/repository"
+	"strconv"
 	"sync"
 )
 
@@ -18,6 +19,14 @@ func NewItemService(repo *repository.Repository, configManager config.ConfigMana
 		Repository:    repo,
 		configManager: configManager,
 	}
+}
+
+func (s *itemService) GetItemById(id string) (*model.Item, error) {
+	item, err := s.Repository.Item.GetItemById(id)
+	if err != nil {
+		return nil, err
+	}
+	return item, nil
 }
 
 func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, error) {
@@ -74,6 +83,14 @@ func (s *itemService) InsertItem(item model.ItemInsertRequest) (string, error) {
 	return id, nil
 }
 
+func (s *itemService) UpdateItemCallback(itemId string, isCallbackFailed bool) error {
+	err := s.Repository.Item.UpdateItemCallback(itemId, isCallbackFailed)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *itemService) UpdateItemDateSent(itemId string) error {
 	err := s.Repository.Item.UpdateItemDateSent(itemId)
 	if err != nil {
@@ -104,4 +121,25 @@ func (s *itemService) removeEnterpriseOwnersInApprovers(approvers []string) []st
 	}
 
 	return newApprovers
+}
+
+func (s *itemService) UpdateItemResponse(req model.ProcessResponseRequest) error {
+	isApproved, err := strconv.ParseBool(req.IsApproved)
+	if err != nil {
+		return err
+	}
+
+	err = s.Repository.Item.UpdateItemResponse(req.ItemId, req.Remarks, req.ApproverEmail, isApproved)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *itemService) ValidateItem(req model.ProcessResponseRequest) (bool, error) {
+	isValid, err := s.Repository.Item.ValidateItem(req.ApplicationId, req.ApplicationModuleId, req.ItemId, req.ApproverEmail)
+	if err != nil {
+		return false, err
+	}
+	return isValid, nil
 }
