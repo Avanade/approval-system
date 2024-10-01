@@ -23,3 +23,20 @@ func (s *applicationModuleService) GetApplicationModuleByIdAndApplicationId(appl
 
 	return result, nil
 }
+
+func (s *applicationModuleService) GetRequestTypes() ([]RequestType, error) {
+	a, err := s.Repository.ApplicationModule.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	var result []RequestType
+	for _, v := range a {
+		result = append(result, RequestType{
+			Id:   v.ApplicationModuleId,
+			Name: v.ApplicationModuleName,
+		})
+	}
+
+	return result, nil
+}

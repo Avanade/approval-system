@@ -29,6 +29,7 @@ var (
 
 	ctrl = c.NewController(
 		c.NewItemController(svc),
+		c.NewApplicationModuleController(svc),
 	)
 
 	httpRouter router.Router = router.NewMuxRouter()

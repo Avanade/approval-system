@@ -55,3 +55,51 @@ func (r *applicationModuleRepository) GetApplicationModuleByIdAndApplicationId(a
 
 	return &result, nil
 }
+
+func (r *applicationModuleRepository) GetAll() ([]model.ApplicationModule, error) {
+	rowApplicationModules, err := r.Query("PR_ApplicationModules_Select")
+	if err != nil {
+		return nil, err
+	}
+
+	applicationModules, err := r.RowsToMap(rowApplicationModules)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []model.ApplicationModule
+	for _, v := range applicationModules {
+		m := model.ApplicationModule{
+			ApplicationModuleId:   v["Id"].(string),
+			ApplicationModuleName: v["Name"].(string),
+		}
+
+		if v["CallbackUrl"] != nil {
+			m.Callbackurl = v["CallbackUrl"].(string)
+		}
+
+		if v["AllowReassign"] != nil {
+			m.AllowReassign = v["AllowReassign"].(bool)
+		}
+
+		if v["RequireRemarks"] != nil {
+			m.RequireRemarks = v["RequireRemarks"].(bool)
+		}
+
+		if v["RequireAuthentication"] != nil {
+			m.RequireAuthentication = v["RequireAuthentication"].(bool)
+		}
+
+		if v["ReassignCallbackUrl"] != nil {
+			m.ReassignCallbackUrl = v["ReassignCallbackUrl"].(string)
+		}
+
+		if v["ExportUrl"] != nil {
+			m.ExportUrl = v["ExportUrl"].(string)
+		}
+
+		result = append(result, m)
+	}
+
+	return result, nil
+}
