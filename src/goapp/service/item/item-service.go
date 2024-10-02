@@ -83,6 +83,14 @@ func (s *itemService) InsertItem(item model.ItemInsertRequest) (string, error) {
 	return id, nil
 }
 
+func (s *itemService) UpdateItemApproverEmail(itemId, approverEmail, username string) error {
+	err := s.Repository.Item.UpdateItemApproverEmail(itemId, approverEmail, username)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *itemService) UpdateItemCallback(itemId string, isCallbackFailed bool) error {
 	err := s.Repository.Item.UpdateItemCallback(itemId, isCallbackFailed)
 	if err != nil {

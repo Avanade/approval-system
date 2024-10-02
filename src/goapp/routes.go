@@ -26,7 +26,7 @@ func setApiRoutes() {
 	httpRouter.POST("/api/process", ctrl.Item.ProcessResponse)
 	httpRouter.GET("/api/items/type/{type:[0-2]+}/status/{status:[0-3]+}", m.Chain(ctrl.Item.GetItems, m.AzureAuth()))
 	httpRouter.GET("/api/search/users/{search}", m.Chain(ctrl.User.SearchUserFromActiveDirectory, m.AzureAuth()))
-	httpRouter.GET("/api/responsereassignedapi/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{itemId}/{ApproveText}/{RejectText}", m.Chain(rtApprovals.ReAssignApproverHandler, m.AzureAuth()))
+	httpRouter.GET("/api/responsereassignedapi/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{ApproveText}/{RejectText}", m.Chain(rtApprovals.ReAssignApproverHandler, m.AzureAuth()))
 }
 
 func serve() {
