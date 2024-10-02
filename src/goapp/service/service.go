@@ -7,6 +7,7 @@ import (
 	sApprovalRequestApprover "main/service/approval-request-approver"
 	sEmail "main/service/email"
 	sItem "main/service/item"
+	sMsGraph "main/service/msgraph"
 )
 
 type Service struct {
@@ -14,6 +15,7 @@ type Service struct {
 	Item                    sItem.ItemService
 	Email                   sEmail.EmailService
 	ApprovalRequestApprover sApprovalRequestApprover.ApprovalRequestApproverService
+	MsGraph                 sMsGraph.MsGraphService
 }
 
 type ServiceOptionFunc func(*Service)
@@ -49,5 +51,11 @@ func NewEmailService(conf config.ConfigManager) ServiceOptionFunc {
 func NewApprovalRequestApproverService(repo *repository.Repository) ServiceOptionFunc {
 	return func(s *Service) {
 		s.ApprovalRequestApprover = sApprovalRequestApprover.NewApprovalRequestApproverService(repo)
+	}
+}
+
+func NewMsGraphService(conf config.ConfigManager) ServiceOptionFunc {
+	return func(s *Service) {
+		s.MsGraph = sMsGraph.NewMsGraphService(conf)
 	}
 }

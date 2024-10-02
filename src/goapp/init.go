@@ -25,11 +25,13 @@ var (
 		s.NewItemService(repo, conf),
 		s.NewEmailService(conf),
 		s.NewApprovalRequestApproverService(repo),
+		s.NewMsGraphService(conf),
 	)
 
 	ctrl = c.NewController(
 		c.NewItemController(svc),
 		c.NewApplicationModuleController(svc),
+		c.NewUserController(svc),
 	)
 
 	httpRouter router.Router = router.NewMuxRouter()
