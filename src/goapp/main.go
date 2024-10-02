@@ -26,7 +26,6 @@ func main() {
 
 	setPageRoutes()
 	setApiRoutes()
-	setUtilityRoutes()
 
 	serve()
 }

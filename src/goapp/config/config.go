@@ -14,4 +14,7 @@ type ConfigManager interface {
 	GetEmailClientSecret() string
 	GetEmailUserID() string
 	GetIsEmailEnabled() bool
+	GetTenantID() string
+	GetClientID() string
+	GetClientSecret() string
 }

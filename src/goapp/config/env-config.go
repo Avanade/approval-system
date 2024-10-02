@@ -54,3 +54,15 @@ func (ecm *envConfigManager) GetEmailUserID() string {
 func (ecm *envConfigManager) GetIsEmailEnabled() bool {
 	return os.Getenv("EMAIL_ENABLED") == "true"
 }
+
+func (ecm *envConfigManager) GetTenantID() string {
+	return os.Getenv("TENANT_ID")
+}
+
+func (ecm *envConfigManager) GetClientID() string {
+	return os.Getenv("CLIENT_ID")
+}
+
+func (ecm *envConfigManager) GetClientSecret() string {
+	return os.Getenv("CLIENT_SECRET")
+}
