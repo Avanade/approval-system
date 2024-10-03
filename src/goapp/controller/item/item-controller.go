@@ -212,6 +212,51 @@ func (c *itemController) ProcessResponse(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 }
 
+func (c *itemController) ReassignItem(w http.ResponseWriter, r *http.Request) {
+	// Get user info
+	session, err := session.Store.Get(r, "auth-session")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var profile map[string]interface{}
+	u := session.Values["profile"]
+	profile, ok := u.(map[string]interface{})
+	if !ok {
+		http.Error(w, "Failed to get user info", http.StatusInternalServerError)
+		return
+	}
+	user := fmt.Sprintf("%s", profile["preferred_username"])
+
+	// Get query params
+	params := mux.Vars(r)
+	id := params["itemGuid"]
+	approverEmail := params["approver"]
+	applicationId := params["ApplicationId"]
+	applicationModuleId := params["ApplicationModuleId"]
+	approveText := params["ApproveText"]
+	rejectText := params["RejectText"]
+
+	err = c.Service.Item.UpdateItemApproverEmail(id, approverEmail, user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Post callback
+	param := ReassignItemCallback{
+		Id:                  id,
+		ApproverEmail:       approverEmail,
+		Username:            user,
+		ApplicationId:       applicationId,
+		ApplicationModuleId: applicationModuleId,
+		ApproveText:         approveText,
+		RejectText:          rejectText,
+	}
+	go c.postCallbackReassignItem(param)
+}
+
 func (c *itemController) postCallback(id string) {
 	item, err := c.Service.Item.GetItemById(id)
 	if err != nil {
@@ -245,5 +290,27 @@ func (c *itemController) postCallback(id string) {
 		isCallbackFailed := res.StatusCode != 200
 
 		err = c.Service.Item.UpdateItemCallback(id, isCallbackFailed)
+	}
+}
+
+func (c *itemController) postCallbackReassignItem(data ReassignItemCallback) {
+	res, err := c.Service.Item.GetItemById(data.Id)
+	if err != nil {
+		fmt.Println("Error getting item by id: ", data.Id)
+		return
+	}
+
+	if res.ReassignCallbackUrl != "" {
+		jsonReq, err := json.Marshal(data)
+		if err != nil {
+			return
+		}
+
+		_, err = http.Post(res.ReassignCallbackUrl, "application/json", bytes.NewBuffer(jsonReq))
+		if err != nil {
+			fmt.Println("Error posting callback: ", err)
+			return
+		}
+
 	}
 }

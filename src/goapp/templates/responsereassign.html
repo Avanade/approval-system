@@ -134,7 +134,7 @@
             },
             submit(){
               this.showResult("submitted", "Processing", "Please wait while processing your request.")
-              const res =   fetch(`/api/responsereassignedapi/${this.form.itemId}/${this.form.approver[0].id}/${this.form.applicationId}/${this.form.applicationModuleId}/${this.form.itemId}/${this.form.ApproveText}/${this.form.RejectText}`).then(r=>{
+              const res =   fetch(`/api/responsereassignedapi/${this.form.itemId}/${this.form.approver[0].id}/${this.form.applicationId}/${this.form.applicationModuleId}/${this.form.ApproveText}/${this.form.RejectText}`).then(r=>{
                      // Redirect to Home
          
                      switch (r.status) {

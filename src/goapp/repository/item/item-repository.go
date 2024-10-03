@@ -219,6 +219,18 @@ func (r *itemRepository) InsertItem(appModuleId, subject, body, requesterEmail s
 	return resultItem[0]["Id"].(string), nil
 }
 
+func (r *itemRepository) UpdateItemApproverEmail(id, approverEmail, username string) error {
+	_, err := r.Query("PR_Items_Update_ApproverEmail",
+		sql.Named("Id", id),
+		sql.Named("ApproverEmail", approverEmail),
+		sql.Named("Username", username),
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *itemRepository) UpdateItemCallback(id string, isCallbackFailed bool) error {
 	_, err := r.Query("PR_Items_Update_Callback",
 		sql.Named("ItemId", id),
