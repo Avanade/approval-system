@@ -40,8 +40,8 @@ func (s *sdkEmailService) SendApprovalRequestEmail(req *model.ItemInsertRequest,
 		Body:        template.HTML(req.Body),
 		ApproveText: appModule.ApproveText,
 		RejectText:  appModule.RejectText,
-		ApproveUrl:  fmt.Sprintf("%s/response/%s/%s/%d/1", os.Getenv("HOME_URL"), req.ApplicationId, req.ApplicationModuleId, id),
-		RejectUrl:   fmt.Sprintf("%s/response/%s/%s/%d/0", os.Getenv("HOME_URL"), req.ApplicationId, req.ApplicationModuleId, id),
+		ApproveUrl:  fmt.Sprintf("%s/response/%s/%s/%s/1", os.Getenv("HOME_URL"), req.ApplicationId, req.ApplicationModuleId, id),
+		RejectUrl:   fmt.Sprintf("%s/response/%s/%s/%s/0", os.Getenv("HOME_URL"), req.ApplicationId, req.ApplicationModuleId, id),
 	}
 
 	t, err := template.ParseFiles("templates/email.html", "templates/buttons.html")
