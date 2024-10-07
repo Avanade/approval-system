@@ -15,9 +15,9 @@ var (
 	db   database.Database    = database.NewDatabase(conf)
 
 	repo = r.NewRepository(
-		r.NewApplicationModule(db),
-		r.NewItem(db),
-		r.NewApprovalRequestApprover(db),
+		r.NewApplicationModule(&db),
+		r.NewItem(&db),
+		r.NewApprovalRequestApprover(&db),
 	)
 
 	svc = s.NewService(

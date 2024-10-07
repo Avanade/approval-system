@@ -7,10 +7,10 @@ import (
 )
 
 type approvalRequestApproverRepository struct {
-	db.Database
+	*db.Database
 }
 
-func NewApprovalRequestApproverRepository(db db.Database) ApprovalRequestApproverRepository {
+func NewApprovalRequestApproverRepository(db *db.Database) ApprovalRequestApproverRepository {
 	return &approvalRequestApproverRepository{
 		Database: db,
 	}
