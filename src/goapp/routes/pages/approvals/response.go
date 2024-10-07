@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"main/model"
 	session "main/pkg/session"
 	"main/pkg/sql"
 	template "main/pkg/template"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -177,54 +175,6 @@ func ResponseHandler(w http.ResponseWriter, r *http.Request) {
 				template.UseTemplate(&w, r, "response", data)
 			}
 
-		}
-	}
-}
-
-func ProcessResponseHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "POST":
-		// Decode payload
-		var req model.TypRequestProcess
-		err := json.NewDecoder(r.Body).Decode(&req)
-		if err != nil {
-
-			return
-		}
-
-		db := connectSql()
-		defer db.Close()
-
-		// Validate payload
-		params := make(map[string]interface{})
-		params["ApplicationId"] = req.ApplicationId
-		params["ApplicationModuleId"] = req.ApplicationModuleId
-		params["ItemId"] = req.ItemId
-		params["ApproverEmail"] = req.ApproverEmail
-		verification, err := db.ExecuteStoredProcedureWithResult("PR_Items_IsValid", params)
-		handleErrorReturn(w, err)
-		authReq := true
-		authReq = session.IsAuthRequired(req.ApplicationModuleId)
-		if !authReq {
-			verification[0]["IsValid"] = "1"
-		}
-
-		if verification[0]["IsValid"] == "1" {
-			for k := range params {
-				delete(params, k)
-			}
-			isApproved, _ := strconv.ParseBool(req.IsApproved)
-			params["Id"] = req.ItemId
-			params["IsApproved"] = isApproved
-			params["ApproverRemarks"] = req.Remarks
-			params["Username"] = req.ApproverEmail
-			_, err := db.ExecuteStoredProcedure("PR_Items_Update_Response", params)
-			handleErrorReturn(w, err)
-			postCallback(req.ItemId)
-			return
-		} else {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
 		}
 	}
 }
