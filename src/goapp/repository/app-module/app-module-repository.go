@@ -7,10 +7,10 @@ import (
 )
 
 type applicationModuleRepository struct {
-	db.Database
+	*db.Database
 }
 
-func NewApplicationModuleRepository(db db.Database) ApplicationModuleRepository {
+func NewApplicationModuleRepository(db *db.Database) ApplicationModuleRepository {
 	return &applicationModuleRepository{
 		Database: db,
 	}

@@ -25,19 +25,19 @@ func NewRepository(opts ...RepositoryOptionFunc) *Repository {
 	return repo
 }
 
-func NewApplicationModule(db database.Database) RepositoryOptionFunc {
+func NewApplicationModule(db *database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.ApplicationModule = rAppModule.NewApplicationModuleRepository(db)
 	}
 }
 
-func NewItem(db database.Database) RepositoryOptionFunc {
+func NewItem(db *database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.Item = rItem.NewItemRepository(db)
 	}
 }
 
-func NewApprovalRequestApprover(db database.Database) RepositoryOptionFunc {
+func NewApprovalRequestApprover(db *database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.ApprovalRequestApprover = rApprovalRequestApprover.NewApprovalRequestApproverRepository(db)
 	}
