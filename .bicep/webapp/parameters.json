@@ -41,7 +41,8 @@
                 "EMAIL_CLIENT_SECRET" : "",
                 "EMAIL_USER_ID" : "",
                 "LINK_FOOTERS": "",
-                "ORGANIZATION_NAME": ""
+                "ORGANIZATION_NAME": "",
+                "COMMUNITY_PORTAL_APP_ID": ""
             }
         }
     }

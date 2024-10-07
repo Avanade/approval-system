@@ -1,8 +1,8 @@
 package model
 
-type TypPageData struct {
-	Header           interface{}
-	Profile          interface{}
+type MasterPageData struct {
+	Header           Headers
+	Profile          AzureUser
 	Content          interface{}
 	Footers          []Footer
 	OrganizationName string
@@ -13,20 +13,20 @@ type Footer struct {
 	Url  string
 }
 
-type TypHeaders struct {
-	Menu          []TypMenu
-	ExternalLinks []TypMenu
+type Headers struct {
+	Menu          []Menu
+	ExternalLinks []Menu
 	Page          string
 }
 
-type TypMenu struct {
+type Menu struct {
 	Name     string
 	Url      string
 	IconPath string
 	UrlPath  string
 }
 
-type TypAzureUser struct {
+type AzureUser struct {
 	Name  string `json:"name"`
 	Email string `json:"preferred_username"`
 }
