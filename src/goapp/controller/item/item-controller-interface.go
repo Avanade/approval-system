@@ -8,3 +8,7 @@ type ItemController interface {
 	ProcessResponse(w http.ResponseWriter, r *http.Request)
 	ReassignItem(w http.ResponseWriter, r *http.Request)
 }
+
+type ItemPageController interface {
+	MyRequests(w http.ResponseWriter, r *http.Request)
+}

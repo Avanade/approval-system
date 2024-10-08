@@ -4,18 +4,22 @@ import (
 	"main/config"
 	"main/repository"
 	sApplicationModule "main/service/app-module"
+	sApplication "main/service/application"
 	sApprovalRequestApprover "main/service/approval-request-approver"
 	sEmail "main/service/email"
 	sItem "main/service/item"
 	sMsGraph "main/service/msgraph"
+	sTemplate "main/service/template"
 )
 
 type Service struct {
+	Application             sApplication.ApplicationService
 	ApplicationModule       sApplicationModule.ApplicationModuleService
 	Item                    sItem.ItemService
 	Email                   sEmail.EmailService
 	ApprovalRequestApprover sApprovalRequestApprover.ApprovalRequestApproverService
 	MsGraph                 sMsGraph.MsGraphService
+	Template                sTemplate.TemplateService
 }
 
 type ServiceOptionFunc func(*Service)
@@ -28,6 +32,12 @@ func NewService(opts ...ServiceOptionFunc) *Service {
 	}
 
 	return service
+}
+
+func NewApplicationService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.Application = sApplication.NewApplicationService(repo)
+	}
 }
 
 func NewApplicationModuleService(repo *repository.Repository) ServiceOptionFunc {
@@ -57,5 +67,11 @@ func NewApprovalRequestApproverService(repo *repository.Repository) ServiceOptio
 func NewMsGraphService(conf config.ConfigManager) ServiceOptionFunc {
 	return func(s *Service) {
 		s.MsGraph = sMsGraph.NewMsGraphService(conf)
+	}
+}
+
+func NewTemplateService(conf config.ConfigManager) ServiceOptionFunc {
+	return func(s *Service) {
+		s.Template = sTemplate.NewTemplateService(conf)
 	}
 }

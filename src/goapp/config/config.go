@@ -17,4 +17,7 @@ type ConfigManager interface {
 	GetTenantID() string
 	GetClientID() string
 	GetClientSecret() string
+	GetLinkFooters() string
+	GetOrganizationName() string
+	GetCommunityPortalAppId() string
 }

@@ -15,23 +15,27 @@ var (
 	db   database.Database    = database.NewDatabase(conf)
 
 	repo = r.NewRepository(
+		r.NewApplication(&db),
 		r.NewApplicationModule(&db),
 		r.NewItem(&db),
 		r.NewApprovalRequestApprover(&db),
 	)
 
 	svc = s.NewService(
+		s.NewApplicationService(repo),
 		s.NewApplicationModuleService(repo),
 		s.NewItemService(repo, conf),
 		s.NewEmailService(conf),
 		s.NewApprovalRequestApproverService(repo),
 		s.NewMsGraphService(conf),
+		s.NewTemplateService(conf),
 	)
 
 	ctrl = c.NewController(
 		c.NewItemController(svc),
 		c.NewApplicationModuleController(svc),
 		c.NewUserController(svc),
+		c.NewItemPageController(svc, conf),
 	)
 
 	httpRouter router.Router = router.NewMuxRouter()
