@@ -31,14 +31,14 @@ func (d *Database) Connect() (*sql.DB, error) {
 }
 
 func (d *Database) Query(query string, args ...any) (*sql.Rows, error) {
-	con, err := d.Connect()
+	conn, err := d.Connect()
 	if err != nil {
 		return nil, err
 	}
-	defer con.Close()
+	defer conn.Close()
 
 	ctx := context.Background()
-	rows, err := con.QueryContext(ctx, query, args...)
+	rows, err := conn.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,14 +46,14 @@ func (d *Database) Query(query string, args ...any) (*sql.Rows, error) {
 }
 
 func (d *Database) QueryRow(query string, args ...any) (*sql.Row, error) {
-	con, err := d.Connect()
+	conn, err := d.Connect()
 	if err != nil {
 		return nil, err
 	}
-	defer con.Close()
+	defer conn.Close()
 
 	ctx := context.Background()
-	row := con.QueryRowContext(ctx, query, args...)
+	row := conn.QueryRowContext(ctx, query, args...)
 	if row == nil {
 		err = fmt.Errorf("QueryRowContext returned nil")
 	}
@@ -61,14 +61,14 @@ func (d *Database) QueryRow(query string, args ...any) (*sql.Row, error) {
 }
 
 func (d *Database) Execute(query string, args ...any) error {
-	con, err := d.Connect()
+	conn, err := d.Connect()
 	if err != nil {
 		return err
 	}
-	defer con.Close()
+	defer conn.Close()
 
 	ctx := context.Background()
-	_, err = con.ExecContext(ctx, query, args...)
+	_, err = conn.ExecContext(ctx, query, args...)
 	if err != nil {
 		return err
 	}
