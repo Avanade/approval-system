@@ -10,7 +10,7 @@ import (
 
 func setPageRoutes() {
 	httpRouter.GET("/", m.Chain(ctrl.ItemPage.MyRequests, m.AzureAuth()))
-	httpRouter.GET("/myapprovals", m.Chain(rtApprovals.MyApprovalsHandler, m.AzureAuth()))
+	httpRouter.GET("/myapprovals", m.Chain(ctrl.ItemPage.MyApprovals, m.AzureAuth()))
 	httpRouter.GET("/response/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", m.Chain(rtApprovals.ResponseHandler, m.AzureAuth()))
 	httpRouter.GET("/responsereassigned/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}/{ApproveText}/{RejectText}", m.Chain(rtApprovals.ResponseReassignedeHandler, m.AzureAuth()))
 
