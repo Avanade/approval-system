@@ -17,7 +17,7 @@ func NewApprovalRequestApproverRepository(db *db.Database) ApprovalRequestApprov
 }
 
 func (r *approvalRequestApproverRepository) InsertApprovalRequestApprover(approver model.ApprovalRequestApprover) error {
-	_, err := r.Query("PR_ApprovalRequestApprovers_Insert",
+	row, err := r.Query("PR_ApprovalRequestApprovers_Insert",
 		sql.Named("ItemId", approver.ItemId),
 		sql.Named("ApproverEmail", approver.ApproverEmail),
 	)
@@ -25,6 +25,7 @@ func (r *approvalRequestApproverRepository) InsertApprovalRequestApprover(approv
 	if err != nil {
 		return err
 	}
+	defer row.Close()
 
 	return nil
 }
@@ -35,6 +36,7 @@ func (r *approvalRequestApproverRepository) GetApproversByItemId(itemId string) 
 	if err != nil {
 		return nil, err
 	}
+	defer rowApprovers.Close()
 
 	approvers, err := r.RowsToMap(rowApprovers)
 	if err != nil {
