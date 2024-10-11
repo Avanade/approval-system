@@ -22,6 +22,7 @@ func (r *applicationRepository) GetApplicationById(id string) (*model.Applicatio
 	if err != nil {
 		return nil, err
 	}
+	defer rowApplication.Close()
 
 	applications, err := r.RowsToMap(rowApplication)
 	if err != nil {
