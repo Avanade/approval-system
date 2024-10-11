@@ -24,6 +24,7 @@ func (r *applicationModuleRepository) GetApplicationModuleByIdAndApplicationId(a
 	if err != nil {
 		return nil, err
 	}
+	defer rowApplicationModule.Close()
 
 	applicationModule, err := r.RowsToMap(rowApplicationModule)
 	if err != nil {
@@ -61,6 +62,7 @@ func (r *applicationModuleRepository) GetAll() ([]model.ApplicationModule, error
 	if err != nil {
 		return nil, err
 	}
+	defer rowApplicationModules.Close()
 
 	applicationModules, err := r.RowsToMap(rowApplicationModules)
 	if err != nil {
