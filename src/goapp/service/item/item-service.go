@@ -43,7 +43,7 @@ func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, err
 	}
 
 	var wg sync.WaitGroup
-	maxGoroutines := 10
+	maxGoroutines := 2
 	guard := make(chan struct{}, maxGoroutines)
 
 	for i := range data {
