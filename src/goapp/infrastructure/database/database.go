@@ -23,9 +23,9 @@ func NewDatabase(config config.ConfigManager) Database {
 		return Database{db: nil}
 	}
 
-	conn.SetMaxOpenConns(60)
-	conn.SetMaxIdleConns(30)
-	conn.SetConnMaxLifetime(10 * time.Minute)
+	conn.SetMaxOpenConns(10)
+	conn.SetMaxIdleConns(10)
+	conn.SetConnMaxLifetime(5 * time.Minute)
 
 	err = conn.Ping()
 	if err != nil {
