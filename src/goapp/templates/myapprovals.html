@@ -283,7 +283,7 @@
   }
   
   async function pendingCallback(e){
-    return await getItemsBy(1, 0, e.other.requestType.id, '', e.filter, e.page, e.search)
+    return await getItemsBy(1, 0, e.other.requestType.id, e.other.organization, e.filter, e.page, e.search)
   }
   
   //CLOSED REQUEST
