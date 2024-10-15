@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[PR_RESPONSE_IsAuthorized]
+CREATE PROCEDURE [dbo].[PR_Items_IsAuthorized]
 	
 	@ApplicationId UNIQUEIDENTIFIER,
 	@ApplicationModuleId UNIQUEIDENTIFIER,

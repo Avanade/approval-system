@@ -3,7 +3,7 @@ package model
 type MasterPageData struct {
 	Header           Headers
 	Profile          AzureUser
-	Content          interface{}
+	Content          interface{} `json:"content"`
 	Footers          []Footer
 	OrganizationName string
 }

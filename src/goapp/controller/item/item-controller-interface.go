@@ -12,4 +12,5 @@ type ItemController interface {
 type ItemPageController interface {
 	MyRequests(w http.ResponseWriter, r *http.Request)
 	MyApprovals(w http.ResponseWriter, r *http.Request)
+	RespondToItem(w http.ResponseWriter, r *http.Request)
 }

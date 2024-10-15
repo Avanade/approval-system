@@ -83,6 +83,14 @@ func (s *itemService) InsertItem(item model.ItemInsertRequest) (string, error) {
 	return id, nil
 }
 
+func (s *itemService) ItemIsAuthorized(appId, appModuleId, itemId, approverEmail string) (*model.ItemIsAuthorized, error) {
+	itemIsAuthorized, err := s.Repository.Item.ItemIsAuthorized(appId, appModuleId, itemId, approverEmail)
+	if err != nil {
+		return nil, err
+	}
+	return itemIsAuthorized, nil
+}
+
 func (s *itemService) UpdateItemApproverEmail(itemId, approverEmail, username string) error {
 	err := s.Repository.Item.UpdateItemApproverEmail(itemId, approverEmail, username)
 	if err != nil {
