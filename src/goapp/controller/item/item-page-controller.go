@@ -8,6 +8,8 @@ import (
 	"main/pkg/session"
 	"main/service"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type itemPageController struct {
@@ -97,5 +99,83 @@ func (c *itemPageController) MyApprovals(w http.ResponseWriter, r *http.Request)
 	err = t.Execute(w, d)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Request) {
+	session, _ := session.Store.Get(r, "auth-session")
+
+	var profile map[string]interface{}
+	u := session.Values["profile"]
+	profile, ok := u.(map[string]interface{})
+	if !ok {
+		http.Error(w, "Error getting user data", http.StatusInternalServerError)
+		return
+	}
+	user := model.AzureUser{
+		Name:  profile["name"].(string),
+		Email: profile["preferred_username"].(string),
+	}
+
+	params := mux.Vars(r)
+
+	itemIsAuthorized, err := c.Service.Item.ItemIsAuthorized(
+		params["appGuid"],
+		params["appModuleGuid"],
+		params["itemGuid"],
+		user.Email,
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !itemIsAuthorized.IsAuthorized {
+		t, d := c.Service.Template.UseTemplate("Unauthorized", r.URL.Path, user, nil)
+		err = t.Execute(w, d)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		if itemIsAuthorized.IsApproved != nil {
+			var text string
+			if itemIsAuthorized.IsApproved.Value {
+				text = "approved"
+			} else {
+				text = "rejected"
+			}
+
+			data := RespondePageData{
+				Response: text,
+			}
+
+			t, d := c.Service.Template.UseTemplate("already-processed", r.URL.Path, user, data)
+			err = t.Execute(w, d)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		} else {
+			item, err := c.Service.Item.GetItemById(params["itemGuid"])
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			data := RespondePageData{
+				ApplicationId:       params["appGuid"],
+				ApplicationModuleId: params["appModuleGuid"],
+				ItemId:              params["itemGuid"],
+				ApproverEmail:       user.Email,
+				IsApproved:          params["isApproved"],
+				Data:                *item,
+				RequireRemarks:      itemIsAuthorized.RequireRemarks,
+			}
+
+			t, d := c.Service.Template.UseTemplate("response", r.URL.Path, user, data)
+			err = t.Execute(w, d)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		}
 	}
 }

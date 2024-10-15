@@ -43,7 +43,7 @@ func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, err
 	}
 
 	var wg sync.WaitGroup
-	maxGoroutines := 10
+	maxGoroutines := 2
 	guard := make(chan struct{}, maxGoroutines)
 
 	for i := range data {
@@ -81,6 +81,14 @@ func (s *itemService) InsertItem(item model.ItemInsertRequest) (string, error) {
 		return "", err
 	}
 	return id, nil
+}
+
+func (s *itemService) ItemIsAuthorized(appId, appModuleId, itemId, approverEmail string) (*model.ItemIsAuthorized, error) {
+	itemIsAuthorized, err := s.Repository.Item.ItemIsAuthorized(appId, appModuleId, itemId, approverEmail)
+	if err != nil {
+		return nil, err
+	}
+	return itemIsAuthorized, nil
 }
 
 func (s *itemService) UpdateItemApproverEmail(itemId, approverEmail, username string) error {

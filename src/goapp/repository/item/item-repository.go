@@ -24,6 +24,7 @@ func (r *itemRepository) GetItemById(id string) (*model.Item, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer row.Close()
 
 	result, err := r.RowsToMap(row)
 	if err != nil {
@@ -102,6 +103,7 @@ func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item
 	if err != nil {
 		return []model.Item{}, err
 	}
+	defer resList.Close()
 
 	result, err := r.RowsToMap(resList)
 	if err != nil {
@@ -185,6 +187,7 @@ func (r *itemRepository) GetTotalItemsBy(itemOptions model.ItemOptions) (int, er
 	if err != nil {
 		return 0, err
 	}
+	defer rowTotal.Close()
 
 	resultTotal, err := r.RowsToMap(rowTotal)
 	if err != nil {
@@ -210,6 +213,7 @@ func (r *itemRepository) InsertItem(appModuleId, subject, body, requesterEmail s
 	if err != nil {
 		return "", err
 	}
+	defer rowItem.Close()
 
 	resultItem, err := r.RowsToMap(rowItem)
 	if err != nil {
@@ -220,7 +224,7 @@ func (r *itemRepository) InsertItem(appModuleId, subject, body, requesterEmail s
 }
 
 func (r *itemRepository) UpdateItemApproverEmail(id, approverEmail, username string) error {
-	_, err := r.Query("PR_Items_Update_ApproverEmail",
+	row, err := r.Query("PR_Items_Update_ApproverEmail",
 		sql.Named("Id", id),
 		sql.Named("ApproverEmail", approverEmail),
 		sql.Named("Username", username),
@@ -228,34 +232,70 @@ func (r *itemRepository) UpdateItemApproverEmail(id, approverEmail, username str
 	if err != nil {
 		return err
 	}
+	defer row.Close()
 	return nil
+}
+func (r *itemRepository) ItemIsAuthorized(appId, appModuleId, itemId, approverEmail string) (*model.ItemIsAuthorized, error) {
+	row, err := r.Query("PR_Items_IsAuthorized",
+		sql.Named("ApplicationId", appId),
+		sql.Named("ApplicationModuleId", appModuleId),
+		sql.Named("ItemId", itemId),
+		sql.Named("ApproverEmail", approverEmail),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+
+	result, err := r.RowsToMap(row)
+	if err != nil {
+		return nil, err
+	}
+
+	i := model.ItemIsAuthorized{
+		IsAuthorized: result[0]["IsAuthorized"] == "1",
+	}
+
+	if result[0]["IsApproved"] != nil {
+		i.IsApproved = &model.NullBool{Value: result[0]["IsApproved"].(bool)}
+	} else {
+		i.IsApproved = nil
+	}
+
+	if result[0]["RequireRemarks"] != nil {
+		i.RequireRemarks = result[0]["RequireRemarks"].(bool)
+	}
+
+	return &i, nil
 }
 
 func (r *itemRepository) UpdateItemCallback(id string, isCallbackFailed bool) error {
-	_, err := r.Query("PR_Items_Update_Callback",
+	row, err := r.Query("PR_Items_Update_Callback",
 		sql.Named("ItemId", id),
 		sql.Named("IsCallbackFailed", isCallbackFailed),
 	)
 	if err != nil {
 		return err
 	}
+	defer row.Close()
 	return nil
 }
 
 func (r *itemRepository) UpdateItemDateSent(id string) error {
-	_, err := r.Query("PR_Items_Update_DateSent",
+	row, err := r.Query("PR_Items_Update_DateSent",
 		sql.Named("Id", id),
 	)
 
 	if err != nil {
 		return err
 	}
+	defer row.Close()
 
 	return nil
 }
 
 func (r *itemRepository) UpdateItemResponse(id, remarks, email string, isApproved bool) error {
-	_, err := r.Query("PR_Items_Update_Response",
+	row, err := r.Query("PR_Items_Update_Response",
 		sql.Named("Id", id),
 		sql.Named("ApproverRemarks", remarks),
 		sql.Named("Username", email),
@@ -264,6 +304,7 @@ func (r *itemRepository) UpdateItemResponse(id, remarks, email string, isApprove
 	if err != nil {
 		return err
 	}
+	defer row.Close()
 	return nil
 }
 
@@ -277,6 +318,7 @@ func (r *itemRepository) ValidateItem(appId, appModuleId, itemId, email string) 
 	if err != nil {
 		return false, err
 	}
+	defer row.Close()
 
 	result, err := r.RowsToMap(row)
 	if err != nil {
