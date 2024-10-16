@@ -1,6 +1,6 @@
 {{ define "content" }}
-<div x-data="data()" x-init="onLoad()">
-    <h1 class="text-4xl">{{.Data.Subject}}</h1>
+<div x-data="data()">
+    <h1 class="text-2xl mb-5">Reassign Approval Request</h1>
     <span x-html="body"></span>
  
     <form onsubmit="event.preventDefault()"    id="form">
@@ -103,29 +103,21 @@
 }
     function data(){
         return {
-            body: "{{.Data.Body}}",
+            body: `{{.Data.Body}}`,
             form: {
                 applicationId:       "{{.ApplicationId}}",
                 applicationModuleId: "{{.ApplicationModuleId}}",
                 itemId:              "{{.ItemId}}",
-                approverEmail:       "{{.ApproverEmail}}",
                 ApproveText:              "{{.ApproveText}}",
                 RejectText:       "{{.RejectText}}",
-                remarks: "",
-                isApproved: "{{.IsApproved}}",
                 name : '',
                 approver : [],
                 status : null,
             },
-            requireRemarks: "{{.RequireRemarks}}",
             showModal: false,
             status: "",
             modalText: "Please wait...",
             modalSubText: "Your request is being processed.",
-            onLoad(){
-              document.getElementById("modal").attributes.removeNamedItem("hidden")
-              document.getElementById("form").attributes.removeNamedItem("hidden")
-            },
             showResult(status, title, subtext, show=true){
               this.status = status
               this.modalText = title

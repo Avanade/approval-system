@@ -4,14 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	session "main/pkg/session"
 	"main/pkg/sql"
-	template "main/pkg/template"
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 func connectSql() (db *sql.DB) {
@@ -22,91 +18,10 @@ func connectSql() (db *sql.DB) {
 	return
 }
 
-func handleErrorReturn(w http.ResponseWriter, err error) {
-	if err != nil {
-		fmt.Printf("ERROR: %+v", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-}
-
 func handleError(err error) {
 	if err != nil {
 		fmt.Printf("ERROR: %+v", err)
 	}
-}
-func ResponseReassignedeHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "GET":
-		var username string
-		sessionaz, _ := session.Store.Get(r, "auth-session")
-		iprofile := sessionaz.Values["profile"]
-
-		if iprofile != nil {
-			profile := iprofile.(map[string]interface{})
-			username = profile["preferred_username"].(string)
-		}
-		params := mux.Vars(r)
-
-		appGuid := params["appGuid"]
-		appModuleGuid := params["appModuleGuid"]
-		itemGuid := params["itemGuid"]
-		isApproved := params["isApproved"]
-		ApproveText := params["ApproveText"]
-		RejectText := params["RejectText"]
-		sqlParamsIsAuth := map[string]interface{}{
-			"ApplicationId":       appGuid,
-			"ApplicationModuleId": appModuleGuid,
-			"ItemId":              itemGuid,
-			"ApproverEmail":       username,
-		}
-
-		sqlParamsItems := map[string]interface{}{
-			"Id": itemGuid,
-		}
-
-		db := connectSql()
-		defer db.Close()
-		resIsAuth, err := db.ExecuteStoredProcedureWithResult("PR_RESPONSE_IsAuthorized", sqlParamsIsAuth)
-		handleErrorReturn(w, err)
-
-		isAuth := resIsAuth[0]["IsAuthorized"]
-		if isAuth == "0" {
-			template.UseTemplate(&w, r, "Unauthorized", nil)
-		} else {
-			isProcessed := resIsAuth[0]["IsApproved"]
-			if isProcessed != nil {
-				var text string
-				if isProcessed == true {
-					text = "approved"
-				} else {
-					text = "rejected"
-				}
-				data := map[string]interface{}{
-					"response": text,
-				}
-				template.UseTemplate(&w, r, "AlreadyProcessed", data)
-			} else {
-				resItems, err := db.ExecuteStoredProcedureWithResult("PR_Items_Select_ById", sqlParamsItems)
-
-				handleErrorReturn(w, err)
-				requireRemarks := resIsAuth[0]["RequireRemarks"]
-				data := map[string]interface{}{
-					"ApplicationId":       appGuid,
-					"ApplicationModuleId": appModuleGuid,
-					"ItemId":              itemGuid,
-					"ApproverEmail":       username,
-					"IsApproved":          isApproved,
-					"Data":                resItems[0],
-					"RequireRemarks":      requireRemarks,
-					"ApproveText":         ApproveText,
-					"RejectText":          RejectText,
-				}
-				template.UseTemplate(&w, r, "responsereassign", data)
-			}
-
-		}
-	}
-
 }
 
 func ProcessFailedCallbacks() {

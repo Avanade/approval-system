@@ -21,4 +21,6 @@ type RespondePageData struct {
 	Data                model.Item
 	RequireRemarks      bool
 	Response            string
+	ApproveText         string
+	RejectText          string
 }
