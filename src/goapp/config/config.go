@@ -20,4 +20,5 @@ type ConfigManager interface {
 	GetLinkFooters() string
 	GetOrganizationName() string
 	GetCommunityPortalAppId() string
+	GetCallbackRetryFreq() string
 }

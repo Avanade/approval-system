@@ -5,6 +5,7 @@ import (
 )
 
 type ItemService interface {
+	GetFailedCallbacks() ([]string, error)
 	GetItemById(id string) (*model.Item, error)
 	GetAll(itemOptions model.ItemOptions) (model.Response, error)
 	InsertItem(item model.ItemInsertRequest) (string, error)

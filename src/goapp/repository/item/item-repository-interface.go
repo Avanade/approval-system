@@ -5,6 +5,7 @@ import (
 )
 
 type ItemRepository interface {
+	GetFailedCallbacks() ([]string, error)
 	GetItemById(id string) (*model.Item, error)
 	GetItemsBy(itemOptions model.ItemOptions) ([]model.Item, error)
 	GetTotalItemsBy(itemOptions model.ItemOptions) (int, error)

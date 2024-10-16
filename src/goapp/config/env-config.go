@@ -78,3 +78,7 @@ func (ecm *envConfigManager) GetOrganizationName() string {
 func (ecm *envConfigManager) GetCommunityPortalAppId() string {
 	return os.Getenv("COMMUNITY_PORTAL_APP_ID")
 }
+
+func (ecm *envConfigManager) GetCallbackRetryFreq() string {
+	return os.Getenv("CALLBACK_RETRY_FREQ")
+}
