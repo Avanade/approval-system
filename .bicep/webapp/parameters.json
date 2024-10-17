@@ -42,7 +42,8 @@
                 "EMAIL_USER_ID" : "",
                 "LINK_FOOTERS": "",
                 "ORGANIZATION_NAME": "",
-                "COMMUNITY_PORTAL_APP_ID": ""
+                "COMMUNITY_PORTAL_APP_ID": "",
+                "CALLBACK_RETRY_FREQ": ""
             }
         }
     }
