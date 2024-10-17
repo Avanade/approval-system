@@ -21,6 +21,14 @@ func NewItemService(repo *repository.Repository, configManager config.ConfigMana
 	}
 }
 
+func (s *itemService) GetFailedCallbacks() ([]string, error) {
+	failedCallbacks, err := s.Repository.Item.GetFailedCallbacks()
+	if err != nil {
+		return []string{}, err
+	}
+	return failedCallbacks, nil
+}
+
 func (s *itemService) GetItemById(id string) (*model.Item, error) {
 	item, err := s.Repository.Item.GetItemById(id)
 	if err != nil {

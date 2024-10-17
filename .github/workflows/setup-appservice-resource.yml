@@ -46,6 +46,7 @@ jobs:
           parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_PASSWORD : ${{ secrets.CONTAINER_REGISTRY_SERVER_PASSWORD }}
           parameters.appServiceSettings.value.APPROVALSYSTEMDB_CONNECTION_STRING : ${{ secrets.DATABASE_CONNECTION_STRING }}
           parameters.appServiceSettings.value.COMMUNITY_PORTAL_APP_ID : ${{ vars.COMMUNITY_PORTAL_APP_ID }}
+          parameters.appServiceSettings.value.CALLBACK_RETRY_FREQ: ${{ vars.CALLBACK_RETRY_FREQ }}
 
       - name: Deploy App Service Plan and Web App
         uses: azure/arm-deploy@v1

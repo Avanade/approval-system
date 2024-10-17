@@ -19,6 +19,26 @@ func NewItemRepository(db *db.Database) ItemRepository {
 	}
 }
 
+func (r *itemRepository) GetFailedCallbacks() ([]string, error) {
+	row, err := r.Query("PR_Items_Select_FailedCallbacks")
+	if err != nil {
+		return []string{}, err
+	}
+	defer row.Close()
+
+	result, err := r.RowsToMap(row)
+	if err != nil {
+		return []string{}, err
+	}
+
+	var failedCallbacks []string
+	for _, v := range result {
+		failedCallbacks = append(failedCallbacks, v["Id"].(string))
+	}
+
+	return failedCallbacks, nil
+}
+
 func (r *itemRepository) GetItemById(id string) (*model.Item, error) {
 	row, err := r.Query("PR_Items_Select_ById", sql.Named("Id", id))
 	if err != nil {

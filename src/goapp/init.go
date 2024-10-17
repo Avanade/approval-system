@@ -8,6 +8,7 @@ import (
 	c "main/controller"
 	r "main/repository"
 	s "main/service"
+	t "main/timed-jobs"
 )
 
 var (
@@ -37,6 +38,8 @@ var (
 		c.NewUserController(svc),
 		c.NewItemPageController(svc, conf),
 	)
+
+	timedJobs = t.NewTimedJobs(svc, conf)
 
 	httpRouter router.Router = router.NewMuxRouter()
 )
