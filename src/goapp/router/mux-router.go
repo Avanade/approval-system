@@ -5,16 +5,20 @@ import (
 	"net/http"
 	"os"
 
-	rtPages "main/routes/pages"
+	"main/controller"
 
 	"github.com/gorilla/mux"
 	"github.com/unrolled/secure"
 )
 
-type muxRouter struct{}
+type muxRouter struct {
+	*controller.Controller
+}
 
-func NewMuxRouter() Router {
-	return &muxRouter{}
+func NewMuxRouter(c *controller.Controller) Router {
+	return &muxRouter{
+		Controller: c,
+	}
 }
 
 var (
@@ -37,7 +41,7 @@ func (*muxRouter) DELETE(uri string, f func(resp http.ResponseWriter, req *http.
 	muxDispatcher.HandleFunc(uri, f).Methods("DELETE")
 }
 
-func (*muxRouter) SERVE(port string) {
+func (r *muxRouter) SERVE(port string) {
 	secureOptions := secure.Options{
 		SSLRedirect:           true,                                            // Strict-Transport-Security
 		SSLHost:               os.Getenv("SSL_HOST"),                           // Strict-Transport-Security
@@ -57,7 +61,7 @@ func (*muxRouter) SERVE(port string) {
 	muxDispatcher.Use(secureMiddleware.Handler)
 	http.Handle("/", muxDispatcher)
 
-	muxDispatcher.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
+	muxDispatcher.NotFoundHandler = http.HandlerFunc(r.Controller.Fallback.NotFound)
 	muxDispatcher.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 
 	fmt.Printf("Mux HTTP server running on port %v", port)

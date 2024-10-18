@@ -37,9 +37,10 @@ var (
 		c.NewApplicationModuleController(svc),
 		c.NewUserController(svc),
 		c.NewItemPageController(svc, conf),
+		c.NewFallbackController(svc),
 	)
 
 	timedJobs = t.NewTimedJobs(svc, conf)
 
-	httpRouter router.Router = router.NewMuxRouter()
+	httpRouter router.Router = router.NewMuxRouter(ctrl)
 )
