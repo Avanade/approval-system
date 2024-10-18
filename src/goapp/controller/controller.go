@@ -3,6 +3,7 @@ package controller
 import (
 	"main/config"
 	cApplicationModule "main/controller/app-module"
+	cFallback "main/controller/fallback"
 	cItem "main/controller/item"
 	cUser "main/controller/user"
 	"main/service"
@@ -13,6 +14,7 @@ type Controller struct {
 	ItemPage          cItem.ItemPageController
 	ApplicationModule cApplicationModule.ApplicationModuleController
 	User              cUser.UserController
+	Fallback          cFallback.FallbackController
 }
 
 type ControllerOptionFunc func(*Controller)
@@ -50,5 +52,11 @@ func NewUserController(svc *service.Service) ControllerOptionFunc {
 func NewItemPageController(svc *service.Service, conf config.ConfigManager) ControllerOptionFunc {
 	return func(c *Controller) {
 		c.ItemPage = cItem.NewItemPageController(svc, conf)
+	}
+}
+
+func NewFallbackController(svc *service.Service) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.Fallback = cFallback.NewFallbackController(svc)
 	}
 }
