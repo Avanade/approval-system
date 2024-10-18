@@ -19,6 +19,26 @@ func NewItemRepository(db *db.Database) ItemRepository {
 	}
 }
 
+func (r *itemRepository) GetFailedCallbacks() ([]string, error) {
+	row, err := r.Query("PR_Items_Select_FailedCallbacks")
+	if err != nil {
+		return []string{}, err
+	}
+	defer row.Close()
+
+	result, err := r.RowsToMap(row)
+	if err != nil {
+		return []string{}, err
+	}
+
+	var failedCallbacks []string
+	for _, v := range result {
+		failedCallbacks = append(failedCallbacks, v["Id"].(string))
+	}
+
+	return failedCallbacks, nil
+}
+
 func (r *itemRepository) GetItemById(id string) (*model.Item, error) {
 	row, err := r.Query("PR_Items_Select_ById", sql.Named("Id", id))
 	if err != nil {
@@ -234,6 +254,39 @@ func (r *itemRepository) UpdateItemApproverEmail(id, approverEmail, username str
 	}
 	defer row.Close()
 	return nil
+}
+func (r *itemRepository) ItemIsAuthorized(appId, appModuleId, itemId, approverEmail string) (*model.ItemIsAuthorized, error) {
+	row, err := r.Query("PR_Items_IsAuthorized",
+		sql.Named("ApplicationId", appId),
+		sql.Named("ApplicationModuleId", appModuleId),
+		sql.Named("ItemId", itemId),
+		sql.Named("ApproverEmail", approverEmail),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+
+	result, err := r.RowsToMap(row)
+	if err != nil {
+		return nil, err
+	}
+
+	i := model.ItemIsAuthorized{
+		IsAuthorized: result[0]["IsAuthorized"] == "1",
+	}
+
+	if result[0]["IsApproved"] != nil {
+		i.IsApproved = &model.NullBool{Value: result[0]["IsApproved"].(bool)}
+	} else {
+		i.IsApproved = nil
+	}
+
+	if result[0]["RequireRemarks"] != nil {
+		i.RequireRemarks = result[0]["RequireRemarks"].(bool)
+	}
+
+	return &i, nil
 }
 
 func (r *itemRepository) UpdateItemCallback(id string, isCallbackFailed bool) error {

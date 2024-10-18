@@ -89,3 +89,13 @@ type ResponseCallback struct {
 	ResponseDate string `json:"responseDate"`
 	RespondedBy  string `json:"respondedBy"`
 }
+
+type ItemIsAuthorized struct {
+	IsAuthorized   bool      `json:"isAuthorized"`
+	IsApproved     *NullBool `json:"isApproved"`
+	RequireRemarks bool      `json:"requireRemarks"`
+}
+
+type NullBool struct {
+	Value bool
+}

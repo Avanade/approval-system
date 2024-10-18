@@ -1847,16 +1847,12 @@ select {
   top: 50%;
 }
 
-.top-5 {
-  top: 1.25rem;
+.top-8 {
+  top: 2rem;
 }
 
 .top-full {
   top: 100%;
-}
-
-.top-8 {
-  top: 2rem;
 }
 
 .isolate {

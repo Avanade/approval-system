@@ -21,6 +21,14 @@ func NewItemService(repo *repository.Repository, configManager config.ConfigMana
 	}
 }
 
+func (s *itemService) GetFailedCallbacks() ([]string, error) {
+	failedCallbacks, err := s.Repository.Item.GetFailedCallbacks()
+	if err != nil {
+		return []string{}, err
+	}
+	return failedCallbacks, nil
+}
+
 func (s *itemService) GetItemById(id string) (*model.Item, error) {
 	item, err := s.Repository.Item.GetItemById(id)
 	if err != nil {
@@ -81,6 +89,14 @@ func (s *itemService) InsertItem(item model.ItemInsertRequest) (string, error) {
 		return "", err
 	}
 	return id, nil
+}
+
+func (s *itemService) ItemIsAuthorized(appId, appModuleId, itemId, approverEmail string) (*model.ItemIsAuthorized, error) {
+	itemIsAuthorized, err := s.Repository.Item.ItemIsAuthorized(appId, appModuleId, itemId, approverEmail)
+	if err != nil {
+		return nil, err
+	}
+	return itemIsAuthorized, nil
 }
 
 func (s *itemService) UpdateItemApproverEmail(itemId, approverEmail, username string) error {

@@ -66,3 +66,19 @@ func (ecm *envConfigManager) GetClientID() string {
 func (ecm *envConfigManager) GetClientSecret() string {
 	return os.Getenv("CLIENT_SECRET")
 }
+
+func (ecm *envConfigManager) GetLinkFooters() string {
+	return os.Getenv("LINK_FOOTERS")
+}
+
+func (ecm *envConfigManager) GetOrganizationName() string {
+	return os.Getenv("ORGANIZATION_NAME")
+}
+
+func (ecm *envConfigManager) GetCommunityPortalAppId() string {
+	return os.Getenv("COMMUNITY_PORTAL_APP_ID")
+}
+
+func (ecm *envConfigManager) GetCallbackRetryFreq() string {
+	return os.Getenv("CALLBACK_RETRY_FREQ")
+}
