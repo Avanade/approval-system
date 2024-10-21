@@ -44,7 +44,7 @@ func (a *authenticationPageController) LoginHandler(w http.ResponseWriter, r *ht
 		return
 	}
 
-	http.Redirect(w, r, a.Authenticator.GetConfig().AuthCodeURL(state), http.StatusTemporaryRedirect)
+	http.Redirect(w, r, a.Authenticator.GetAuthCodeURL(state), http.StatusTemporaryRedirect)
 }
 
 func (a *authenticationPageController) LoginRedirectHandler(w http.ResponseWriter, r *http.Request) {
