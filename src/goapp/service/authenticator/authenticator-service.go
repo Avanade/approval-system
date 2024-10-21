@@ -83,3 +83,7 @@ func (a *authenticatorService) AccessTokenIsValid(r *http.Request) bool {
 
 	return true
 }
+
+func (a *authenticatorService) GetConfig() *oauth2.Config {
+	return &a.Config
+}
