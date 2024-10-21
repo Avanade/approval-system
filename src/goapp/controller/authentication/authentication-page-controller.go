@@ -102,3 +102,25 @@ func (a *authenticationPageController) LoginRedirectHandler(w http.ResponseWrite
 	tmpl := template.Must(template.ParseFiles("templates/loginredirect.html"))
 	tmpl.Execute(w, data)
 }
+
+func (a *authenticationPageController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := session.Store.Get(r, "auth-session")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	session.Options.MaxAge = -1
+	err = session.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	url, err := a.Authenticator.GetLogoutURL()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}

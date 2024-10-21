@@ -7,6 +7,7 @@ import (
 	"log"
 	"main/config"
 	"net/http"
+	"net/url"
 	"strings"
 
 	oidc "github.com/coreos/go-oidc"
@@ -87,6 +88,14 @@ func (a *authenticatorService) AccessTokenIsValid(r *http.Request) bool {
 
 func (a *authenticatorService) GetAuthCodeURL(state string) string {
 	return a.OAuthConfig.AuthCodeURL(state)
+}
+
+func (a *authenticatorService) GetLogoutURL() (string, error) {
+	logoutUrl, err := url.Parse("https://login.microsoftonline.com/" + a.Config.GetTenantID() + "/oauth2/logout?client_id=" + a.Config.GetClientID() + "&post_logout_redirect_uri=" + a.Config.GetHomeURL())
+	if err != nil {
+		return "", err
+	}
+	return logoutUrl.String(), nil
 }
 
 func (a *authenticatorService) ProcessToken(code string) (*UserToken, error) {

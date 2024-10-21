@@ -3,7 +3,6 @@ package main
 import (
 	m "main/middleware"
 	ev "main/pkg/envvar"
-	rtAzure "main/routes/login/azure"
 )
 
 func setPageRoutes() {
@@ -15,7 +14,7 @@ func setPageRoutes() {
 	httpRouter.GET("/loginredirect", ctrl.AuthenticationPage.LoginRedirectHandler)
 	httpRouter.GET("/login/azure", ctrl.AuthenticationPage.LoginHandler)
 	httpRouter.GET("/login/azure/callback", ctrl.AuthenticationPage.CallbackHandler)
-	httpRouter.GET("/logout/azure", rtAzure.LogoutHandler)
+	httpRouter.GET("/logout/azure", ctrl.AuthenticationPage.LogoutHandler)
 }
 
 func setApiRoutes() {
