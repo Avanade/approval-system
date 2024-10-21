@@ -3,6 +3,7 @@ package controller
 import (
 	"main/config"
 	cApplicationModule "main/controller/app-module"
+	cAuthentication "main/controller/authentication"
 	cFallback "main/controller/fallback"
 	cItem "main/controller/item"
 	cUser "main/controller/user"
@@ -10,11 +11,12 @@ import (
 )
 
 type Controller struct {
-	Item              cItem.ItemController
-	ItemPage          cItem.ItemPageController
-	ApplicationModule cApplicationModule.ApplicationModuleController
-	User              cUser.UserController
-	Fallback          cFallback.FallbackController
+	AuthenticationPage cAuthentication.AuthenticationPageController
+	Item               cItem.ItemController
+	ItemPage           cItem.ItemPageController
+	ApplicationModule  cApplicationModule.ApplicationModuleController
+	User               cUser.UserController
+	Fallback           cFallback.FallbackController
 }
 
 type ControllerOptionFunc func(*Controller)
@@ -27,6 +29,12 @@ func NewController(opts ...ControllerOptionFunc) *Controller {
 	}
 
 	return controller
+}
+
+func NewAuthenticationController() ControllerOptionFunc {
+	return func(c *Controller) {
+		c.AuthenticationPage = cAuthentication.NewAuthenticationController()
+	}
 }
 
 func NewItemController(svc *service.Service) ControllerOptionFunc {

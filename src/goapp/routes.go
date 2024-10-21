@@ -4,7 +4,6 @@ import (
 	m "main/middleware"
 	ev "main/pkg/envvar"
 	rtAzure "main/routes/login/azure"
-	rtPages "main/routes/pages"
 )
 
 func setPageRoutes() {
@@ -13,7 +12,7 @@ func setPageRoutes() {
 	httpRouter.GET("/response/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", m.Chain(ctrl.ItemPage.RespondToItem, m.AzureAuth()))
 	httpRouter.GET("/responsereassigned/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}/{ApproveText}/{RejectText}", m.Chain(ctrl.ItemPage.ReassignApproval, m.AzureAuth()))
 
-	httpRouter.GET("/loginredirect", rtPages.LoginRedirectHandler)
+	httpRouter.GET("/loginredirect", ctrl.AuthenticationPage.LoginRedirectHandler)
 	httpRouter.GET("/login/azure", rtAzure.LoginHandler)
 	httpRouter.GET("/login/azure/callback", rtAzure.CallbackHandler)
 	httpRouter.GET("/logout/azure", rtAzure.LogoutHandler)

@@ -30,6 +30,7 @@ var (
 		s.NewApprovalRequestApproverService(repo),
 		s.NewMsGraphService(conf),
 		s.NewTemplateService(conf),
+		s.NewAuthenticatorService(),
 	)
 
 	ctrl = c.NewController(
@@ -38,6 +39,7 @@ var (
 		c.NewUserController(svc),
 		c.NewItemPageController(svc, conf),
 		c.NewFallbackController(svc),
+		c.NewAuthenticationController(),
 	)
 
 	timedJobs = t.NewTimedJobs(svc, conf)
