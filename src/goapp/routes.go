@@ -13,7 +13,7 @@ func setPageRoutes() {
 	httpRouter.GET("/responsereassigned/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}/{ApproveText}/{RejectText}", m.Chain(ctrl.ItemPage.ReassignApproval, m.AzureAuth()))
 
 	httpRouter.GET("/loginredirect", ctrl.AuthenticationPage.LoginRedirectHandler)
-	httpRouter.GET("/login/azure", rtAzure.LoginHandler)
+	httpRouter.GET("/login/azure", ctrl.AuthenticationPage.LoginHandler)
 	httpRouter.GET("/login/azure/callback", rtAzure.CallbackHandler)
 	httpRouter.GET("/logout/azure", rtAzure.LogoutHandler)
 }

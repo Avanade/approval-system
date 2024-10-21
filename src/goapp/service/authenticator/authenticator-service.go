@@ -83,3 +83,7 @@ func (a *authenticatorService) AccessTokenIsValid(r *http.Request) bool {
 
 	return true
 }
+
+func (a *authenticatorService) GetAuthCodeURL(state string) string {
+	return a.Config.AuthCodeURL(state)
+}

@@ -31,9 +31,9 @@ func NewController(opts ...ControllerOptionFunc) *Controller {
 	return controller
 }
 
-func NewAuthenticationController() ControllerOptionFunc {
+func NewAuthenticationController(svc *service.Service) ControllerOptionFunc {
 	return func(c *Controller) {
-		c.AuthenticationPage = cAuthentication.NewAuthenticationController()
+		c.AuthenticationPage = cAuthentication.NewAuthenticationController(svc)
 	}
 }
 

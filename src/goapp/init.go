@@ -39,7 +39,7 @@ var (
 		c.NewUserController(svc),
 		c.NewItemPageController(svc, conf),
 		c.NewFallbackController(svc),
-		c.NewAuthenticationController(),
+		c.NewAuthenticationController(svc),
 	)
 
 	timedJobs = t.NewTimedJobs(svc, conf)
