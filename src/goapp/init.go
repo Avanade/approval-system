@@ -30,7 +30,7 @@ var (
 		s.NewApprovalRequestApproverService(repo),
 		s.NewMsGraphService(conf),
 		s.NewTemplateService(conf),
-		s.NewAuthenticatorService(),
+		s.NewAuthenticatorService(conf),
 	)
 
 	ctrl = c.NewController(

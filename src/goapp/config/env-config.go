@@ -51,6 +51,10 @@ func (ecm *envConfigManager) GetEmailUserID() string {
 	return os.Getenv("EMAIL_USER_ID")
 }
 
+func (ecm *envConfigManager) GetHomeURL() string {
+	return os.Getenv("HOME_URL")
+}
+
 func (ecm *envConfigManager) GetIsEmailEnabled() bool {
 	return os.Getenv("EMAIL_ENABLED") == "true"
 }

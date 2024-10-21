@@ -7,4 +7,5 @@ import (
 type AuthenticatorService interface {
 	AccessTokenIsValid(r *http.Request) bool
 	GetAuthCodeURL(state string) string
+	ProcessToken(code string) (*UserToken, error)
 }

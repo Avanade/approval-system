@@ -48,9 +48,9 @@ func NewApplicationModuleService(repo *repository.Repository) ServiceOptionFunc 
 	}
 }
 
-func NewAuthenticatorService() ServiceOptionFunc {
+func NewAuthenticatorService(conf config.ConfigManager) ServiceOptionFunc {
 	return func(s *Service) {
-		s.Authenticator = sAuthenticator.NewAuthenticatorService()
+		s.Authenticator = sAuthenticator.NewAuthenticatorService(conf)
 	}
 }
 
