@@ -14,7 +14,7 @@ func setPageRoutes() {
 
 	httpRouter.GET("/loginredirect", ctrl.AuthenticationPage.LoginRedirectHandler)
 	httpRouter.GET("/login/azure", ctrl.AuthenticationPage.LoginHandler)
-	httpRouter.GET("/login/azure/callback", rtAzure.CallbackHandler)
+	httpRouter.GET("/login/azure/callback", ctrl.AuthenticationPage.CallbackHandler)
 	httpRouter.GET("/logout/azure", rtAzure.LogoutHandler)
 }
 

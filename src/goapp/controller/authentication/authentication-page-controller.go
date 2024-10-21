@@ -19,6 +19,43 @@ func NewAuthenticationController(s *service.Service) AuthenticationPageControlle
 	}
 }
 
+func (a *authenticationPageController) CallbackHandler(w http.ResponseWriter, r *http.Request) {
+	// Check session
+	session, err := session.Store.Get(r, "auth-session")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if r.URL.Query().Get("state") != session.Values["state"] {
+		http.Error(w, "Invalid state parameter", http.StatusBadRequest)
+		return
+	}
+
+	//Retrieve token and save data on session store
+	u, err := a.Service.Authenticator.ProcessToken(r.URL.Query().Get("code"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	session.Values["id_token"] = u.IdToken
+	session.Values["access_token"] = u.AccessToken
+	session.Values["profile"] = u.Profile
+	session.Values["refresh_token"] = u.RefreshToken
+	session.Values["expiry"] = u.Expiry
+	session.Options.MaxAge = 43200
+	err = session.Save(r, w)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Redirect to index
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func (a *authenticationPageController) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate random state
 	b := make([]byte, 32)
