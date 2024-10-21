@@ -6,6 +6,7 @@ import (
 	sApplicationModule "main/service/app-module"
 	sApplication "main/service/application"
 	sApprovalRequestApprover "main/service/approval-request-approver"
+	sAuthenticator "main/service/authenticator"
 	sEmail "main/service/email"
 	sItem "main/service/item"
 	sMsGraph "main/service/msgraph"
@@ -20,6 +21,7 @@ type Service struct {
 	ApprovalRequestApprover sApprovalRequestApprover.ApprovalRequestApproverService
 	MsGraph                 sMsGraph.MsGraphService
 	Template                sTemplate.TemplateService
+	Authenticator           sAuthenticator.AuthenticatorService
 }
 
 type ServiceOptionFunc func(*Service)
@@ -43,6 +45,12 @@ func NewApplicationService(repo *repository.Repository) ServiceOptionFunc {
 func NewApplicationModuleService(repo *repository.Repository) ServiceOptionFunc {
 	return func(s *Service) {
 		s.ApplicationModule = sApplicationModule.NewApplicationModuleService(repo)
+	}
+}
+
+func NewAuthenticatorService() ServiceOptionFunc {
+	return func(s *Service) {
+		s.Authenticator = sAuthenticator.NewAuthenticatorService()
 	}
 }
 

@@ -1,11 +1,17 @@
-package routes
+package authentication
 
 import (
 	"html/template"
 	"net/http"
 )
 
-func LoginRedirectHandler(w http.ResponseWriter, r *http.Request) {
+type authenticationPageController struct{}
+
+func NewAuthenticationController() AuthenticationPageController {
+	return &authenticationPageController{}
+}
+
+func (a *authenticationPageController) LoginRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	redirect := "/"
 	if len(q["redirect"]) > 0 {
