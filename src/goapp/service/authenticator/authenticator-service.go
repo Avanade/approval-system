@@ -45,15 +45,15 @@ func NewAuthenticatorService() AuthenticatorService {
 	}
 }
 
-func (a *authenticatorService) VerifyAccessToken(r *http.Request) (*jwt.Token, error) {
+func (a *authenticatorService) AccessTokenIsValid(r *http.Request) bool {
 	tokenString := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
 	keySet, err := jwk.Fetch(r.Context(), "https://login.microsoftonline.com/common/discovery/v2.0/keys")
 	if err != nil {
 		log.Println(err.Error())
-		return nil, err
+		return false
 	}
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	_, err = jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if token.Method.Alg() != jwa.RS256.String() {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -78,8 +78,8 @@ func (a *authenticatorService) VerifyAccessToken(r *http.Request) (*jwt.Token, e
 
 	if err != nil {
 		log.Println(err.Error())
-		return nil, err
+		return false
 	}
 
-	return token, nil
+	return true
 }
