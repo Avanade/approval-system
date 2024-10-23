@@ -105,3 +105,24 @@ func (r *applicationModuleRepository) GetAll() ([]model.ApplicationModule, error
 
 	return result, nil
 }
+
+func (r *applicationModuleRepository) IsAuthRequired(applicationModuleId string) (bool, error) {
+	rows, err := r.Query("PR_ApplicationModules_IsAuthRequired",
+		sql.Named("ApplicationModuleId", applicationModuleId))
+
+	if err != nil {
+		return true, err
+	}
+	defer rows.Close()
+
+	result, err := r.RowsToMap(rows)
+	if err != nil {
+		return true, err
+	}
+
+	if len(result) == 0 {
+		return result[0]["RequireAuthentication"].(bool), nil
+	} else {
+		return true, nil
+	}
+}

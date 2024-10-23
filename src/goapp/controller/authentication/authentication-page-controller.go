@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"html/template"
-	session "main/pkg/session"
+	"main/model"
 	"main/service"
 	"net/http"
 )
@@ -20,32 +20,30 @@ func NewAuthenticationController(s *service.Service) AuthenticationPageControlle
 }
 
 func (a *authenticationPageController) CallbackHandler(w http.ResponseWriter, r *http.Request) {
-	// Check session
-	session, err := session.Store.Get(r, "auth-session")
+	state, err := a.Authenticator.GetStringValue(r, "auth-session", "state")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if r.URL.Query().Get("state") != session.Values["state"] {
+	if r.URL.Query().Get("state") != state {
 		http.Error(w, "Invalid state parameter", http.StatusBadRequest)
 		return
 	}
 
 	//Retrieve token and save data on session store
-	u, err := a.Service.Authenticator.ProcessToken(r.URL.Query().Get("code"))
+	u, err := a.Authenticator.ProcessToken(r.URL.Query().Get("code"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	session.Values["id_token"] = u.IdToken
-	session.Values["access_token"] = u.AccessToken
-	session.Values["profile"] = u.Profile
-	session.Values["refresh_token"] = u.RefreshToken
-	session.Values["expiry"] = u.Expiry
-	session.Options.MaxAge = 43200
-	err = session.Save(r, w)
+	err = a.Authenticator.SaveOnSession(&w, r, "auth-session",
+		model.SessionStringValue{Key: "id_token", Value: u.IdToken},
+		model.SessionStringValue{Key: "access", Value: u.AccessToken},
+		model.SessionMapValue{Key: "profile", Value: u.Profile},
+		model.SessionStringValue{Key: "refresh_token", Value: u.RefreshToken},
+		model.SessionStringValue{Key: "expiry", Value: u.Expiry})
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -67,15 +65,9 @@ func (a *authenticationPageController) LoginHandler(w http.ResponseWriter, r *ht
 	}
 	state := base64.StdEncoding.EncodeToString(b)
 
-	session, err := session.Store.Get(r, "auth-session")
+	err = a.Authenticator.SaveOnSession(&w, r, "auth-session",
+		model.SessionStringValue{Key: "state", Value: state})
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	session.Values["state"] = state
-	err = session.Save(r, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -104,14 +96,7 @@ func (a *authenticationPageController) LoginRedirectHandler(w http.ResponseWrite
 }
 
 func (a *authenticationPageController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := session.Store.Get(r, "auth-session")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	session.Options.MaxAge = -1
-	err = session.Save(r, w)
+	err := a.Authenticator.ClearFromSession(&w, r, "auth-session")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

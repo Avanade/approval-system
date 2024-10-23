@@ -2,6 +2,7 @@ package service
 
 import (
 	"main/config"
+	"main/infrastructure/session"
 	"main/repository"
 	sApplicationModule "main/service/app-module"
 	sApplication "main/service/application"
@@ -48,9 +49,9 @@ func NewApplicationModuleService(repo *repository.Repository) ServiceOptionFunc 
 	}
 }
 
-func NewAuthenticatorService(conf config.ConfigManager) ServiceOptionFunc {
+func NewAuthenticatorService(conf config.ConfigManager, session *session.Session) ServiceOptionFunc {
 	return func(s *Service) {
-		s.Authenticator = sAuthenticator.NewAuthenticatorService(conf)
+		s.Authenticator = sAuthenticator.NewAuthenticatorService(conf, session)
 	}
 }
 

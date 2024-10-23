@@ -7,3 +7,8 @@ type UserToken struct {
 	RefreshToken string
 	Expiry       string
 }
+
+type ErrorDetails struct {
+	Error            string `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}

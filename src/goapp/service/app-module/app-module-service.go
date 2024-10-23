@@ -40,3 +40,7 @@ func (s *applicationModuleService) GetRequestTypes() ([]RequestType, error) {
 
 	return result, nil
 }
+
+func (s *applicationModuleService) IsAuthRequired(applicationModuleId string) (bool, error) {
+	return s.Repository.ApplicationModule.IsAuthRequired(applicationModuleId)
+}

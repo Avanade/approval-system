@@ -22,4 +22,5 @@ type ConfigManager interface {
 	GetOrganizationName() string
 	GetCommunityPortalAppId() string
 	GetCallbackRetryFreq() string
+	GetPort() string
 }

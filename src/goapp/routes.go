@@ -1,10 +1,5 @@
 package main
 
-import (
-	m "main/middleware"
-	ev "main/pkg/envvar"
-)
-
 func setPageRoutes() {
 	httpRouter.GET("/", m.Chain(ctrl.ItemPage.MyRequests, m.AzureAuth()))
 	httpRouter.GET("/myapprovals", m.Chain(ctrl.ItemPage.MyApprovals, m.AzureAuth()))
@@ -27,6 +22,5 @@ func setApiRoutes() {
 }
 
 func serve() {
-	port := ev.GetEnvVar("PORT", "8080")
-	httpRouter.SERVE(port)
+	httpRouter.SERVE()
 }
