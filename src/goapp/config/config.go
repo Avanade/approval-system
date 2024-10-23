@@ -23,4 +23,5 @@ type ConfigManager interface {
 	GetCommunityPortalAppId() string
 	GetCallbackRetryFreq() string
 	GetPort() string
+	GetSessionKey() string
 }

@@ -90,3 +90,7 @@ func (ecm *envConfigManager) GetCallbackRetryFreq() string {
 func (ecm *envConfigManager) GetPort() string {
 	return os.Getenv("PORT")
 }
+
+func (ecm *envConfigManager) GetSessionKey() string {
+	return os.Getenv("SESSION_KEY")
+}

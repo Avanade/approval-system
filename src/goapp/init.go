@@ -16,7 +16,7 @@ import (
 var (
 	conf  config.ConfigManager = config.NewEnvConfigManager()
 	db    database.Database    = database.NewDatabase(conf)
-	store session.Session      = session.NewSession()
+	store session.Session      = session.NewSession(conf)
 
 	repo = r.NewRepository(
 		r.NewApplication(&db),

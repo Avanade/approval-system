@@ -2,6 +2,7 @@ package session
 
 import (
 	"encoding/gob"
+	"main/config"
 	"math"
 	"net/http"
 	"os"
@@ -13,8 +14,8 @@ type Session struct {
 	Store *sessions.FilesystemStore
 }
 
-func NewSession() Session {
-	s := sessions.NewFilesystemStore(os.TempDir(), []byte("secret"))
+func NewSession(conf config.ConfigManager) Session {
+	s := sessions.NewFilesystemStore(os.TempDir(), []byte(conf.GetSessionKey()))
 	s.MaxLength(math.MaxInt64)
 	gob.Register(map[string]interface{}{})
 	return Session{
