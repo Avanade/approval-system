@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	conf  config.ConfigManager = config.NewEnvConfigManager()
-	db    database.Database    = database.NewDatabase(conf)
-	store session.Session      = session.NewSession(conf)
+	conf config.ConfigManager   = config.NewEnvConfigManager()
+	db   database.Database      = database.NewDatabase(conf)
+	cs   session.ConnectSession = session.NewSession(conf)
 
 	repo = r.NewRepository(
 		r.NewApplication(&db),
@@ -33,7 +33,7 @@ var (
 		s.NewApprovalRequestApproverService(repo),
 		s.NewMsGraphService(conf),
 		s.NewTemplateService(conf),
-		s.NewAuthenticatorService(conf, &store),
+		s.NewAuthenticatorService(conf, &cs),
 	)
 
 	ctrl = c.NewController(

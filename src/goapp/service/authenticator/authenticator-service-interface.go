@@ -15,5 +15,5 @@ type AuthenticatorService interface {
 	IsAuthenticated(r *http.Request) (bool, bool, error)
 	ProcessToken(code string) (*UserToken, error)
 	RefreshToken(w *http.ResponseWriter, r *http.Request) error
-	SaveOnSession(w *http.ResponseWriter, r *http.Request, session string, p ...interface{}) error
+	SaveOnSession(w *http.ResponseWriter, r *http.Request, session string, p map[string]interface{}) error
 }

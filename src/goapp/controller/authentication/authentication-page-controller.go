@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"html/template"
-	"main/model"
 	"main/service"
 	"net/http"
 )
@@ -38,12 +37,15 @@ func (a *authenticationPageController) CallbackHandler(w http.ResponseWriter, r 
 		return
 	}
 
-	err = a.Authenticator.SaveOnSession(&w, r, "auth-session",
-		model.SessionStringValue{Key: "id_token", Value: u.IdToken},
-		model.SessionStringValue{Key: "access", Value: u.AccessToken},
-		model.SessionMapValue{Key: "profile", Value: u.Profile},
-		model.SessionStringValue{Key: "refresh_token", Value: u.RefreshToken},
-		model.SessionStringValue{Key: "expiry", Value: u.Expiry})
+	data := map[string]interface{}{
+		"id_token":      u.IdToken,
+		"access":        u.AccessToken,
+		"profile":       u.Profile,
+		"refresh_token": u.RefreshToken,
+		"expiry":        u.Expiry,
+	}
+
+	err = a.Authenticator.SaveOnSession(&w, r, "auth-session", data)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -65,8 +67,11 @@ func (a *authenticationPageController) LoginHandler(w http.ResponseWriter, r *ht
 	}
 	state := base64.StdEncoding.EncodeToString(b)
 
-	err = a.Authenticator.SaveOnSession(&w, r, "auth-session",
-		model.SessionStringValue{Key: "state", Value: state})
+	data := map[string]interface{}{
+		"state": state,
+	}
+
+	err = a.Authenticator.SaveOnSession(&w, r, "auth-session", data)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

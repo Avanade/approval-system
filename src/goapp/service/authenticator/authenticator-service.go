@@ -26,10 +26,10 @@ type authenticatorService struct {
 	OAuthConfig oauth2.Config
 	Ctx         context.Context
 	Config      config.ConfigManager
-	Session     *session.Session
+	Session     session.ConnectSession
 }
 
-func NewAuthenticatorService(conf config.ConfigManager, session *session.Session) AuthenticatorService {
+func NewAuthenticatorService(conf config.ConfigManager, session session.ConnectSession) AuthenticatorService {
 	ctx := context.Background()
 	provider, err := oidc.NewProvider(ctx, "https://login.microsoftonline.com/"+conf.GetTenantID()+"/v2.0")
 	if err != nil {
@@ -93,13 +93,8 @@ func (a *authenticatorService) AccessTokenIsValid(r *http.Request) bool {
 }
 
 func (a *authenticatorService) ClearFromSession(w *http.ResponseWriter, r *http.Request, session string) error {
-	s, err := a.Session.Get(r, session)
-	if err != nil {
-		return err
-	}
-
-	s.Options.MaxAge = -1
-	err = s.Save(r, *w)
+	s := a.Session.ConnectSession(w, r, session)
+	err := s.Destroy()
 	if err != nil {
 		return err
 	}
@@ -112,13 +107,14 @@ func (a *authenticatorService) GetAuthCodeURL(state string) string {
 }
 
 func (a *authenticatorService) GetAuthenticatedUser(r *http.Request) (*model.AzureUser, error) {
-	s, err := a.Session.Get(r, "auth-session")
+
+	var profile map[string]interface{}
+	s := a.Session.ConnectSession(nil, r, "auth-session")
+	u, err := s.Get("profile")
 	if err != nil {
 		return nil, err
 	}
 
-	var profile map[string]interface{}
-	u := s.Values["profile"]
 	profile, ok := u.(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("error getting user data")
@@ -139,30 +135,30 @@ func (a *authenticatorService) GetLogoutURL() (string, error) {
 }
 
 func (a *authenticatorService) GetStringValue(r *http.Request, session string, key string) (string, error) {
-	s, err := a.Session.Get(r, session)
+	s := a.Session.ConnectSession(nil, r, session)
+	v, err := s.Get(key)
 	if err != nil {
 		return "", err
 	}
 
-	if _, ok := s.Values[key]; !ok {
-		return "", fmt.Errorf("no key found in session")
-	}
-
-	return fmt.Sprintf("%s", s.Values[key]), nil
+	return fmt.Sprintf("%s", v), nil
 }
 
 func (a *authenticatorService) IsAuthenticated(r *http.Request) (bool, bool, error) {
-	s, err := a.Session.Get(r, "auth-session")
+	s := a.Session.ConnectSession(nil, r, "auth-session")
+
+	_, err := s.Get("profile")
 	if err != nil {
 		return false, false, err
 	}
 
-	if _, ok := s.Values["profile"]; !ok {
-		return false, false, fmt.Errorf("no profile found in session")
+	e, err := s.Get("expiry")
+	if err != nil {
+		return false, false, err
 	}
 
 	today := time.Now().UTC()
-	expiry, err := time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%s", s.Values["expiry"]))
+	expiry, err := time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%s", e))
 	if err != nil {
 		return false, false, err
 	}
@@ -207,13 +203,20 @@ func (a *authenticatorService) ProcessToken(code string) (*UserToken, error) {
 }
 
 func (a *authenticatorService) RefreshToken(w *http.ResponseWriter, r *http.Request) error {
-	s, err := a.Session.Get(r, "auth-session")
+	s := a.Session.ConnectSession(w, r, "auth-session")
+
+	t, err := s.Get("refresh_token")
 	if err != nil {
 		return err
 	}
 
-	refreshToken := fmt.Sprintf("%s", s.Values["refresh_token"])
-	expiry, err := time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%s", s.Values["expiry"]))
+	e, err := s.Get("expiry")
+	if err != nil {
+		return err
+	}
+
+	refreshToken := fmt.Sprintf("%s", t)
+	expiry, err := time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%s", e))
 	if err != nil {
 		return err
 	}
@@ -234,10 +237,10 @@ func (a *authenticatorService) RefreshToken(w *http.ResponseWriter, r *http.Requ
 	}
 
 	if newToken != nil {
-		s.Values["refresh_token"] = newToken.RefreshToken
-		s.Values["expiry"] = newToken.Expiry.UTC().Format("2006-01-02 15:04:05")
-		s.Values["access_token"] = newToken.AccessToken
-		err = s.Save(r, *w)
+		s.Set("refresh_token", newToken.RefreshToken)
+		s.Set("expiry", newToken.Expiry.UTC().Format("2006-01-02 15:04:05"))
+		s.Set("access_token", newToken.AccessToken)
+		err = s.Save(43200)
 		if err != nil {
 			return err
 		}
@@ -245,23 +248,14 @@ func (a *authenticatorService) RefreshToken(w *http.ResponseWriter, r *http.Requ
 	return nil
 }
 
-func (a *authenticatorService) SaveOnSession(w *http.ResponseWriter, r *http.Request, session string, p ...interface{}) error {
-	s, err := a.Session.Get(r, session)
-	if err != nil {
-		return err
+func (a *authenticatorService) SaveOnSession(w *http.ResponseWriter, r *http.Request, session string, p map[string]interface{}) error {
+	s := a.Session.ConnectSession(w, r, session)
+
+	for k, val := range p {
+		s.Set(k, val)
 	}
 
-	for _, v := range p {
-		switch v := v.(type) {
-		case model.SessionMapValue:
-			s.Values[v.Key] = v.Value
-		case model.SessionStringValue:
-			s.Values[v.Key] = v.Value
-		}
-	}
-
-	s.Options.MaxAge = 43200
-	err = s.Save(r, *w)
+	err := s.Save(43200)
 	if err != nil {
 		return err
 	}

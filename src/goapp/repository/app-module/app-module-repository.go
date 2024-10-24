@@ -120,7 +120,7 @@ func (r *applicationModuleRepository) IsAuthRequired(applicationModuleId string)
 		return true, err
 	}
 
-	if len(result) == 0 {
+	if len(result) != 0 {
 		return result[0]["RequireAuthentication"].(bool), nil
 	} else {
 		return true, nil
