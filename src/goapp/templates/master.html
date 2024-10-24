@@ -263,6 +263,11 @@
           },
           get profileUrl() {
             return 'https://people.'+this.profileDomain
+          },
+          init() {
+            let redirect = localStorage.getItem("redirectUrl")
+            if (redirect) window.location.href = redirect;
+            localStorage.clear()
           }
         }
       }
