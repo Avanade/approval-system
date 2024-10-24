@@ -25,8 +25,3 @@ type Menu struct {
 	IconPath string
 	UrlPath  string
 }
-
-type AzureUser struct {
-	Name  string `json:"name"`
-	Email string `json:"preferred_username"`
-}

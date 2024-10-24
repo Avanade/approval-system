@@ -3,12 +3,16 @@ package authenticator
 import (
 	"context"
 	"crypto/rsa"
+	"encoding/json"
 	"fmt"
 	"log"
 	"main/config"
+	"main/infrastructure/session"
+	"main/model"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	oidc "github.com/coreos/go-oidc"
 	"github.com/golang-jwt/jwt"
@@ -22,9 +26,10 @@ type authenticatorService struct {
 	OAuthConfig oauth2.Config
 	Ctx         context.Context
 	Config      config.ConfigManager
+	Session     session.ConnectSession
 }
 
-func NewAuthenticatorService(conf config.ConfigManager) AuthenticatorService {
+func NewAuthenticatorService(conf config.ConfigManager, session session.ConnectSession) AuthenticatorService {
 	ctx := context.Background()
 	provider, err := oidc.NewProvider(ctx, "https://login.microsoftonline.com/"+conf.GetTenantID()+"/v2.0")
 	if err != nil {
@@ -44,6 +49,7 @@ func NewAuthenticatorService(conf config.ConfigManager) AuthenticatorService {
 		OAuthConfig: oauth2Conf,
 		Ctx:         ctx,
 		Config:      conf,
+		Session:     session,
 	}
 }
 
@@ -86,8 +92,38 @@ func (a *authenticatorService) AccessTokenIsValid(r *http.Request) bool {
 	return true
 }
 
+func (a *authenticatorService) ClearFromSession(w *http.ResponseWriter, r *http.Request, session string) error {
+	s := a.Session.ConnectSession(w, r, session)
+	err := s.Destroy()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (a *authenticatorService) GetAuthCodeURL(state string) string {
 	return a.OAuthConfig.AuthCodeURL(state)
+}
+
+func (a *authenticatorService) GetAuthenticatedUser(r *http.Request) (*model.AzureUser, error) {
+
+	var profile map[string]interface{}
+	s := a.Session.ConnectSession(nil, r, "auth-session")
+	u, err := s.Get("profile")
+	if err != nil {
+		return nil, err
+	}
+
+	profile, ok := u.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("error getting user data")
+	}
+
+	return &model.AzureUser{
+		Name:  profile["name"].(string),
+		Email: profile["preferred_username"].(string),
+	}, nil
 }
 
 func (a *authenticatorService) GetLogoutURL() (string, error) {
@@ -96,6 +132,38 @@ func (a *authenticatorService) GetLogoutURL() (string, error) {
 		return "", err
 	}
 	return logoutUrl.String(), nil
+}
+
+func (a *authenticatorService) GetStringValue(r *http.Request, session string, key string) (string, error) {
+	s := a.Session.ConnectSession(nil, r, session)
+	v, err := s.Get(key)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s", v), nil
+}
+
+func (a *authenticatorService) IsAuthenticated(r *http.Request) (bool, bool, error) {
+	s := a.Session.ConnectSession(nil, r, "auth-session")
+
+	_, err := s.Get("profile")
+	if err != nil {
+		return false, false, err
+	}
+
+	e, err := s.Get("expiry")
+	if err != nil {
+		return false, false, err
+	}
+
+	today := time.Now().UTC()
+	expiry, err := time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%s", e))
+	if err != nil {
+		return false, false, err
+	}
+
+	return true, today.After(expiry), nil
 }
 
 func (a *authenticatorService) ProcessToken(code string) (*UserToken, error) {
@@ -132,4 +200,65 @@ func (a *authenticatorService) ProcessToken(code string) (*UserToken, error) {
 		RefreshToken: token.RefreshToken,
 		Expiry:       token.Expiry.UTC().Format("2006-01-02 15:04:05"),
 	}, nil
+}
+
+func (a *authenticatorService) RefreshToken(w *http.ResponseWriter, r *http.Request) error {
+	s := a.Session.ConnectSession(w, r, "auth-session")
+
+	t, err := s.Get("refresh_token")
+	if err != nil {
+		return err
+	}
+
+	e, err := s.Get("expiry")
+	if err != nil {
+		return err
+	}
+
+	refreshToken := fmt.Sprintf("%s", t)
+	expiry, err := time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%s", e))
+	if err != nil {
+		return err
+	}
+
+	ts := a.OAuthConfig.TokenSource(context.Background(), &oauth2.Token{RefreshToken: refreshToken, Expiry: expiry})
+	newToken, err := ts.Token()
+	if err != nil {
+		if rErr, ok := err.(*oauth2.RetrieveError); ok {
+			details := new(ErrorDetails)
+			if err := json.Unmarshal(rErr.Body, details); err != nil {
+				fmt.Println(err)
+				return err
+			}
+
+			fmt.Println(details.Error, details.ErrorDescription)
+			return fmt.Errorf("error refreshing token: %v", details.ErrorDescription)
+		}
+	}
+
+	if newToken != nil {
+		s.Set("refresh_token", newToken.RefreshToken)
+		s.Set("expiry", newToken.Expiry.UTC().Format("2006-01-02 15:04:05"))
+		s.Set("access_token", newToken.AccessToken)
+		err = s.Save(43200)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (a *authenticatorService) SaveOnSession(w *http.ResponseWriter, r *http.Request, session string, p map[string]interface{}) error {
+	s := a.Session.ConnectSession(w, r, session)
+
+	for k, val := range p {
+		s.Set(k, val)
+	}
+
+	err := s.Save(43200)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	session "main/pkg/session"
 
 	"github.com/joho/godotenv"
 )
@@ -13,9 +12,6 @@ func main() {
 	if err != nil {
 		log.Print(err.Error())
 	}
-
-	// Create session and GitHubClient
-	session.InitializeSession()
 
 	go timedJobs.ReprocessFailedCallbacks()
 

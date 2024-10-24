@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"main/config"
 	"main/controller"
 
 	"github.com/gorilla/mux"
@@ -13,11 +14,13 @@ import (
 
 type muxRouter struct {
 	*controller.Controller
+	Port string
 }
 
-func NewMuxRouter(c *controller.Controller) Router {
+func NewMuxRouter(c *controller.Controller, conf config.ConfigManager) Router {
 	return &muxRouter{
 		Controller: c,
+		Port:       conf.GetPort(),
 	}
 }
 
@@ -41,7 +44,7 @@ func (*muxRouter) DELETE(uri string, f func(resp http.ResponseWriter, req *http.
 	muxDispatcher.HandleFunc(uri, f).Methods("DELETE")
 }
 
-func (r *muxRouter) SERVE(port string) {
+func (r *muxRouter) SERVE() {
 	secureOptions := secure.Options{
 		SSLRedirect:           true,                                            // Strict-Transport-Security
 		SSLHost:               os.Getenv("SSL_HOST"),                           // Strict-Transport-Security
@@ -64,6 +67,6 @@ func (r *muxRouter) SERVE(port string) {
 	muxDispatcher.NotFoundHandler = http.HandlerFunc(r.Controller.Fallback.NotFound)
 	muxDispatcher.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 
-	fmt.Printf("Mux HTTP server running on port %v", port)
-	http.ListenAndServe(fmt.Sprintf(":%v", port), muxDispatcher)
+	fmt.Printf("Mux HTTP server running on port %v", r.Port)
+	http.ListenAndServe(fmt.Sprintf(":%v", r.Port), muxDispatcher)
 }

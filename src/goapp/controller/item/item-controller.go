@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/model"
-	"main/pkg/session"
 	"main/service"
 	"net/http"
 	"strconv"
@@ -28,21 +27,13 @@ func (c *itemController) GetItems(w http.ResponseWriter, r *http.Request) {
 	// Get all items
 	var itemOptions model.ItemOptions
 
-	session, err := session.Store.Get(r, "auth-session")
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var profile map[string]interface{}
-	u := session.Values["profile"]
-	profile, ok := u.(map[string]interface{})
-	if !ok {
-		http.Error(w, "Failed to get user info", http.StatusInternalServerError)
-		return
-	}
-	user := fmt.Sprintf("%s", profile["preferred_username"])
-	itemOptions.User = user
+	itemOptions.User = user.Email
 
 	vars := mux.Vars(r)
 
@@ -214,20 +205,11 @@ func (c *itemController) ProcessResponse(w http.ResponseWriter, r *http.Request)
 
 func (c *itemController) ReassignItem(w http.ResponseWriter, r *http.Request) {
 	// Get user info
-	session, err := session.Store.Get(r, "auth-session")
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	var profile map[string]interface{}
-	u := session.Values["profile"]
-	profile, ok := u.(map[string]interface{})
-	if !ok {
-		http.Error(w, "Failed to get user info", http.StatusInternalServerError)
-		return
-	}
-	user := fmt.Sprintf("%s", profile["preferred_username"])
 
 	// Get query params
 	params := mux.Vars(r)
@@ -238,7 +220,7 @@ func (c *itemController) ReassignItem(w http.ResponseWriter, r *http.Request) {
 	approveText := params["ApproveText"]
 	rejectText := params["RejectText"]
 
-	err = c.Service.Item.UpdateItemApproverEmail(id, approverEmail, user)
+	err = c.Service.Item.UpdateItemApproverEmail(id, approverEmail, user.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -248,7 +230,7 @@ func (c *itemController) ReassignItem(w http.ResponseWriter, r *http.Request) {
 	param := ReassignItemCallback{
 		Id:                  id,
 		ApproverEmail:       approverEmail,
-		Username:            user,
+		Username:            user.Email,
 		ApplicationId:       applicationId,
 		ApplicationModuleId: applicationModuleId,
 		ApproveText:         approveText,

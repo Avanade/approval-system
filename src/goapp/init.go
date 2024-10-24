@@ -3,6 +3,8 @@ package main
 import (
 	"main/config"
 	"main/infrastructure/database"
+	"main/infrastructure/session"
+	"main/middleware"
 	"main/router"
 
 	c "main/controller"
@@ -12,8 +14,9 @@ import (
 )
 
 var (
-	conf config.ConfigManager = config.NewEnvConfigManager()
-	db   database.Database    = database.NewDatabase(conf)
+	conf config.ConfigManager   = config.NewEnvConfigManager()
+	db   database.Database      = database.NewDatabase(conf)
+	cs   session.ConnectSession = session.NewSession(conf)
 
 	repo = r.NewRepository(
 		r.NewApplication(&db),
@@ -30,7 +33,7 @@ var (
 		s.NewApprovalRequestApproverService(repo),
 		s.NewMsGraphService(conf),
 		s.NewTemplateService(conf),
-		s.NewAuthenticatorService(conf),
+		s.NewAuthenticatorService(conf, &cs),
 	)
 
 	ctrl = c.NewController(
@@ -44,5 +47,6 @@ var (
 
 	timedJobs = t.NewTimedJobs(svc, conf)
 
-	httpRouter router.Router = router.NewMuxRouter(ctrl)
+	m          middleware.Middleware = middleware.NewMiddleware(svc)
+	httpRouter router.Router         = router.NewMuxRouter(ctrl, conf)
 )

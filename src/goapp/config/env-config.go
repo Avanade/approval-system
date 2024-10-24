@@ -86,3 +86,11 @@ func (ecm *envConfigManager) GetCommunityPortalAppId() string {
 func (ecm *envConfigManager) GetCallbackRetryFreq() string {
 	return os.Getenv("CALLBACK_RETRY_FREQ")
 }
+
+func (ecm *envConfigManager) GetPort() string {
+	return os.Getenv("PORT")
+}
+
+func (ecm *envConfigManager) GetSessionKey() string {
+	return os.Getenv("SESSION_KEY")
+}
