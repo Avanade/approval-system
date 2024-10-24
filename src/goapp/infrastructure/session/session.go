@@ -15,6 +15,14 @@ type Session struct {
 	Store *sessions.FilesystemStore
 }
 
+type sessionManager struct {
+	w           *http.ResponseWriter
+	r           *http.Request
+	values      map[string]interface{}
+	sessionName string
+	store       *sessions.FilesystemStore
+}
+
 func NewSession(conf config.ConfigManager) ConnectSession {
 	s := sessions.NewFilesystemStore(os.TempDir(), []byte(conf.GetSessionKey()))
 	s.MaxLength(math.MaxInt64)
