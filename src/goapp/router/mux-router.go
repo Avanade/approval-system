@@ -7,6 +7,7 @@ import (
 
 	"main/config"
 	"main/controller"
+	"main/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/unrolled/secure"
@@ -15,12 +16,14 @@ import (
 type muxRouter struct {
 	*controller.Controller
 	Port string
+	m    middleware.Middleware
 }
 
-func NewMuxRouter(c *controller.Controller, conf config.ConfigManager) Router {
+func NewMuxRouter(c *controller.Controller, conf config.ConfigManager, m *middleware.Middleware) Router {
 	return &muxRouter{
 		Controller: c,
 		Port:       conf.GetPort(),
+		m:          *m,
 	}
 }
 
@@ -64,7 +67,7 @@ func (r *muxRouter) SERVE() {
 	muxDispatcher.Use(secureMiddleware.Handler)
 	http.Handle("/", muxDispatcher)
 
-	muxDispatcher.NotFoundHandler = http.HandlerFunc(r.Controller.Fallback.NotFound)
+	muxDispatcher.NotFoundHandler = http.HandlerFunc(r.m.Chain(r.Controller.Fallback.NotFound, r.m.AzureAuth()))
 	muxDispatcher.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 
 	fmt.Printf("Mux HTTP server running on port %v", r.Port)

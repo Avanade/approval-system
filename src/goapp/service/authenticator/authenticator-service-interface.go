@@ -8,6 +8,7 @@ import (
 type AuthenticatorService interface {
 	AccessTokenIsValid(r *http.Request) bool
 	ClearFromSession(w *http.ResponseWriter, r *http.Request, session string) error
+	GenerateToken() (string, error)
 	GetAuthCodeURL(state string) string
 	GetAuthenticatedUser(r *http.Request) (*model.AzureUser, error)
 	GetLogoutURL() (string, error)

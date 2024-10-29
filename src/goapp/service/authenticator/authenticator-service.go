@@ -11,6 +11,7 @@ import (
 	"main/model"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -100,6 +101,46 @@ func (a *authenticatorService) ClearFromSession(w *http.ResponseWriter, r *http.
 	}
 
 	return nil
+}
+
+func (a *authenticatorService) GenerateToken() (string, error) {
+	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", a.Config.GetTenantID())
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	data := url.Values{}
+	data.Set("client_id", a.Config.GetClientID())
+	data.Set("scope", a.Config.GetScope())
+	data.Set("client_secret", a.Config.GetClientSecret())
+	data.Set("grant_type", "client_credentials")
+	ecodedData := data.Encode()
+
+	req, err := http.NewRequest("POST", urlPath, strings.NewReader(ecodedData))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+	response, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+
+	var token struct {
+		TokenType    string `json:"token_type"`
+		ExpiresIn    int    `json:"expires_in"`
+		ExtExpiresIn int    `json:"ext_expires_in"`
+		AccessToken  string `json:"access_token"`
+	}
+	err = json.NewDecoder(response.Body).Decode(&token)
+	if err != nil {
+		return "", err
+	}
+
+	return token.AccessToken, nil
 }
 
 func (a *authenticatorService) GetAuthCodeURL(state string) string {

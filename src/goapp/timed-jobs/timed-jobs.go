@@ -66,7 +66,24 @@ func (t *timedJobs) postCallback(id string) {
 			return
 		}
 
-		res, err := http.Post(item.CallbackUrl, "application/json", bytes.NewBuffer(jsonReq))
+		token, err := t.Service.Authenticator.GenerateToken()
+		if err != nil {
+			fmt.Println("Error generating token: ", err)
+			return
+		}
+
+		req, err := http.NewRequest("POST", item.CallbackUrl, bytes.NewBuffer(jsonReq))
+		if err != nil {
+			return
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+
+		client := &http.Client{
+			Timeout: time.Second * 90,
+		}
+		res, err := client.Do(req)
 		if err != nil {
 			fmt.Println("Error posting callback: ", err)
 			return

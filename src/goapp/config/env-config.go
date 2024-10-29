@@ -94,3 +94,7 @@ func (ecm *envConfigManager) GetPort() string {
 func (ecm *envConfigManager) GetSessionKey() string {
 	return os.Getenv("SESSION_KEY")
 }
+
+func (ecm *envConfigManager) GetScope() string {
+	return os.Getenv("SCOPE")
+}
