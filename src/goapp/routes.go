@@ -14,8 +14,8 @@ func setPageRoutes() {
 
 func setApiRoutes() {
 	httpRouter.GET("/api/request/types", m.Chain(ctrl.ApplicationModule.GetRequestTypes, m.AzureAuth()))
-	httpRouter.POST("/api/request", ctrl.Item.CreateItem)
-	httpRouter.POST("/api/process", ctrl.Item.ProcessResponse)
+	httpRouter.POST("/api/request", m.Chain(ctrl.Item.CreateItem, m.ManagedIdentityAuth()))
+	httpRouter.POST("/api/process", m.Chain(ctrl.Item.ProcessResponse, m.AzureAuth()))
 	httpRouter.GET("/api/items/type/{type:[0-2]+}/status/{status:[0-3]+}", m.Chain(ctrl.Item.GetItems, m.AzureAuth()))
 	httpRouter.GET("/api/search/users/{search}", m.Chain(ctrl.User.SearchUserFromActiveDirectory, m.AzureAuth()))
 	httpRouter.GET("/api/responsereassignedapi/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{ApproveText}/{RejectText}", m.Chain(ctrl.Item.ReassignItem, m.AzureAuth()))

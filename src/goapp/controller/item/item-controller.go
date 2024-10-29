@@ -8,6 +8,7 @@ import (
 	"main/service"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -260,10 +261,28 @@ func (c *itemController) postCallback(id string) {
 
 		jsonReq, err := json.Marshal(params)
 		if err != nil {
+			fmt.Println("Error marshalling response callback: ", err)
 			return
 		}
 
-		res, err := http.Post(item.CallbackUrl, "application/json", bytes.NewBuffer(jsonReq))
+		token, err := c.Authenticator.GenerateToken()
+		if err != nil {
+			fmt.Println("Error generating token: ", err)
+			return
+		}
+
+		req, err := http.NewRequest("POST", item.CallbackUrl, bytes.NewBuffer(jsonReq))
+		if err != nil {
+			return
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+
+		client := &http.Client{
+			Timeout: time.Second * 90,
+		}
+		res, err := client.Do(req)
 		if err != nil {
 			fmt.Println("Error posting callback: ", err)
 			return
@@ -288,7 +307,24 @@ func (c *itemController) postCallbackReassignItem(data ReassignItemCallback) {
 			return
 		}
 
-		_, err = http.Post(res.ReassignCallbackUrl, "application/json", bytes.NewBuffer(jsonReq))
+		token, err := c.Authenticator.GenerateToken()
+		if err != nil {
+			fmt.Println("Error generating token: ", err)
+			return
+		}
+
+		req, err := http.NewRequest("POST", res.ReassignCallbackUrl, bytes.NewBuffer(jsonReq))
+		if err != nil {
+			return
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+
+		client := &http.Client{
+			Timeout: time.Second * 90,
+		}
+		_, err = client.Do(req)
 		if err != nil {
 			fmt.Println("Error posting callback: ", err)
 			return

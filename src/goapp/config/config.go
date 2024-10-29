@@ -24,4 +24,5 @@ type ConfigManager interface {
 	GetCallbackRetryFreq() string
 	GetPort() string
 	GetSessionKey() string
+	GetScope() string
 }

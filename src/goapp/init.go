@@ -48,5 +48,5 @@ var (
 	timedJobs = t.NewTimedJobs(svc, conf)
 
 	m          middleware.Middleware = middleware.NewMiddleware(svc)
-	httpRouter router.Router         = router.NewMuxRouter(ctrl, conf)
+	httpRouter router.Router         = router.NewMuxRouter(ctrl, conf, &m)
 )
