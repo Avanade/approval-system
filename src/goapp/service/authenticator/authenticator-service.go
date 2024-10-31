@@ -106,7 +106,7 @@ func (a *authenticatorService) ClearFromSession(w *http.ResponseWriter, r *http.
 func (a *authenticatorService) GenerateToken() (string, error) {
 	urlPath := fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", a.Config.GetTenantID())
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 90,
 	}
 
 	data := url.Values{}
