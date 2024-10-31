@@ -47,6 +47,8 @@ jobs:
           parameters.appServiceSettings.value.APPROVALSYSTEMDB_CONNECTION_STRING : ${{ secrets.DATABASE_CONNECTION_STRING }}
           parameters.appServiceSettings.value.COMMUNITY_PORTAL_APP_ID : ${{ vars.COMMUNITY_PORTAL_APP_ID }}
           parameters.appServiceSettings.value.CALLBACK_RETRY_FREQ: ${{ vars.CALLBACK_RETRY_FREQ }}
+          parameters.appServiceSettings.value.SESSION_KEY: ${{ secrets.SESSION_KEY }}
+          parameters.appServiceSettings.value.SCOPE: ${{ secrets.SCOPE}}
 
       - name: Deploy App Service Plan and Web App
         uses: azure/arm-deploy@v1

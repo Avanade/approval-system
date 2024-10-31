@@ -5,16 +5,26 @@ import (
 	"net/http"
 	"os"
 
-	rtPages "main/routes/pages"
+	"main/config"
+	"main/controller"
+	"main/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/unrolled/secure"
 )
 
-type muxRouter struct{}
+type muxRouter struct {
+	*controller.Controller
+	Port string
+	m    middleware.Middleware
+}
 
-func NewMuxRouter() Router {
-	return &muxRouter{}
+func NewMuxRouter(c *controller.Controller, conf config.ConfigManager, m *middleware.Middleware) Router {
+	return &muxRouter{
+		Controller: c,
+		Port:       conf.GetPort(),
+		m:          *m,
+	}
 }
 
 var (
@@ -37,7 +47,7 @@ func (*muxRouter) DELETE(uri string, f func(resp http.ResponseWriter, req *http.
 	muxDispatcher.HandleFunc(uri, f).Methods("DELETE")
 }
 
-func (*muxRouter) SERVE(port string) {
+func (r *muxRouter) SERVE() {
 	secureOptions := secure.Options{
 		SSLRedirect:           true,                                            // Strict-Transport-Security
 		SSLHost:               os.Getenv("SSL_HOST"),                           // Strict-Transport-Security
@@ -57,9 +67,9 @@ func (*muxRouter) SERVE(port string) {
 	muxDispatcher.Use(secureMiddleware.Handler)
 	http.Handle("/", muxDispatcher)
 
-	muxDispatcher.NotFoundHandler = http.HandlerFunc(rtPages.NotFoundHandler)
+	muxDispatcher.NotFoundHandler = http.HandlerFunc(r.m.Chain(r.Controller.Fallback.NotFound, r.m.AzureAuth()))
 	muxDispatcher.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 
-	fmt.Printf("Mux HTTP server running on port %v", port)
-	http.ListenAndServe(fmt.Sprintf(":%v", port), muxDispatcher)
+	fmt.Printf("Mux HTTP server running on port %v", r.Port)
+	http.ListenAndServe(fmt.Sprintf(":%v", r.Port), muxDispatcher)
 }

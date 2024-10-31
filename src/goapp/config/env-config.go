@@ -51,6 +51,10 @@ func (ecm *envConfigManager) GetEmailUserID() string {
 	return os.Getenv("EMAIL_USER_ID")
 }
 
+func (ecm *envConfigManager) GetHomeURL() string {
+	return os.Getenv("HOME_URL")
+}
+
 func (ecm *envConfigManager) GetIsEmailEnabled() bool {
 	return os.Getenv("EMAIL_ENABLED") == "true"
 }
@@ -81,4 +85,16 @@ func (ecm *envConfigManager) GetCommunityPortalAppId() string {
 
 func (ecm *envConfigManager) GetCallbackRetryFreq() string {
 	return os.Getenv("CALLBACK_RETRY_FREQ")
+}
+
+func (ecm *envConfigManager) GetPort() string {
+	return os.Getenv("PORT")
+}
+
+func (ecm *envConfigManager) GetSessionKey() string {
+	return os.Getenv("SESSION_KEY")
+}
+
+func (ecm *envConfigManager) GetScope() string {
+	return os.Getenv("SCOPE")
 }

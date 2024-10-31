@@ -13,6 +13,7 @@ type ConfigManager interface {
 	GetEmailClientID() string
 	GetEmailClientSecret() string
 	GetEmailUserID() string
+	GetHomeURL() string
 	GetIsEmailEnabled() bool
 	GetTenantID() string
 	GetClientID() string
@@ -21,4 +22,7 @@ type ConfigManager interface {
 	GetOrganizationName() string
 	GetCommunityPortalAppId() string
 	GetCallbackRetryFreq() string
+	GetPort() string
+	GetSessionKey() string
+	GetScope() string
 }

@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/model"
-	"main/pkg/session"
 	"main/service"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -28,21 +28,13 @@ func (c *itemController) GetItems(w http.ResponseWriter, r *http.Request) {
 	// Get all items
 	var itemOptions model.ItemOptions
 
-	session, err := session.Store.Get(r, "auth-session")
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var profile map[string]interface{}
-	u := session.Values["profile"]
-	profile, ok := u.(map[string]interface{})
-	if !ok {
-		http.Error(w, "Failed to get user info", http.StatusInternalServerError)
-		return
-	}
-	user := fmt.Sprintf("%s", profile["preferred_username"])
-	itemOptions.User = user
+	itemOptions.User = user.Email
 
 	vars := mux.Vars(r)
 
@@ -214,20 +206,11 @@ func (c *itemController) ProcessResponse(w http.ResponseWriter, r *http.Request)
 
 func (c *itemController) ReassignItem(w http.ResponseWriter, r *http.Request) {
 	// Get user info
-	session, err := session.Store.Get(r, "auth-session")
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	var profile map[string]interface{}
-	u := session.Values["profile"]
-	profile, ok := u.(map[string]interface{})
-	if !ok {
-		http.Error(w, "Failed to get user info", http.StatusInternalServerError)
-		return
-	}
-	user := fmt.Sprintf("%s", profile["preferred_username"])
 
 	// Get query params
 	params := mux.Vars(r)
@@ -238,7 +221,7 @@ func (c *itemController) ReassignItem(w http.ResponseWriter, r *http.Request) {
 	approveText := params["ApproveText"]
 	rejectText := params["RejectText"]
 
-	err = c.Service.Item.UpdateItemApproverEmail(id, approverEmail, user)
+	err = c.Service.Item.UpdateItemApproverEmail(id, approverEmail, user.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -248,7 +231,7 @@ func (c *itemController) ReassignItem(w http.ResponseWriter, r *http.Request) {
 	param := ReassignItemCallback{
 		Id:                  id,
 		ApproverEmail:       approverEmail,
-		Username:            user,
+		Username:            user.Email,
 		ApplicationId:       applicationId,
 		ApplicationModuleId: applicationModuleId,
 		ApproveText:         approveText,
@@ -278,10 +261,28 @@ func (c *itemController) postCallback(id string) {
 
 		jsonReq, err := json.Marshal(params)
 		if err != nil {
+			fmt.Println("Error marshalling response callback: ", err)
 			return
 		}
 
-		res, err := http.Post(item.CallbackUrl, "application/json", bytes.NewBuffer(jsonReq))
+		token, err := c.Authenticator.GenerateToken()
+		if err != nil {
+			fmt.Println("Error generating token: ", err)
+			return
+		}
+
+		req, err := http.NewRequest("POST", item.CallbackUrl, bytes.NewBuffer(jsonReq))
+		if err != nil {
+			return
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+
+		client := &http.Client{
+			Timeout: time.Second * 90,
+		}
+		res, err := client.Do(req)
 		if err != nil {
 			fmt.Println("Error posting callback: ", err)
 			return
@@ -306,7 +307,24 @@ func (c *itemController) postCallbackReassignItem(data ReassignItemCallback) {
 			return
 		}
 
-		_, err = http.Post(res.ReassignCallbackUrl, "application/json", bytes.NewBuffer(jsonReq))
+		token, err := c.Authenticator.GenerateToken()
+		if err != nil {
+			fmt.Println("Error generating token: ", err)
+			return
+		}
+
+		req, err := http.NewRequest("POST", res.ReassignCallbackUrl, bytes.NewBuffer(jsonReq))
+		if err != nil {
+			return
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+
+		client := &http.Client{
+			Timeout: time.Second * 90,
+		}
+		_, err = client.Do(req)
 		if err != nil {
 			fmt.Println("Error posting callback: ", err)
 			return

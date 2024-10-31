@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/config"
-	"main/model"
-	"main/pkg/session"
 	"main/service"
 	"net/http"
 
@@ -25,22 +23,10 @@ func NewItemPageController(s *service.Service, conf config.ConfigManager) ItemPa
 }
 
 func (c *itemPageController) MyRequests(w http.ResponseWriter, r *http.Request) {
-	session, err := session.Store.Get(r, "auth-session")
+	user, err := c.Service.Authenticator.GetAuthenticatedUser(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-
-	var profile map[string]interface{}
-	u := session.Values["profile"]
-	profile, ok := u.(map[string]interface{})
-	if !ok {
-		http.Error(w, "Error getting user data", http.StatusInternalServerError)
-		return
-	}
-	user := model.AzureUser{
-		Name:  profile["name"].(string),
-		Email: profile["preferred_username"].(string),
 	}
 
 	application, err := c.Service.Application.GetApplicationById(c.CommunityPortalAppId)
@@ -55,7 +41,7 @@ func (c *itemPageController) MyRequests(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	t, d := c.Service.Template.UseTemplate("myrequests", r.URL.Path, user, string(b))
+	t, d := c.Service.Template.UseTemplate("myrequests", r.URL.Path, *user, string(b))
 
 	err = t.Execute(w, d)
 	if err != nil {
@@ -64,22 +50,10 @@ func (c *itemPageController) MyRequests(w http.ResponseWriter, r *http.Request) 
 }
 
 func (c *itemPageController) MyApprovals(w http.ResponseWriter, r *http.Request) {
-	session, err := session.Store.Get(r, "auth-session")
+	user, err := c.Service.Authenticator.GetAuthenticatedUser(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-
-	var profile map[string]interface{}
-	u := session.Values["profile"]
-	profile, ok := u.(map[string]interface{})
-	if !ok {
-		http.Error(w, "Error getting user data", http.StatusInternalServerError)
-		return
-	}
-	user := model.AzureUser{
-		Name:  profile["name"].(string),
-		Email: profile["preferred_username"].(string),
 	}
 
 	application, err := c.Service.Application.GetApplicationById(c.CommunityPortalAppId)
@@ -94,7 +68,7 @@ func (c *itemPageController) MyApprovals(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	t, d := c.Service.Template.UseTemplate("myapprovals", r.URL.Path, user, string(b))
+	t, d := c.Service.Template.UseTemplate("myapprovals", r.URL.Path, *user, string(b))
 
 	err = t.Execute(w, d)
 	if err != nil {
@@ -103,18 +77,10 @@ func (c *itemPageController) MyApprovals(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Request) {
-	session, _ := session.Store.Get(r, "auth-session")
-
-	var profile map[string]interface{}
-	u := session.Values["profile"]
-	profile, ok := u.(map[string]interface{})
-	if !ok {
-		http.Error(w, "Error getting user data", http.StatusInternalServerError)
+	user, err := c.Service.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-	user := model.AzureUser{
-		Name:  profile["name"].(string),
-		Email: profile["preferred_username"].(string),
 	}
 
 	params := mux.Vars(r)
@@ -131,7 +97,7 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 	}
 
 	if !itemIsAuthorized.IsAuthorized {
-		t, d := c.Service.Template.UseTemplate("Unauthorized", r.URL.Path, user, nil)
+		t, d := c.Service.Template.UseTemplate("Unauthorized", r.URL.Path, *user, nil)
 		err = t.Execute(w, d)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -149,7 +115,7 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 				Response: text,
 			}
 
-			t, d := c.Service.Template.UseTemplate("already-processed", r.URL.Path, user, data)
+			t, d := c.Service.Template.UseTemplate("already-processed", r.URL.Path, *user, data)
 			err = t.Execute(w, d)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -171,7 +137,7 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 				RequireRemarks:      itemIsAuthorized.RequireRemarks,
 			}
 
-			t, d := c.Service.Template.UseTemplate("response", r.URL.Path, user, data)
+			t, d := c.Service.Template.UseTemplate("response", r.URL.Path, *user, data)
 			err = t.Execute(w, d)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -181,18 +147,10 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 }
 
 func (c *itemPageController) ReassignApproval(w http.ResponseWriter, r *http.Request) {
-	session, _ := session.Store.Get(r, "auth-session")
-
-	var profile map[string]interface{}
-	u := session.Values["profile"]
-	profile, ok := u.(map[string]interface{})
-	if !ok {
-		http.Error(w, "Error getting user data", http.StatusInternalServerError)
+	user, err := c.Service.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-	user := model.AzureUser{
-		Name:  profile["name"].(string),
-		Email: profile["preferred_username"].(string),
 	}
 
 	params := mux.Vars(r)
@@ -209,7 +167,7 @@ func (c *itemPageController) ReassignApproval(w http.ResponseWriter, r *http.Req
 	}
 
 	if !itemIsAuthorized.IsAuthorized {
-		t, d := c.Service.Template.UseTemplate("Unauthorized", r.URL.Path, user, nil)
+		t, d := c.Service.Template.UseTemplate("Unauthorized", r.URL.Path, *user, nil)
 		err = t.Execute(w, d)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -227,7 +185,7 @@ func (c *itemPageController) ReassignApproval(w http.ResponseWriter, r *http.Req
 				Response: text,
 			}
 
-			t, d := c.Service.Template.UseTemplate("already-processed", r.URL.Path, user, data)
+			t, d := c.Service.Template.UseTemplate("already-processed", r.URL.Path, *user, data)
 			err = t.Execute(w, d)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -248,7 +206,7 @@ func (c *itemPageController) ReassignApproval(w http.ResponseWriter, r *http.Req
 				RejectText:          params["RejectText"],
 			}
 
-			t, d := c.Service.Template.UseTemplate("reassign", r.URL.Path, user, data)
+			t, d := c.Service.Template.UseTemplate("reassign", r.URL.Path, *user, data)
 			err = t.Execute(w, d)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)

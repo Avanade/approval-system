@@ -1,10 +1,9 @@
 module main
 
-go 1.21
+go 1.23
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.7.0
-	github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets v0.7.1
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
@@ -49,7 +48,6 @@ require (
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.10.0 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/keyvault/internal v0.5.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2 // indirect
 	github.com/denisenkom/go-mssqldb v0.12.0 // indirect
 	github.com/golang-jwt/jwt v3.2.1+incompatible
