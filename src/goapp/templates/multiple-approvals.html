@@ -1,0 +1,393 @@
+{{ define "content" }}
+<div id="pageTitle">Approve Multiple Requests</div>
+
+<div class="flex flex-row h-[calc(100vh-13rem)]">
+    <div class="flex flex-col w-1/2 border-1 border-red-500 p-1">
+        <div class="border-1 shrink">
+            <h1 class="text-xl font-semibold text-gray-500">Pending Requests</h1>
+        </div>
+        <div class="border-1 pt-3">
+            <nav class="grid grid-cols-2" aria-label="header">
+                <div class="sm:block px-1">
+                    <div class="content-start">
+                        <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
+                        <select @change="" id="reponseType" name="responseType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option>Select Request Type</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="sm:block px-1">
+                    <div class="content-start">
+                        <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
+                        <select @change="" id="reponseType" name="responseType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option>Select Organization</option>
+                        </select>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <div class="border-1 ml-1 mt-3">
+            <div class="relative flex items-start">
+                <div class="flex h-6 items-center">
+                    <input id="select" name="select" type="checkbox"
+                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-1 text-sm/6">
+                    <label for="select" class="text-sm font-medium text-gray-700">Select/Unselect All</label>
+                </div>
+            </div>
+        </div>
+        <div class="border mx-1 grow rounded-md overflow-y-auto">
+            <ul role="list" class="divide-y divide-gray-300">
+                <template x-for="i in 15">
+                    <li class="cursor-pointer">
+                        <div class="hover:bg-gray-50">
+                            <div class="group flex flex-row">
+                                <div class="flex items-center justify-center">
+                                    <div class="hidden group-hover:block pl-5 pr-2">
+                                        <input id="select" name="select" type="checkbox"
+                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
+                                    </div>
+                                </div>
+                                <div class="p-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="grow">
+                                            <div class="items-center justify-between">
+                                                <p class="text-sm font-medium text-gray-800 truncate">New GitHub Copilot License Request</p>
+                                            </div>
+                                            <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-gray-500">
+                                                <div><p class="truncate">Application: GH Management Tool</p></div>
+                                                <div class="pl-3"><p class="truncate">Module: GitHubCopilot</p></div>
+                                                <div><p class="truncate">Request by: jerrico.jr.dela.cruz@accenture.com</p></div>
+                                                <div class="pl-3"><p class="truncate">Requested on Oct 25, 2024, 2:51 PM</p></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </template>
+                <!-- PAGINATION -->
+                <li>
+                    <div class="relative text-center my-5">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-b border-gray-300"></div>
+                        </div>
+                        <span class="relative p-3 bg-white">
+                            <!-- LOAD MORE -->
+                            <button class="hidden bg-[#FF5800] hover:bg-[#FF4300] text-white text-sm font-bold px-3 py-1 rounded">
+                                Load More
+                            </button>
+                            <!-- LAST PAGE -->
+                            <span class="hidden text-sm font-medium text-gray-500">
+                                End Here
+                            </span>
+                            <!-- LOADING -->
+                            <span class="relative flex flex-col justify-center items-center">
+                                <svg role="status" class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] bg-white rounded-full p-2" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+                                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+                                </svg>
+                            </span>
+                        </span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="flex flex-col w-1/2 border-1 border-blue-500 p-1">
+        <div class="border-1">
+            <h1 class="text-xl font-semibold text-gray-500">Selected Requests</h1>
+        </div>
+        <div class="border m-1 mt-3 grow rounded-md overflow-y-auto">
+            <ul role="list" class="divide-y divide-gray-300">
+                <template x-for="i in 3">
+                    <li class="cursor-pointer p-3">
+                        <div class="hover:bg-gray-50">
+                            <div class="flex items-center justify-between">
+                                <div class="grow">
+                                    <div class="items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-800 truncate">New GitHub Copilot License Request</p>
+                                    </div>
+                                    <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-sm text-gray-500">
+                                        <div><p class="truncate">Application: GH Management Tool</p></div>
+                                        <div class="pl-3"><p class="truncate">Module: GitHubCopilot</p></div>
+                                        <div><p class="truncate">Request by: jerrico.jr.dela.cruz@accenture.com</p></div>
+                                        <div class="pl-3"><p class="truncate">Requested on Oct 25, 2024, 2:51 PM</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div class="absolute flex flex-col right-1 bottom-10">
+                                    <button class="group text-center text-sm font-semibold text-gray-400" title="Remove">
+                                        <!-- DEFAULT REMOVE ICON (OUTLINE) -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 group-hover:hidden">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                        </svg>                                          
+                                        <!-- HOVERED REMOVE ICON (SOLID) -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 hidden group-hover:block">
+                                            <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                        </svg>                                                                                            
+                                    </button>
+                                </div>
+                                <div class="absolute flex flex-col right-0 bottom-0">
+                                    <button class="group px-1 text-center text-sm font-semibold text-gray-400" title="Custom Remarks">
+                                        <!-- DEFAULT CUSTOM REMARKS ICON (OUTLINE) -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 group-hover:hidden">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                        </svg>
+                                        <!-- HOVERED CUSTOM REMARKS ICON (SOLID) -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 hidden group-hover:block">
+                                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                        </svg>                                                                              
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3" x-bind:class="i == 1 ? '' : 'hidden'">
+                            <label for="remarks" class="block text-sm font-medium text-gray-700">
+                                Custom Remarks
+                            </label>
+                            <div class="mt-1">
+                                <textarea id="remarks" name="remarks" maxlength="255" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                Specify remarks for your response
+                            </p>
+                        </div>
+                    </li>
+                </template>
+            </ul>
+        </div>
+        <div class="border-1 p-1 text-xs text-right text-gray-500">
+            Total items selected: 3
+        </div>
+        <div class="border-1 p-1">
+            <div>
+                <label for="remarks" class="block text-sm font-medium text-gray-700">
+                  General Remarks
+                </label>
+                <div class="mt-1">
+                  <textarea id="remarks" name="remarks" maxlength="255" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
+                </div>
+                <p class="text-xs text-gray-500">
+                  Specify remarks for your response
+                </p>
+            </div>
+        </div>
+        <div class="border-1 p-1">
+            <button class="bg-[#FF5800] w-full hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
+                Approve
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW REQUEST DETAILS MODAL -->
+<div class="relative z-10 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <!--
+      Background backdrop, show/hide based on modal state.
+  
+      Entering: "ease-out duration-300"
+        From: "opacity-0"
+        To: "opacity-100"
+      Leaving: "ease-in duration-200"
+        From: "opacity-100"
+        To: "opacity-0"
+    -->
+    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+  
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div class="flex min-h-full justify-center text-center items-center">
+        <!--
+          Modal panel, show/hide based on modal state.
+  
+          Entering: "ease-out duration-300"
+            From: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            To: "opacity-100 translate-y-0 sm:scale-100"
+          Leaving: "ease-in duration-200"
+            From: "opacity-100 translate-y-0 sm:scale-100"
+            To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+        -->
+        <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-xl px-5 pt-5">
+            <div class="group absolute right-5 top-5">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 group-hover:text-gray-500 group-hover:w-6 group-hover:h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </div>
+            <div class="text-left">
+              <h3 class="text-base font-semibold text-gray-900 border-b pb-3" id="modal-title">Request Details</h3>
+              <div class="mt-2">
+                <div class="flex items-center justify-between">
+                    <div class="grow">
+                        <div class="items-center justify-between">
+                            <p class="text-sm font-medium text-gray-800 truncate">New GitHub Copilot License Request</p>
+                        </div>
+                        <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-sm text-gray-500">
+                            <div><p class="truncate">Application: GH Management Tool</p></div>
+                            <div class="pl-3"><p class="truncate">Module: GitHubCopilot</p></div>
+                            <div><p class="truncate">Request by: jerrico.jr.dela.cruz@accenture.com</p></div>
+                            <div class="pl-3"><p class="truncate">Requested on Oct 25, 2024, 2:51 PM</p></div>
+                            <div class="col-span-2" title="jerrico.jr.dela.cruz@accenture.com, ismael.r.ibuan@accenture.com"><p class="truncate">Approvers: jerrico.jr.dela.cruz@accenture.com, ismael.r.ibuan@accenture.com</p></div>
+                        </div>
+                        <!-- REQUEST EMAIL DETAILS -->
+                        <div class="text-sm mt-3">
+                            <style>
+                                table,
+                                th,
+                                tr,
+                                td {
+                                    border: 0;
+                                    border-collapse: collapse;
+                                    vertical-align: middle;
+                                }
+                        
+                                .thead {
+                                    padding: 15px;
+                                }
+                        
+                                .center-table {
+                                    text-align: -webkit-center;
+                                }
+                        
+                                .margin-auto {
+                                    margin: auto;
+                                }
+                        
+                                .border-top {
+                                    border-top: 1px rgb(204, 204, 204) solid;
+                                    border-collapse: separate;
+                                }
+                            </style>
+                            <table style="width: 100%">
+                                <tbody>
+                                    <tr>
+                                        <th class="center-table">
+                                            <table style="width: 100%; max-width: 700px;" class="margin-auto">
+                                                <tbody>
+                                                    <tr style="background-color: #ff5800">
+                                                        <td class="thead" style="width: 95px">
+                                                            <img
+                                                                src="data:image/png;base64,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">
+                                                        </td>
+                                                        <td class="thead" style="
+                                                                            font-family: SegoeUI, sans-serif;
+                                                                            font-size: 14px;
+                                                                            color: white;
+                                                                            padding-bottom: 10px;
+                                                                            ">
+                                                            Community
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="center-table">
+                                            <table style="width: 100%; max-width: 700px;" class="margin-auto">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="font-size: 18px; font-weight: 600; padding-top: 20px">
+                                                            Request for a GitHub Enterprise Organization
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="center-table">
+                                            <table style="width: 100%; max-width: 700px; margin: auto">
+                                                <tbody>
+                                                    <tr class="border-top">
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+                                                            Region
+                                                        </td>
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+                                                            avanade-group-octoUAT
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="border-top">
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+                                                            Client Name
+                                                        </td>
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+                                                            Bistro
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="border-top">
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+                                                            Project Name
+                                                        </td>
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+                                                            TexasRoadhouse
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="border-top">
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+                                                            WBS
+                                                        </td>
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+                                                            DGX34R5
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="border-top">
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+                                                            Requested By
+                                                        </td>
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+                                                            ismael.r.ibuan@accenture.com
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="border-top">
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+                                                            GitHub Id
+                                                        </td>
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+                                                            102030576
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="border-top">
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+                                                            GitHub Username
+                                                        </td>
+                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+                                                            iibuan
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="center-table" align="center">
+                                            <table style="width: 100%; max-width: 700px;" class="margin-auto">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="padding-top: 20px">
+                                                            Note: Before you approve the request, you'll have to manually create the
+                                                            organization and add the requestor as an organization owner.
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+  
+  
+{{ end }}

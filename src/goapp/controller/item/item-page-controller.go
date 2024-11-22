@@ -214,3 +214,18 @@ func (c *itemPageController) ReassignApproval(w http.ResponseWriter, r *http.Req
 		}
 	}
 }
+
+func (c *itemPageController) MultipleApprovals(w http.ResponseWriter, r *http.Request) {
+	user, err := c.Service.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	t, d := c.Service.Template.UseTemplate("multiple-approvals", r.URL.Path, *user, nil)
+
+	err = t.Execute(w, d)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
