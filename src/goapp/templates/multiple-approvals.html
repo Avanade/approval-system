@@ -1,392 +1,249 @@
 {{ define "content" }}
 <div id="pageTitle">Approve Multiple Requests</div>
 
-<div class="flex flex-row h-[calc(100vh-13rem)]">
-    <div class="flex flex-col w-1/2 border-1 border-red-500 p-1">
-        <div class="border-1 shrink">
-            <h1 class="text-xl font-semibold text-gray-500">Pending Requests</h1>
-        </div>
-        <div class="border-1 pt-3">
-            <nav class="grid grid-cols-2" aria-label="header">
-                <div class="sm:block px-1">
-                    <div class="content-start">
-                        <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
-                        <select @change="" id="reponseType" name="responseType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                            <option>Select Request Type</option>
-                        </select>
+<div x-data="multipleApprovals">
+    <div class="flex flex-row h-[calc(100vh-13rem)]">
+        <div class="flex flex-col w-1/2 border-1 border-red-500 p-1">
+            <div class="border-1 shrink">
+                <h1 class="text-xl font-semibold text-gray-500">Pending Requests</h1>
+            </div>
+            <div class="border-1 pt-3">
+                <nav class="grid grid-cols-2" aria-label="header">
+                    <div class="sm:block px-1">
+                        <div class="content-start">
+                            <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
+                            <select @change="onChangeSelectRequestType()" id="reponseType" name="responseType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <option>Select Request Type</option>
+                                <option>[REQUEST TYPE 01]</option>
+                                <option>[REQUEST TYPE 02]</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="sm:block px-1">
-                    <div class="content-start">
-                        <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
-                        <select @change="" id="reponseType" name="responseType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                            <option>Select Organization</option>
-                        </select>
+                    <div class="sm:block px-1">
+                        <div class="content-start">
+                            <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
+                            <select @change="onChangeSelectOrganization()" id="reponseType" name="responseType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <option>Select Organization</option>
+                                <option>[ORGANIZATION 01]</option>
+                                <option>[ORGANIZATION 02]</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-            </nav>
-        </div>
-        <div class="border-1 ml-1 mt-3">
-            <div class="relative flex items-start">
-                <div class="flex h-6 items-center">
-                    <input id="select" name="select" type="checkbox"
-                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
-                </div>
-                <div class="ml-1 text-sm/6">
-                    <label for="select" class="text-sm font-medium text-gray-700">Select/Unselect All</label>
+                </nav>
+            </div>
+            <div class="border-1 ml-1 mt-3">
+                <div class="relative flex items-start">
+                    <div class="flex h-6 items-center">
+                        <input @change="onToggleSelectAllPendingRequests" type="checkbox" x-model="pendingRequests.isSelectedAll"
+                            class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
+                    </div>
+                    <div class="ml-1 text-sm/6">
+                        <label for="select" class="text-sm font-medium text-gray-700">Select/Unselect All</label>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="border mx-1 grow rounded-md overflow-y-auto">
-            <ul role="list" class="divide-y divide-gray-300">
-                <template x-for="i in 15">
-                    <li class="cursor-pointer">
-                        <div class="hover:bg-gray-50">
-                            <div class="group flex flex-row">
-                                <div class="flex items-center justify-center">
-                                    <div class="hidden group-hover:block pl-5 pr-2">
-                                        <input id="select" name="select" type="checkbox"
-                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
+            <div class="border mx-1 grow rounded-md overflow-y-auto">
+                <ul role="list" class="divide-y divide-gray-300">
+                    <template x-for="item in pendingRequests.requests" :key="item.id">
+                        <li class="cursor-pointer">
+                            <div class="hover:bg-gray-50">
+                                <div class="group flex flex-row">
+                                    <div class="flex items-center justify-center">
+                                        <div @change="(e) => onToggleSelectPendingRequest(e, item)" x-bind:class="isRequestSelected(item.id) ? '':' hidden'" class="group-hover:block pl-5 pr-2">
+                                            <input id="select" name="select" type="checkbox" x-bind:value="item.id" x-model="selectedRequests.ids"
+                            class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="p-3">
-                                    <div class="flex items-center justify-between">
-                                        <div class="grow">
-                                            <div class="items-center justify-between">
-                                                <p class="text-sm font-medium text-gray-800 truncate">New GitHub Copilot License Request</p>
-                                            </div>
-                                            <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-gray-500">
-                                                <div><p class="truncate">Application: GH Management Tool</p></div>
-                                                <div class="pl-3"><p class="truncate">Module: GitHubCopilot</p></div>
-                                                <div><p class="truncate">Request by: juan.dela.cruz@email.com</p></div>
-                                                <div class="pl-3"><p class="truncate">Requested on Dec 12, 2012, 12:12 PM</p></div>
+                                    <div @click="onClickRowPendingRequest(item)" class="p-3">
+                                        <div class="flex items-center justify-between">
+                                            <div class="grow">
+                                                <div class="items-center justify-between">
+                                                    <p class="text-sm font-medium text-gray-800 truncate" x-text="item.subject"></p>
+                                                </div>
+                                                <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-gray-500">
+                                                    <div><p class="truncate">Application: <span x-text="item.application"></span></p></div>
+                                                    <div class="pl-3"><p class="truncate">Module: <span x-text="item.module"></span></p></div>
+                                                    <div><p class="truncate">Request by: <span x-text="item.requestedBy"></span></p></div>
+                                                    <div class="pl-3"><p class="truncate">Requested on <span x-text="item.requestedOn"></span></p></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </li>
+                    </template>
+                    <!-- PAGINATION -->
+                    <li>
+                        <div class="relative text-center my-5">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-b border-gray-300"></div>
+                            </div>
+                            <span class="relative p-3 bg-white">
+                                <!-- LOAD MORE -->
+                                <template x-if="!pendingRequestLastPage()">
+                                    <button x-bind:class="pendingRequests.isViewMoreLoading ? 'hidden' : ''" class="bg-[#FF5800] hover:bg-[#FF4300] text-white text-sm font-bold px-3 py-1 rounded">
+                                        Load More
+                                    </button>
+                                </template>
+                                <!-- LAST PAGE -->
+                                <template x-if="pendingRequestLastPage()">
+                                    <span x-bind:class="pendingRequests.isViewMoreLoading ? 'hidden' : ''" class="text-sm font-medium text-gray-500">
+                                        No more requests to load
+                                    </span>
+                                </template>
+                                <!-- LOADING -->
+                                <span x-bind:class="pendingRequests.isViewMoreLoading ? '' : 'hidden'" class="relative flex flex-col justify-center items-center">
+                                    <svg role="status" class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] bg-white rounded-full p-2" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+                                        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+                                    </svg>
+                                </span>
+                            </span>
                         </div>
                     </li>
-                </template>
-                <!-- PAGINATION -->
-                <li>
-                    <div class="relative text-center my-5">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-b border-gray-300"></div>
-                        </div>
-                        <span class="relative p-3 bg-white">
-                            <!-- LOAD MORE -->
-                            <button class="hidden bg-[#FF5800] hover:bg-[#FF4300] text-white text-sm font-bold px-3 py-1 rounded">
-                                Load More
-                            </button>
-                            <!-- LAST PAGE -->
-                            <span class="hidden text-sm font-medium text-gray-500">
-                                End Here
-                            </span>
-                            <!-- LOADING -->
-                            <span class="relative flex flex-col justify-center items-center">
-                                <svg role="status" class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] bg-white rounded-full p-2" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-                                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-                                </svg>
-                            </span>
-                        </span>
-                    </div>
-                </li>
-            </ul>
+                </ul>
+            </div>
         </div>
-    </div>
-    <div class="flex flex-col w-1/2 border-1 border-blue-500 p-1">
-        <div class="border-1">
-            <h1 class="text-xl font-semibold text-gray-500">Selected Requests</h1>
-        </div>
-        <div class="border m-1 mt-3 grow rounded-md overflow-y-auto">
-            <ul role="list" class="divide-y divide-gray-300">
-                <template x-for="i in 3">
-                    <li class="cursor-pointer p-3">
-                        <div class="hover:bg-gray-50">
-                            <div class="flex items-center justify-between">
-                                <div class="grow">
-                                    <div class="items-center justify-between">
-                                        <p class="text-sm font-medium text-gray-800 truncate">New GitHub Copilot License Request</p>
+        <div class="flex flex-col w-1/2 border-1 border-blue-500 p-1">
+            <div class="border-1">
+                <h1 class="text-xl font-semibold text-gray-500">Selected Requests</h1>
+            </div>
+            <div class="border m-1 mt-3 grow rounded-md overflow-y-auto">
+                <ul role="list" class="divide-y divide-gray-300">
+                    <template x-for="item in selectedRequests.items">
+                        <li class="cursor-pointer p-3">
+                            <div class="hover:bg-gray-50">
+                                <div @click="onClickRowSelectedRequest(item)" class="flex items-center justify-between">
+                                    <div class="grow">
+                                        <div class="items-center justify-between">
+                                            <p class="text-sm font-medium text-gray-800 truncate" x-text="item.request.subject"></p>
+                                        </div>
+                                        <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-sm text-gray-500">
+                                            <div><p class="truncate">Application: <span x-text="item.request.application"></span></p></div>
+                                            <div class="pl-3"><p class="truncate">Module: <span x-text="item.request.module"></span></p></div>
+                                            <div><p class="truncate">Requested by: <span x-text="item.request.requestedBy"></span></p></div>
+                                            <div class="pl-3"><p class="truncate">Requested on <span x-text="item.request.requestedOn"></span></p></div>
+                                        </div>
                                     </div>
-                                    <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-sm text-gray-500">
-                                        <div><p class="truncate">Application: GH Management Tool</p></div>
-                                        <div class="pl-3"><p class="truncate">Module: GitHubCopilot</p></div>
-                                        <div><p class="truncate">Request by: juan.dela.cruz@email.com</p></div>
-                                        <div class="pl-3"><p class="truncate">Requested on Dec 12, 2012, 12:12 PM</p></div>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute flex flex-col right-1 bottom-10">
+                                        <button @click="onRemoveSelectedRequest(item.request.id)" class="group text-center text-sm font-semibold text-gray-400" title="Remove">
+                                            <!-- DEFAULT REMOVE ICON (OUTLINE) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 group-hover:hidden">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                            </svg>                                          
+                                            <!-- HOVERED REMOVE ICON (SOLID) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 hidden group-hover:block">
+                                                <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                            </svg>                                                                                            
+                                        </button>
+                                    </div>
+                                    <div class="absolute flex flex-col right-0 bottom-0" x-bind:class="item.hasCustomRemarks ? 'hidden' : ''">
+                                        <button @click="onClickAddCustomRemarks(item.request.id)" class="group px-1 text-center text-sm font-semibold text-gray-400" title="Custom Remarks">
+                                            <!-- DEFAULT CUSTOM REMARKS ICON (OUTLINE) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 group-hover:hidden">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                            </svg>
+                                            <!-- HOVERED CUSTOM REMARKS ICON (SOLID) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 hidden group-hover:block">
+                                                <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                                <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                            </svg>                                                                              
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="relative">
-                                <div class="absolute flex flex-col right-1 bottom-10">
-                                    <button class="group text-center text-sm font-semibold text-gray-400" title="Remove">
-                                        <!-- DEFAULT REMOVE ICON (OUTLINE) -->
+                            <div class="mt-3 relative" x-bind:class="item.hasCustomRemarks ? '' : 'hidden'">
+                                <div class="absolute flex flex-col right-1 top-0">
+                                    <button @click="onClickRemoveCustomRemarks(item.request.id)" class="group text-center text-sm font-semibold text-gray-400" title="Remove">
+                                        <!-- DEFAULT REMOVE CUSTOM REMARKS ICON (OUTLINE) -->
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 group-hover:hidden">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                        </svg>                                          
-                                        <!-- HOVERED REMOVE ICON (SOLID) -->
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>                                                                       
+                                        <!-- HOVERED REMOVE CUSTOM REMARKS ICON (SOLID) -->
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 hidden group-hover:block">
-                                            <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                                        </svg>                                                                                            
-                                    </button>
-                                </div>
-                                <div class="absolute flex flex-col right-0 bottom-0">
-                                    <button class="group px-1 text-center text-sm font-semibold text-gray-400" title="Custom Remarks">
-                                        <!-- DEFAULT CUSTOM REMARKS ICON (OUTLINE) -->
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 group-hover:hidden">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                            <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
                                         </svg>
-                                        <!-- HOVERED CUSTOM REMARKS ICON (SOLID) -->
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 hidden group-hover:block">
-                                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                                            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-                                        </svg>                                                                              
                                     </button>
                                 </div>
+                                <div>
+                                    <label for="remarks" class="block text-sm font-medium text-gray-700">
+                                        Custom Remarks
+                                    </label>
+                                    <div class="mt-1">
+                                        <textarea x-model='item.customRemarks' id="remarks" name="remarks" maxlength="255" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
+                                    </div>
+                                    <p class="text-xs text-gray-500">
+                                        Specify remarks for your response
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="mt-3" x-bind:class="i == 1 ? '' : 'hidden'">
-                            <label for="remarks" class="block text-sm font-medium text-gray-700">
-                                Custom Remarks
-                            </label>
-                            <div class="mt-1">
-                                <textarea id="remarks" name="remarks" maxlength="255" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
-                            </div>
-                            <p class="text-xs text-gray-500">
-                                Specify remarks for your response
-                            </p>
-                        </div>
-                    </li>
-                </template>
-            </ul>
-        </div>
-        <div class="border-1 p-1 text-xs text-right text-gray-500">
-            Total items selected: 3
-        </div>
-        <div class="border-1 p-1">
-            <div>
-                <label for="remarks" class="block text-sm font-medium text-gray-700">
-                  General Remarks
-                </label>
-                <div class="mt-1">
-                  <textarea id="remarks" name="remarks" maxlength="255" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
-                </div>
-                <p class="text-xs text-gray-500">
-                  Specify remarks for your response
-                </p>
+                        </li>
+                    </template>
+                </ul>
             </div>
-        </div>
-        <div class="border-1 p-1">
-            <button class="bg-[#FF5800] w-full hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
-                Approve
-            </button>
+            <div class="border-1 p-1 text-xs text-right text-gray-500">
+                Total items selected: <span x-text="selectedRequests.items.length"></span>
+            </div>
+            <div class="border-1 p-1">
+                <div>
+                    <label for="generalRemarks" class="block text-sm font-medium text-gray-700">
+                    General Remarks
+                    </label>
+                    <div class="mt-1">
+                    <textarea x-model="selectedRequests.generalRemarks" id="generalRemarks" name="generalRemarks" maxlength="255" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
+                    </div>
+                    <p class="text-xs text-gray-500">
+                    Specify remarks for your response
+                    </p>
+                </div>
+            </div>
+            <div class="border-1 p-1">
+                <button @click="onSubmit" class="bg-[#FF5800] w-full hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded">
+                    Approve
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- VIEW REQUEST DETAILS MODAL -->
-<div class="relative z-10 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <!--
-      Background backdrop, show/hide based on modal state.
-  
-      Entering: "ease-out duration-300"
-        From: "opacity-0"
-        To: "opacity-100"
-      Leaving: "ease-in duration-200"
-        From: "opacity-100"
-        To: "opacity-0"
-    -->
-    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
-  
-    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-      <div class="flex min-h-full justify-center text-center items-center">
-        <!--
-          Modal panel, show/hide based on modal state.
-  
-          Entering: "ease-out duration-300"
-            From: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            To: "opacity-100 translate-y-0 sm:scale-100"
-          Leaving: "ease-in duration-200"
-            From: "opacity-100 translate-y-0 sm:scale-100"
-            To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        -->
-        <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-xl px-5 pt-5">
-            <div class="group absolute right-5 top-5">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 group-hover:text-gray-500 group-hover:w-6 group-hover:h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
-            </div>
-            <div class="text-left">
-            <h3 class="text-base font-semibold text-gray-900 border-b pb-3" id="modal-title">Request Details</h3>
-            <div class="mt-2">
-                <div class="flex items-center justify-between">
-                    <div class="grow">
-                        <div class="items-center justify-between">
-                            <p class="text-sm font-medium text-gray-800 truncate">New GitHub Copilot License Request</p>
-                        </div>
-                        <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-sm text-gray-500">
-                            <div><p class="truncate">Application: GH Management Tool</p></div>
-                            <div class="pl-3"><p class="truncate">Module: GitHubCopilot</p></div>
-                            <div><p class="truncate">Request by: juan.dela.cruz@email.com</p></div>
-                            <div class="pl-3"><p class="truncate">Requested on Dec 12, 2012, 12:12 PM</p></div>
-                            <div class="col-span-2" title="juan.dela.cruz@email.com, uncle.sam@email.com"><p class="truncate">Approvers: juan.dela.cruz@email.com, uncle.sam@email.com</p></div>
-                        </div>
-                        <!-- REQUEST EMAIL DETAILS -->
-                        <div class="text-sm mt-3">
-                            <style>
-                                table,
-                                th,
-                                tr,
-                                td {
-                                    border: 0;
-                                    border-collapse: collapse;
-                                    vertical-align: middle;
-                                }
-                        
-                                .thead {
-                                    padding: 15px;
-                                }
-                        
-                                .center-table {
-                                    text-align: -webkit-center;
-                                }
-                        
-                                .margin-auto {
-                                    margin: auto;
-                                }
-                        
-                                .border-top {
-                                    border-top: 1px rgb(204, 204, 204) solid;
-                                    border-collapse: separate;
-                                }
-                            </style>
-                            <table style="width: 100%">
-                                <tbody>
-                                    <tr>
-                                        <th class="center-table">
-                                            <table style="width: 100%; max-width: 700px;" class="margin-auto">
-                                                <tbody>
-                                                    <tr style="background-color: #ff5800">
-                                                        <td class="thead" style="width: 95px">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-white">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
-                                                            </svg>
-                                                        </td>
-                                                        <td class="thead" style="
-                                                                            font-family: SegoeUI, sans-serif;
-                                                                            font-size: 14px;
-                                                                            color: white;
-                                                                            padding-bottom: 10px;
-                                                                            ">
-                                                            Community
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th class="center-table">
-                                            <table style="width: 100%; max-width: 700px;" class="margin-auto">
-                                                <tbody>
-                                                    <tr>
-                                                        <td style="font-size: 18px; font-weight: 600; padding-top: 20px">
-                                                            Request for a GitHub Enterprise Organization
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th class="center-table">
-                                            <table style="width: 100%; max-width: 700px; margin: auto">
-                                                <tbody>
-                                                    <tr class="border-top">
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-                                                            Region
-                                                        </td>
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
-                                                            silicon-group-valley
-                                                        </td>
-                                                    </tr>
-                                                    <tr class="border-top">
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-                                                            Client Name
-                                                        </td>
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
-                                                            Sboj Evets 
-                                                        </td>
-                                                    </tr>
-                                                    <tr class="border-top">
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-                                                            Project Name
-                                                        </td>
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
-                                                            Mansanas
-                                                        </td>
-                                                    </tr>
-                                                    <tr class="border-top">
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-                                                            WBS
-                                                        </td>
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
-                                                            MBP16M3
-                                                        </td>
-                                                    </tr>
-                                                    <tr class="border-top">
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-                                                            Requested By
-                                                        </td>
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
-                                                            juan.dela.cruz@email.com
-                                                        </td>
-                                                    </tr>
-                                                    <tr class="border-top">
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-                                                            GitHub Id
-                                                        </td>
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
-                                                            123456789
-                                                        </td>
-                                                    </tr>
-                                                    <tr class="border-top">
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-                                                            GitHub Username
-                                                        </td>
-                                                        <td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
-                                                            juandelacruz
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <td class="center-table" align="center">
-                                            <table style="width: 100%; max-width: 700px;" class="margin-auto">
-                                                <tbody>
-                                                    <tr>
-                                                        <td style="padding-top: 20px">
-                                                            Note: Before you approve the request, you'll have to manually create the
-                                                            organization and add the requestor as an organization owner.
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <br>
+    <!-- VIEW REQUEST DETAILS MODAL -->
+    <div x-show="requestDetailsModal.isShow" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+    
+        <div @click="closeModal()" class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full justify-center text-center items-center">
+            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-xl px-5 pt-5">
+                <button @click="closeModal()" class="group absolute right-5 top-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 group-hover:text-gray-500 group-hover:w-6 group-hover:h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <div @click.stop class="text-left">
+                <h3 class="text-base font-semibold text-gray-900 border-b pb-3" id="modal-title">Request Details</h3>
+                <div class="mt-2">
+                    <div class="flex items-center justify-between">
+                        <div class="grow">
+                            <div class="items-center justify-between">
+                                <p class="text-sm font-medium text-gray-800 truncate" x-text="requestDetailsModal.request.subject"></p>
+                            </div>
+                            <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-sm text-gray-500">
+                                <div><p class="truncate">Application: <span x-text="requestDetailsModal.request.application"></span></p></div>
+                                <div class="pl-3"><p class="truncate">Module: <span x-text="requestDetailsModal.request.module"></span></p></div>
+                                <div><p class="truncate">Requested by: <span x-text="requestDetailsModal.request.requestedBy"></span></p></div>
+                                <div class="pl-3"><p class="truncate">Requested on <span x-text="requestDetailsModal.request.requestedOn"></span></p></div>
+                                <div class="col-span-2" x-bind:title="requestDetailsModal.request.approvers"><p class="truncate">Approvers: <span x-text="requestDetailsModal.request.approvers"></span></p></div>
+                            </div>
+                            <!-- REQUEST EMAIL DETAILS -->
+                            <div x-html="requestDetailsModal.request.bodyHTML" class="text-sm text-center py-5 my-5"></div>
                         </div>
                     </div>
                 </div>
-              </div>
+                </div>
             </div>
         </div>
-      </div>
+        </div>
     </div>
 </div>
 
@@ -394,36 +251,37 @@
     const multipleApprovals = () => {
         const defaultState = {
             pendingRequests: {
-                requestTypes: [],
-                organizations: [],
+                requestTypes: [ // RequestTypeArray
+                    // { id: 0, name: '' }
+                ],
+                organizations: [ // OrganizationArray
+                    // { id: 0, name: '' }
+                ],
                 filter: {
                     requestType: '',
                     organization: '',
                 },
                 isSelectedAll: false,
-                requests: [], // Array of pending request
-                total: 0, // Total number of pending request by filter
+                requests: [ // pendingRequestArray
+                    // { id: 0, subject: '', application: '', module: '', requestedBy: '', requestedOn: '', approvers: [], bodyHTML: '' }
+                ], // Array of pending request
+                total: 9, // Total number of pending request by filter
                 isInitLoading: false,
-                isViewMoreLoading: false,
+                isViewMoreLoading: false
             },
             selectedRequests: {
-                items: [
-                    // { customRemarks: '', hasCustomRemarks: false, request: {} }
-                ], // Array of selected request, custom remarks string, hasCustomRemarks boolean
+                ids: [], // Array of selected request id
+                items: [ // SelectedRequestArray
+                    // { customRemarks: '', hasCustomRemarks: false,
+                    // request: { id: 0, subject: '', application: '', module: '', requestedBy: '', requestedOn: '', approvers: [], bodyHTML: '' }
+                ],
                 generalRemarks: '', // General remarks string
-                total: 0 // Total number of selected request
             },
             requestDetailsModal: {
                 isShow: false,
-                request: {
-                    subject: "",
-                    application: "",
-                    module: "",
-                    requestedBy: "",
-                    requestedOn: "",
-                    approvers: [],
-                    bodyHTML: "",
-                },
+                request: { // RequestObject
+                    // { id: 0, subject: '', application: '', module: '', requestedBy: '', requestedOn: '', approvers: '', bodyHTML: '' }
+                }
             }
         }
         return {
@@ -441,59 +299,98 @@
                 isViewMoreLoading: defaultState.pendingRequests.isViewMoreLoading,
             },
             selectedRequests: {
+                ids: defaultState.selectedRequests.ids,
                 items: defaultState.selectedRequests.items,
                 generalRemarks: defaultState.selectedRequests.generalRemarks,
                 total: defaultState.selectedRequests.total
             },
+            requestDetailsModal: {
+                isShow: defaultState.requestDetailsModal.isShow,
+                request: {
+                    subject: defaultState.requestDetailsModal.request.subject,
+                    application: defaultState.requestDetailsModal.request.application,
+                    module: defaultState.requestDetailsModal.request.module,
+                    requestedBy: defaultState.requestDetailsModal.request.requestedBy,
+                    requestedOn: defaultState.requestDetailsModal.request.requestedOn,
+                    approvers: defaultState.requestDetailsModal.request.approvers,
+                    bodyHTML: defaultState.requestDetailsModal.request.bodyHTML,
+                },
+            },
+
             async init() {
                 // Fetch request types
+                const requestTypes = this.fetchRequestTypes()
+                this.pendingRequests.requestTypes = requestTypes.map((requestType) => {
+                    return { id: requestType.id, name: requestType.name }
+                })
                 // Fetch organizations
+                const organizations = this.fetchOrganizations()
+                this.pendingRequests.organizations = organizations.map((organization) => {
+                    return { id: organization.id, name: organization.name }
+                })
                 // Fetch pending requests
+                const pendingRequests = this.fetchPendingRequests()
+                this.pendingRequests.requests = pendingRequests.requests.map((request) => {
+                    return {
+                        id: request.id,
+                        subject: request.subject,
+                        application: request.application,
+                        module: request.module,
+                        requestedBy: request.requestedBy,
+                        requestedOn: request.requestedOn,
+                        approvers: request.approvers,
+                        bodyHTML: request.bodyHTML
+                    }
+                })
+                this.pendingRequests.total = defaultState.pendingRequests.total // Must be the total number of pending request in the database
             },
-            async fetchPendingRequests() {
+            fetchPendingRequests() {
                 // Fetch pending requests
+                return {
+                    requests: [
+                        { id: 1, subject: 'Subject 1', application: 'App 1', module: 'Module 1', requestedBy: 'User 1', requestedOn: '2023-01-01', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 1</p>'},
+                        { id: 2, subject: 'Subject 2', application: 'App 2', module: 'Module 2', requestedBy: 'User 2', requestedOn: '2023-01-02', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 2</p>'},
+                        { id: 3, subject: 'Subject 3', application: 'App 3', module: 'Module 3', requestedBy: 'User 3', requestedOn: '2023-01-03', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 3</p>'},
+                        { id: 4, subject: 'Subject 4', application: 'App 4', module: 'Module 4', requestedBy: 'User 4', requestedOn: '2023-01-04', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 4</p>'},
+                        { id: 5, subject: 'Subject 5', application: 'App 5', module: 'Module 5', requestedBy: 'User 5', requestedOn: '2023-01-05', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 5</p>'},
+                        { id: 6, subject: 'Subject 6', application: 'App 6', module: 'Module 6', requestedBy: 'User 6', requestedOn: '2023-01-06', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 6</p>'},
+                        { id: 7, subject: 'Subject 7', application: 'App 7', module: 'Module 7', requestedBy: 'User 7', requestedOn: '2023-01-07', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 7</p>'},
+                        { id: 8, subject: 'Subject 8', application: 'App 8', module: 'Module 8', requestedBy: 'User 8', requestedOn: '2023-01-08', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 8</p>'},
+                        { id: 9, subject: 'Subject 9', application: 'App 9', module: 'Module 9', requestedBy: 'User 9', requestedOn: '2023-01-09', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 9</p>'}
+                    ],
+                    total: 10
+                }
             },
-            async fetchRequestTypes() {
+            fetchRequestTypes() {
                 // Fetch request types
+                return [
+                    { id: 1, name: '[REQUEST TYPE 01]' },
+                    { id: 2, name: '[REQUEST TYPE 02]' }
+                ]
             },
-            async fetchOrganizations() {
+            fetchOrganizations() {
                 // Fetch organizations
+                return [
+                    { id: 1, name: '[ORGANIZATION 01]' },
+                    { id: 2, name: '[ORGANIZATION 02]' }
+                ]
             },
-
-            // Pending Requests Section
-            onSelectRequestType() {
-                // Filter pending requests by request type
-            },
-            onSelectOrganization() {
-                // Filter pending requests by organization
-            },
-            onToggleSelectAllPendingRequests() {
-                // Select/Unselect all pending requests
-            },
-            onClickRowPendingRequest() {
-                // Show request details modal
-            },
-            onClickViewMore() {
-                // Fetch more pending requests
-            },
-            onToggleSelectPendingRequest() {
-                // Select/Unselect pending request
-            },
-
-            // Request Details Modal Section
-            onModalOpen(subject, application, module, requestedBy, requestedOn, approvers, bodyHTML) {
+            openModal(subject, application, module, requestedBy, requestedOn, approvers, bodyHTML) {
                 // Open request details modal
                 this.requestDetailsModal.request.subject = subject
                 this.requestDetailsModal.request.application = application
                 this.requestDetailsModal.request.module = module
                 this.requestDetailsModal.request.requestedBy = requestedBy
                 this.requestDetailsModal.request.requestedOn = requestedOn
-                this.requestDetailsModal.request.approvers = approvers
                 this.requestDetailsModal.request.bodyHTML = bodyHTML
+
+                if (approvers) {
+                    this.requestDetailsModal.request.approvers = approvers.join(', ')
+                }
 
                 this.requestDetailsModal.isShow = true
             },
-            onModalClose() {
+            closeModal() {
                 // Close request details modal
                 this.requestDetailsModal.request.subject = defaultState.requestDetailsModal.request.subject
                 this.requestDetailsModal.request.application = defaultState.requestDetailsModal.request.application
@@ -505,19 +402,118 @@
 
                 this.requestDetailsModal.isShow = false
             },
+            addSelectedRequest(request) {
+                // Add selected request                
+                this.selectedRequests.items.push({
+                    customRemarks: '',
+                    hasCustomRemarks: false,
+                    request: {
+                        id: request.id,
+                        subject: request.subject,
+                        application: request.application,
+                        module: request.module,
+                        requestedBy: request.requestedBy,
+                        requestedOn: request.requestedOn,
+                        approvers: request.approvers,
+                        bodyHTML: request.bodyHTML
+                    }
+                })
+                this.updateIsSelectedAll()
+            },
+            removeSelectedRequest(id) {
+                // Remove selected request                
+                this.selectedRequests.items = this.selectedRequests.items.filter((item) => item.request.id !== id)
+                this.updateIsSelectedAll()
+            },
+            isRequestSelected(id) {
+                // Check if request is selected
+                return this.selectedRequests.ids.some((selectedRequestId) =>  selectedRequestId == id)
+            },
+            pendingRequestLastPage() {
+                // Check if pending requests is on last page
+                return this.pendingRequests.requests.length === this.pendingRequests.total
+            },
+            clearSelectedRequests() {
+                // Clear selected requests
+                this.selectedRequests.ids = []
+                this.selectedRequests.items = []
+            },
+            updateIsSelectedAll(){
+                // Update isSelectedAll
+                let isSelectedAll = true
+                this.pendingRequests.requests.forEach((request) => {
+                    if (!this.isRequestSelected(request.id)) {
+                        isSelectedAll = false
+                    }
+                })
+                this.pendingRequests.isSelectedAll = isSelectedAll
+            },
+
+            // Pending Requests Section
+            onChangeSelectRequestType(e) {
+                // Filter pending requests by request type
+            },
+            onChangeSelectOrganization(e) {
+                // Filter pending requests by organization
+            },
+            onToggleSelectAllPendingRequests(e) {
+                // Select/Unselect all pending requests
+                if (e.target.checked) {
+                    this.pendingRequests.requests.forEach((request) => {
+                        if (!this.isRequestSelected(request.id))
+                            this.selectedRequests.ids.push(request.id)
+                            this.addSelectedRequest(request)
+                    })
+                } else {
+                    this.clearSelectedRequests()
+                }
+            },
+            onClickRowPendingRequest(data) {
+                // Show request details modal
+                this.openModal(data.subject, data.application, data.module, data.requestedBy, data.requestedOn, data.approvers, data.bodyHTML)
+            },
+            onClickViewMore() {
+                // Fetch more pending requests
+            },
+            onToggleSelectPendingRequest(e, data) {
+                // Select/Unselect pending request
+                if (e.target.checked) {
+                    this.addSelectedRequest(data)
+                } else {
+                    this.removeSelectedRequest(data.id)
+                }
+            },
 
             // Selected Requests Section
-            onClickRowSelectedRequest() {
+            onClickRowSelectedRequest(item) {
                 // Show request details modal
+                this.openModal(item.request.subject, item.request.application, item.request.module, item.request.requestedBy, item.request.requestedOn, item.request.approvers, item.request.bodyHTML)
             },
-            onToggleCustomRemarks() {
-                // Toggle custom remarks
+            onClickAddCustomRemarks(id){
+                // Show custom remarks
+                this.selectedRequests.items.forEach((item) => {
+                    if (item.request.id === id) {
+                        item.hasCustomRemarks = true
+                    }
+                })
             },
-            onRemoveSelectedRequest() {
+            onClickRemoveCustomRemarks(id){
+                // Remove custom remarks
+                this.selectedRequests.items.forEach((item) => {
+                    if (item.request.id === id) {
+                        item.hasCustomRemarks = false
+                    }
+                })
+            },
+            onRemoveSelectedRequest(id) {
                 // Remove selected request
+                this.selectedRequests.ids = this.selectedRequests.ids.filter((selectedId) => selectedId != id)
+                this.removeSelectedRequest(id)
             },
-            async onSubmit() {
+            async onSubmit(e) {
                 // Submit selected requests
+                console.log('Pending Requests : ', this.pendingRequests)
+                console.log('Selected Requests', this.selectedRequests)
             },
         }
     }
