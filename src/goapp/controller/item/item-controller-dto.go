@@ -24,3 +24,19 @@ type RespondePageData struct {
 	ApproveText         string
 	RejectText          string
 }
+
+type GetItemsByApproverResponse struct {
+	Data  []Item `json:"data"`
+	Total int    `json:"total"`
+}
+
+type Item struct {
+	Id          string   `json:"id"`
+	Subject     string   `json:"subject"`
+	Application string   `json:"application"`
+	Module      string   `json:"module"`
+	RequestedBy string   `json:"requestedBy"`
+	RequestedOn string   `json:"requestedOn"`
+	Approvers   []string `json:"approvers"`
+	Body        string   `json:"body"`
+}

@@ -222,7 +222,19 @@ func (c *itemPageController) MultipleApprovals(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	t, d := c.Service.Template.UseTemplate("multiple-approvals", r.URL.Path, *user, nil)
+	application, err := c.Service.Application.GetApplicationById(c.CommunityPortalAppId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	b, err := json.Marshal(application)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	t, d := c.Service.Template.UseTemplate("multiple-approvals", r.URL.Path, *user, string(b))
 
 	err = t.Execute(w, d)
 	if err != nil {

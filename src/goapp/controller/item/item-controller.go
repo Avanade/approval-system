@@ -102,6 +102,77 @@ func (c *itemController) GetItems(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
+func (c *itemController) GetItemsByApprover(w http.ResponseWriter, r *http.Request) {
+	// Get all items
+	var filterOptions model.FilterOptions
+
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	params := r.URL.Query()
+
+	var requestType string
+	if params.Has("requestType") {
+		requestType = params["requestType"][0]
+	}
+
+	var organization string
+	if params.Has("organization") {
+		organization = params["organization"][0]
+	}
+
+	if params.Has("offset") {
+		filterOptions.Offset, err = strconv.Atoi(params["offset"][0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		filterOptions.Offset = 0
+	}
+
+	if params.Has("filter") {
+		filterOptions.Filter, err = strconv.Atoi(params["filter"][0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		filterOptions.Filter = 100
+	}
+
+	result, total, err := c.Service.Item.GetByApprover(user.Email, requestType, organization, filterOptions)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var response GetItemsByApproverResponse
+	for _, item := range result {
+		itemResponse := Item{
+			Id:          item.Id,
+			Subject:     item.Subject,
+			Application: item.Application,
+			Module:      item.Module,
+			RequestedBy: item.RequestedBy,
+			RequestedOn: item.Created,
+			Approvers:   item.Approvers,
+			Body:        item.Body,
+		}
+
+		response.Data = append(response.Data, itemResponse)
+	}
+	response.Total = total
+
+	// Return the result
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
 func (c *itemController) CreateItem(w http.ResponseWriter, r *http.Request) {
 	// Decode payload
 	var req model.ItemInsertRequest
