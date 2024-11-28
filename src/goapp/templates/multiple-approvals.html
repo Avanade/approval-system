@@ -14,8 +14,9 @@
                             <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
                             <select @change="onChangeSelectRequestType()" id="reponseType" name="responseType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                 <option>Select Request Type</option>
-                                <option>[REQUEST TYPE 01]</option>
-                                <option>[REQUEST TYPE 02]</option>
+                                <template x-for="item in pendingRequests.requestTypes" :key="item.id">
+                                    <option x-bind:value="item.id" x-text="item.name"></option>
+                                </template>
                             </select>
                         </div>
                     </div>
@@ -24,8 +25,9 @@
                             <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
                             <select @change="onChangeSelectOrganization()" id="reponseType" name="responseType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                 <option>Select Organization</option>
-                                <option>[ORGANIZATION 01]</option>
-                                <option>[ORGANIZATION 02]</option>
+                                <template x-for="item in pendingRequests.organizations" :key="item.id">
+                                    <option x-bind:value="item.id" x-text="item.name"></option>
+                                </template>
                             </select>
                         </div>
                     </div>
@@ -42,7 +44,7 @@
                     </div>
                 </div>
             </div>
-            <div class="border mx-1 grow rounded-md overflow-y-auto">
+            <div class="border mx-1 grow rounded-md overflow-y-auto overflow-hidden">
                 <ul role="list" class="divide-y divide-gray-300">
                     <template x-for="item in pendingRequests.requests" :key="item.id">
                         <li class="cursor-pointer">
@@ -58,13 +60,18 @@
                                         <div class="flex items-center justify-between">
                                             <div class="grow">
                                                 <div class="items-center justify-between">
-                                                    <p class="text-sm font-medium text-gray-800 truncate" x-text="item.subject"></p>
+                                                    <p class="text-sm font-medium text-gray-800 truncate" x-bind:title="item.subject" x-text="item.subject"></p>
                                                 </div>
                                                 <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-gray-500">
-                                                    <div><p class="truncate">Application: <span x-text="item.application"></span></p></div>
-                                                    <div class="pl-3"><p class="truncate">Module: <span x-text="item.module"></span></p></div>
-                                                    <div><p class="truncate">Request by: <span x-text="item.requestedBy"></span></p></div>
-                                                    <div class="pl-3"><p class="truncate">Requested on <span x-text="item.requestedOn"></span></p></div>
+                                                    <div><p x-bind:title="item.application" class="truncate">Application: <span x-text="item.application"></span></p></div>
+                                                    <div class="pl-3"><p x-bind:title="item.module" class="truncate">Module: <span x-text="item.module"></span></p></div>
+                                                    <div><p x-bind:title="item.requestedBy" class="truncate">Request by: <span x-text="item.requestedBy"></span></p></div>
+                                                    <div class="pl-3">
+                                                        <p x-data="{date: new Date(item.requestedOn.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}" 
+                                                            x-bind:title="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})" 
+                                                            class="truncate">Requested on <time x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -266,6 +273,7 @@
                     // { id: 0, subject: '', application: '', module: '', requestedBy: '', requestedOn: '', approvers: [], bodyHTML: '' }
                 ], // Array of pending request
                 total: 9, // Total number of pending request by filter
+                page: 0, // Current page number
                 isInitLoading: false,
                 isViewMoreLoading: false
             },
@@ -285,6 +293,7 @@
             }
         }
         return {
+            data: JSON.parse('{{ . }}'),
             pendingRequests: {
                 requestTypes: defaultState.pendingRequests.requestTypes,
                 organizations: defaultState.pendingRequests.organizations,
@@ -319,61 +328,38 @@
 
             async init() {
                 // Fetch request types
-                const requestTypes = this.fetchRequestTypes()
+                const requestTypes = await this.fetchRequestTypes()
                 this.pendingRequests.requestTypes = requestTypes.map((requestType) => {
                     return { id: requestType.id, name: requestType.name }
                 })
                 // Fetch organizations
-                const organizations = this.fetchOrganizations()
-                this.pendingRequests.organizations = organizations.map((organization) => {
-                    return { id: organization.id, name: organization.name }
+                const organizations = await this.fetchOrganizations()
+                this.pendingRequests.organizations = organizations.map((v) => {
+                    return { id: v, name: v }
                 })
-                // Fetch pending requests
-                const pendingRequests = this.fetchPendingRequests()
-                this.pendingRequests.requests = pendingRequests.requests.map((request) => {
-                    return {
-                        id: request.id,
-                        subject: request.subject,
-                        application: request.application,
-                        module: request.module,
-                        requestedBy: request.requestedBy,
-                        requestedOn: request.requestedOn,
-                        approvers: request.approvers,
-                        bodyHTML: request.bodyHTML
-                    }
-                })
-                this.pendingRequests.total = defaultState.pendingRequests.total // Must be the total number of pending request in the database
+            
+                this.loadPendingRequestTable()
             },
-            fetchPendingRequests() {
+            async fetchPendingRequests() {
                 // Fetch pending requests
-                return {
-                    requests: [
-                        { id: 1, subject: 'Subject 1', application: 'App 1', module: 'Module 1', requestedBy: 'User 1', requestedOn: '2023-01-01', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 1</p>'},
-                        { id: 2, subject: 'Subject 2', application: 'App 2', module: 'Module 2', requestedBy: 'User 2', requestedOn: '2023-01-02', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 2</p>'},
-                        { id: 3, subject: 'Subject 3', application: 'App 3', module: 'Module 3', requestedBy: 'User 3', requestedOn: '2023-01-03', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 3</p>'},
-                        { id: 4, subject: 'Subject 4', application: 'App 4', module: 'Module 4', requestedBy: 'User 4', requestedOn: '2023-01-04', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 4</p>'},
-                        { id: 5, subject: 'Subject 5', application: 'App 5', module: 'Module 5', requestedBy: 'User 5', requestedOn: '2023-01-05', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 5</p>'},
-                        { id: 6, subject: 'Subject 6', application: 'App 6', module: 'Module 6', requestedBy: 'User 6', requestedOn: '2023-01-06', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 6</p>'},
-                        { id: 7, subject: 'Subject 7', application: 'App 7', module: 'Module 7', requestedBy: 'User 7', requestedOn: '2023-01-07', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 7</p>'},
-                        { id: 8, subject: 'Subject 8', application: 'App 8', module: 'Module 8', requestedBy: 'User 8', requestedOn: '2023-01-08', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 8</p>'},
-                        { id: 9, subject: 'Subject 9', application: 'App 9', module: 'Module 9', requestedBy: 'User 9', requestedOn: '2023-01-09', approvers: ['Approver 1', 'Approver 2'], bodyHTML: '<p>Body 9</p>'}
-                    ],
-                    total: 10
-                }
+                const res = await fetch(
+                    `/api/approver/me/items`
+                )
+                const data = await res.json()
+                return data
             },
-            fetchRequestTypes() {
+            async fetchRequestTypes() {
                 // Fetch request types
-                return [
-                    { id: 1, name: '[REQUEST TYPE 01]' },
-                    { id: 2, name: '[REQUEST TYPE 02]' }
-                ]
+                const res = await fetch(`/api/request/types`)
+                const data = await res.json()
+                return data
             },
-            fetchOrganizations() {
+            async fetchOrganizations() {
                 // Fetch organizations
-                return [
-                    { id: 1, name: '[ORGANIZATION 01]' },
-                    { id: 2, name: '[ORGANIZATION 02]' }
-                ]
+                const url = this.data.OrganizationTypeUrl
+                const res = await fetch(url)
+                const data = await res.json()
+                return data
             },
             openModal(subject, application, module, requestedBy, requestedOn, approvers, bodyHTML) {
                 // Open request details modal
@@ -447,6 +433,23 @@
                     }
                 })
                 this.pendingRequests.isSelectedAll = isSelectedAll
+            },
+            async loadPendingRequestTable(){
+                // Fetch pending requests
+                const pendingRequests = await this.fetchPendingRequests()
+                this.pendingRequests.requests = pendingRequests.data.map((v) => {
+                    return {
+                        id: v.id,
+                        subject: v.subject,
+                        application: v.application,
+                        module: v.module,
+                        requestedBy: v.requestedBy,
+                        requestedOn: v.requestedOn,
+                        approvers: v.approvers,
+                        bodyHTML: v.body
+                    }
+                })
+                this.pendingRequests.total = defaultState.pendingRequests.total // Must be the total number of pending request in the database
             },
 
             // Pending Requests Section
