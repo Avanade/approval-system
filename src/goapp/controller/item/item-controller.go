@@ -141,7 +141,7 @@ func (c *itemController) GetItemsByApprover(w http.ResponseWriter, r *http.Reque
 			return
 		}
 	} else {
-		filterOptions.Filter = 10
+		filterOptions.Filter = 50
 	}
 
 	result, total, err := c.Service.Item.GetByApprover(user.Email, requestType, organization, filterOptions)
@@ -165,7 +165,10 @@ func (c *itemController) GetItemsByApprover(w http.ResponseWriter, r *http.Reque
 
 		response.Data = append(response.Data, itemResponse)
 	}
-	response.Page = filterOptions.Page
+	if len(response.Data) == 0 {
+		response.Data = []Item{}
+	}
+	response.Page = filterOptions.Page + 1
 	response.Filter = filterOptions.Filter
 	response.Total = total
 

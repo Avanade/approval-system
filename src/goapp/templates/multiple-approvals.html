@@ -13,7 +13,7 @@
                         <div class="content-start">
                             <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
                             <select @change="onChangeSelectRequestType()" x-model="pendingRequests.filterBy.requestType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option>Select Request Type</option>
+                                <option value="">Select Request Type</option>
                                 <template x-for="item in pendingRequests.requestTypes" :key="item.id">
                                     <option x-bind:value="item.id" x-text="item.name"></option>
                                 </template>
@@ -24,7 +24,7 @@
                         <div class="content-start">
                             <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
                             <select @change="onChangeSelectOrganization()" x-model="pendingRequests.filterBy.organization" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option>Select Organization</option>
+                                <option value="">Select Organization</option>
                                 <template x-for="item in pendingRequests.organizations" :key="item.id">
                                     <option x-bind:value="item.id" x-text="item.name"></option>
                                 </template>
@@ -61,8 +61,8 @@
                     </svg>
                 </div>
                 <template x-if="!pendingRequests.isInitLoading">
-                    <template x-if="pendingRequests.requests.length > 0">
-                        <ul role="list" class="divide-y divide-gray-300">
+                    <div>
+                        <ul x-show="pendingRequests.requests.length > 0" x-transition role="list" class="divide-y divide-gray-300">
                             <template x-for="item in pendingRequests.requests" :key="item.id">
                                 <li class="cursor-pointer">
                                     <div class="hover:bg-gray-50">
@@ -106,7 +106,7 @@
                                     <span class="relative p-3 bg-white">
                                         <!-- LOAD MORE -->
                                         <template x-if="!pendingRequestLastPage()">
-                                            <button x-bind:class="pendingRequests.isViewMoreLoading ? 'hidden' : ''" class="bg-[#FF5800] hover:bg-[#FF4300] text-white text-sm font-bold px-3 py-1 rounded">
+                                            <button @click="onClickViewMore" x-bind:class="pendingRequests.isViewMoreLoading ? 'hidden' : ''" class="bg-[#FF5800] hover:bg-[#FF4300] text-white text-sm font-bold px-3 py-1 rounded">
                                                 Load More
                                             </button>
                                         </template>
@@ -127,10 +127,8 @@
                                 </div>
                             </li>
                         </ul>
-                    </template>
-                    <template x-if="pendingRequests.requests.length === 0">
-                        <p class="text-center my-5">NO RESULT FOUND</p>
-                    </template>
+                        <p x-show="pendingRequests.requests.length == 0" x-transition class="text-center my-5">NO RESULT FOUND</p>       
+                    </div>
                 </template>
             </div>
         </div>
@@ -299,7 +297,7 @@
                 requests: [ // pendingRequestArray
                     // { id: 0, subject: '', application: '', module: '', requestedBy: '', requestedOn: '', approvers: [], bodyHTML: '' }
                 ], // Array of pending request
-                total: 9, // Total number of pending request by filter
+                total: 0, // Total number of pending request by filter
                 page: 1, // Current page number
                 isInitLoading: false,
                 isViewMoreLoading: false
@@ -338,8 +336,7 @@
             selectedRequests: {
                 ids: defaultState.selectedRequests.ids,
                 items: defaultState.selectedRequests.items,
-                generalRemarks: defaultState.selectedRequests.generalRemarks,
-                total: defaultState.selectedRequests.total
+                generalRemarks: defaultState.selectedRequests.generalRemarks
             },
             requestDetailsModal: {
                 isShow: defaultState.requestDetailsModal.isShow,
@@ -350,7 +347,7 @@
                     requestedBy: defaultState.requestDetailsModal.request.requestedBy,
                     requestedOn: defaultState.requestDetailsModal.request.requestedOn,
                     approvers: defaultState.requestDetailsModal.request.approvers,
-                    bodyHTML: defaultState.requestDetailsModal.request.bodyHTML,
+                    bodyHTML: defaultState.requestDetailsModal.request.bodyHTML
                 },
             },
 
@@ -436,7 +433,7 @@
                 this.requestDetailsModal.isShow = false
             },
             addSelectedRequest(request) {
-                // Add selected request                
+                // Add selected request
                 this.selectedRequests.items.push({
                     customRemarks: '',
                     hasCustomRemarks: false,
@@ -474,6 +471,9 @@
             updateIsSelectedAll(){
                 // Update isSelectedAll
                 let isSelectedAll = true
+                if (this.pendingRequests.requests.length === 0) {
+                    isSelectedAll = false
+                }
                 this.pendingRequests.requests.forEach((request) => {
                     if (!this.isRequestSelected(request.id)) {
                         isSelectedAll = false
@@ -483,8 +483,8 @@
             },
             async loadPendingRequestTable(){
                 // Fetch pending requests
-                
                 this.pendingRequests.isInitLoading = true
+                this.pendingRequests.page = 1
                 const pendingRequests = await this.fetchPendingRequests()
                 this.pendingRequests.requests = pendingRequests.data.map((v) => {
                     return {
@@ -499,8 +499,9 @@
                     }
                 })
 
-                this.pendingRequests.total = defaultState.pendingRequests.total // Must be the total number of pending request in the database
+                this.pendingRequests.total = pendingRequests.total // Must be the total number of pending request in the database
                 this.pendingRequests.isInitLoading = false
+                this.updateIsSelectedAll()
             },
 
             // Pending Requests Section
@@ -517,8 +518,10 @@
                 if (e.target.checked) {
                     this.pendingRequests.requests.forEach((request) => {
                         if (!this.isRequestSelected(request.id))
+                        {
                             this.selectedRequests.ids.push(request.id)
                             this.addSelectedRequest(request)
+                        }
                     })
                 } else {
                     this.clearSelectedRequests()
@@ -528,8 +531,28 @@
                 // Show request details modal
                 this.openModal(data.subject, data.application, data.module, data.requestedBy, data.requestedOn, data.approvers, data.bodyHTML)
             },
-            onClickViewMore() {
+            async onClickViewMore() {
                 // Fetch more pending requests
+                if (this.pendingRequests.total === this.pendingRequests.requests.length) {
+                    return
+                }
+                this.pendingRequests.isViewMoreLoading = true
+                this.pendingRequests.page++
+                const pendingRequests = await this.fetchPendingRequests()
+                pendingRequests.data.forEach((v) => {
+                    this.pendingRequests.requests.push({
+                        id: v.id,
+                        subject: v.subject,
+                        application: v.application,
+                        module: v.module,
+                        requestedBy: v.requestedBy,
+                        requestedOn: v.requestedOn,
+                        approvers: v.approvers,
+                        bodyHTML: v.body
+                    })
+                })
+                this.pendingRequests.isViewMoreLoading = false
+                this.updateIsSelectedAll()
             },
             onToggleSelectPendingRequest(e, data) {
                 // Select/Unselect pending request
@@ -570,7 +593,7 @@
                 // Submit selected requests
                 console.log('Pending Requests : ', this.pendingRequests)
                 console.log('Selected Requests', this.selectedRequests)
-            },
+            }
         }
     }
 </script>
