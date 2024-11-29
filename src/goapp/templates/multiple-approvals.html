@@ -402,12 +402,6 @@
                 return data
             },
             async fetchOrganizations() {
-                return [
-                    'Organization 1',
-                    'Organization 2',
-                    'Organization 3',
-                    'Organization 4',
-                ]
                 // Fetch organizations
                 const url = this.data.OrganizationTypeUrl
                 const res = await fetch(url)
