@@ -26,8 +26,10 @@ type RespondePageData struct {
 }
 
 type GetItemsByApproverResponse struct {
-	Data  []Item `json:"data"`
-	Total int    `json:"total"`
+	Data   []Item `json:"data"`
+	Page   int    `json:"page"`
+	Filter int    `json:"filter"`
+	Total  int    `json:"total"`
 }
 
 type Item struct {

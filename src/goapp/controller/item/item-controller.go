@@ -124,14 +124,14 @@ func (c *itemController) GetItemsByApprover(w http.ResponseWriter, r *http.Reque
 		organization = params["organization"][0]
 	}
 
-	if params.Has("offset") {
-		filterOptions.Offset, err = strconv.Atoi(params["offset"][0])
+	filterOptions.Page = 0 // Default page is 1 which is 0 in the database
+	if params.Has("page") {
+		filterOptions.Page, err = strconv.Atoi(params["page"][0])
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	} else {
-		filterOptions.Offset = 0
+		filterOptions.Page = filterOptions.Page - 1
 	}
 
 	if params.Has("filter") {
@@ -141,7 +141,7 @@ func (c *itemController) GetItemsByApprover(w http.ResponseWriter, r *http.Reque
 			return
 		}
 	} else {
-		filterOptions.Filter = 100
+		filterOptions.Filter = 10
 	}
 
 	result, total, err := c.Service.Item.GetByApprover(user.Email, requestType, organization, filterOptions)
@@ -165,6 +165,8 @@ func (c *itemController) GetItemsByApprover(w http.ResponseWriter, r *http.Reque
 
 		response.Data = append(response.Data, itemResponse)
 	}
+	response.Page = filterOptions.Page
+	response.Filter = filterOptions.Filter
 	response.Total = total
 
 	// Return the result

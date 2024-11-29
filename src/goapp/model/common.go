@@ -2,7 +2,7 @@ package model
 
 type FilterOptions struct {
 	Filter    int
-	Offset    int
+	Page      int
 	Search    string
 	Orderby   string
 	Ordertype string

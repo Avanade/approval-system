@@ -12,7 +12,7 @@
                     <div class="sm:block px-1">
                         <div class="content-start">
                             <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
-                            <select @change="onChangeSelectRequestType()" id="reponseType" name="responseType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <select @change="onChangeSelectRequestType()" x-model="pendingRequests.filterBy.requestType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                 <option>Select Request Type</option>
                                 <template x-for="item in pendingRequests.requestTypes" :key="item.id">
                                     <option x-bind:value="item.id" x-text="item.name"></option>
@@ -23,7 +23,7 @@
                     <div class="sm:block px-1">
                         <div class="content-start">
                             <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
-                            <select @change="onChangeSelectOrganization()" id="reponseType" name="responseType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <select @change="onChangeSelectOrganization()" x-model="pendingRequests.filterBy.organization" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                 <option>Select Organization</option>
                                 <template x-for="item in pendingRequests.organizations" :key="item.id">
                                     <option x-bind:value="item.id" x-text="item.name"></option>
@@ -45,71 +45,93 @@
                 </div>
             </div>
             <div class="border mx-1 grow rounded-md overflow-y-auto overflow-hidden">
-                <ul role="list" class="divide-y divide-gray-300">
-                    <template x-for="item in pendingRequests.requests" :key="item.id">
-                        <li class="cursor-pointer">
-                            <div class="hover:bg-gray-50">
-                                <div class="group flex flex-row">
-                                    <div class="flex items-center justify-center">
-                                        <div @change="(e) => onToggleSelectPendingRequest(e, item)" class="group-hover:block pl-5 pr-2">
-                                            <input id="select" name="select" type="checkbox" x-bind:value="item.id" x-model="selectedRequests.ids"
-                            class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
-                                        </div>
-                                    </div>
-                                    <div @click="onClickRowPendingRequest(item)" class="p-3">
-                                        <div class="flex items-center justify-between">
-                                            <div class="grow">
-                                                <div class="items-center justify-between">
-                                                    <p class="text-sm font-medium text-gray-800 truncate" x-bind:title="item.subject" x-text="item.subject"></p>
+                <div x-show='pendingRequests.isInitLoading' x-transition>
+                    <svg 
+                        role="status" 
+                        class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] m-auto my-5"
+                        viewBox="0 0 100 101" 
+                        fill="none" 
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                        fill="currentColor" />
+                        <path
+                        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                        fill="currentFill" />
+                    </svg>
+                </div>
+                <template x-if="!pendingRequests.isInitLoading">
+                    <template x-if="pendingRequests.requests.length > 0">
+                        <ul role="list" class="divide-y divide-gray-300">
+                            <template x-for="item in pendingRequests.requests" :key="item.id">
+                                <li class="cursor-pointer">
+                                    <div class="hover:bg-gray-50">
+                                        <div class="group flex flex-row">
+                                            <div class="flex items-center justify-center">
+                                                <div @change="(e) => onToggleSelectPendingRequest(e, item)" class="group-hover:block pl-5 pr-2">
+                                                    <input id="select" name="select" type="checkbox" x-bind:value="item.id" x-model="selectedRequests.ids"
+                                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
                                                 </div>
-                                                <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-gray-500">
-                                                    <div><p x-bind:title="item.application" class="truncate">Application: <span x-text="item.application"></span></p></div>
-                                                    <div class="pl-3"><p x-bind:title="item.module" class="truncate">Module: <span x-text="item.module"></span></p></div>
-                                                    <div><p x-bind:title="item.requestedBy" class="truncate">Request by: <span x-text="item.requestedBy"></span></p></div>
-                                                    <div class="pl-3">
-                                                        <p x-data="{date: new Date(item.requestedOn.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}" 
-                                                            x-bind:title="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})" 
-                                                            class="truncate">Requested on <time x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
-                                                        </p>
+                                            </div>
+                                            <div @click="onClickRowPendingRequest(item)" class="p-3">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="grow">
+                                                        <div class="items-center justify-between">
+                                                            <p class="text-sm font-medium text-gray-800 truncate" x-bind:title="item.subject" x-text="item.subject"></p>
+                                                        </div>
+                                                        <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-gray-500">
+                                                            <div><p x-bind:title="item.application" class="truncate">Application: <span x-text="item.application"></span></p></div>
+                                                            <div class="pl-3"><p x-bind:title="item.module" class="truncate">Module: <span x-text="item.module"></span></p></div>
+                                                            <div><p x-bind:title="item.requestedBy" class="truncate">Request by: <span x-text="item.requestedBy"></span></p></div>
+                                                            <div class="pl-3">
+                                                                <p x-data="{date: new Date(item.requestedOn.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}" 
+                                                                    x-bind:title="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})" 
+                                                                    class="truncate">Requested on <time x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                                                                </p>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </li>
-                    </template>
-                    <!-- PAGINATION -->
-                    <li>
-                        <div class="relative text-center my-5">
-                            <div class="absolute inset-0 flex items-center">
-                                <div class="w-full border-b border-gray-300"></div>
-                            </div>
-                            <span class="relative p-3 bg-white">
-                                <!-- LOAD MORE -->
-                                <template x-if="!pendingRequestLastPage()">
-                                    <button x-bind:class="pendingRequests.isViewMoreLoading ? 'hidden' : ''" class="bg-[#FF5800] hover:bg-[#FF4300] text-white text-sm font-bold px-3 py-1 rounded">
-                                        Load More
-                                    </button>
-                                </template>
-                                <!-- LAST PAGE -->
-                                <template x-if="pendingRequestLastPage()">
-                                    <span x-bind:class="pendingRequests.isViewMoreLoading ? 'hidden' : ''" class="text-sm font-medium text-gray-500">
-                                        No more requests to load
+                                </li>
+                            </template>
+                            <!-- PAGINATION -->
+                            <li>
+                                <div class="relative text-center my-5">
+                                    <div class="absolute inset-0 flex items-center">
+                                        <div class="w-full border-b border-gray-300"></div>
+                                    </div>
+                                    <span class="relative p-3 bg-white">
+                                        <!-- LOAD MORE -->
+                                        <template x-if="!pendingRequestLastPage()">
+                                            <button x-bind:class="pendingRequests.isViewMoreLoading ? 'hidden' : ''" class="bg-[#FF5800] hover:bg-[#FF4300] text-white text-sm font-bold px-3 py-1 rounded">
+                                                Load More
+                                            </button>
+                                        </template>
+                                        <!-- LAST PAGE -->
+                                        <template x-if="pendingRequestLastPage()">
+                                            <span x-bind:class="pendingRequests.isViewMoreLoading ? 'hidden' : ''" class="text-sm font-medium text-gray-500">
+                                                No more requests to load
+                                            </span>
+                                        </template>
+                                        <!-- LOADING -->
+                                        <span x-bind:class="pendingRequests.isViewMoreLoading ? '' : 'hidden'" class="relative flex flex-col justify-center items-center">
+                                            <svg role="status" class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] bg-white rounded-full p-2" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+                                                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+                                            </svg>
+                                        </span>
                                     </span>
-                                </template>
-                                <!-- LOADING -->
-                                <span x-bind:class="pendingRequests.isViewMoreLoading ? '' : 'hidden'" class="relative flex flex-col justify-center items-center">
-                                    <svg role="status" class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] bg-white rounded-full p-2" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-                                        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-                                    </svg>
-                                </span>
-                            </span>
-                        </div>
-                    </li>
-                </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </template>
+                    <template x-if="pendingRequests.requests.length === 0">
+                        <p class="text-center my-5">NO RESULT FOUND</p>
+                    </template>
+                </template>
             </div>
         </div>
         <div class="flex flex-col w-1/2 border-1 border-blue-500 p-1">
@@ -124,13 +146,18 @@
                                 <div @click="onClickRowSelectedRequest(item)" class="flex items-center justify-between">
                                     <div class="grow">
                                         <div class="items-center justify-between">
-                                            <p class="text-sm font-medium text-gray-800 truncate" x-text="item.request.subject"></p>
+                                            <p class="text-sm font-medium text-gray-800 truncate" x-bind:title="item.request.subject" x-text="item.request.subject"></p>
                                         </div>
                                         <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-sm text-gray-500">
-                                            <div><p class="truncate">Application: <span x-text="item.request.application"></span></p></div>
-                                            <div class="pl-3"><p class="truncate">Module: <span x-text="item.request.module"></span></p></div>
-                                            <div><p class="truncate">Requested by: <span x-text="item.request.requestedBy"></span></p></div>
-                                            <div class="pl-3"><p class="truncate">Requested on <span x-text="item.request.requestedOn"></span></p></div>
+                                            <div><p x-bind:title="item.request.application" class="truncate">Application: <span x-text="item.request.application"></span></p></div>
+                                            <div class="pl-3"><p x-bind:title="item.request.module" class="truncate">Module: <span x-text="item.request.module"></span></p></div>
+                                            <div><p x-bind:title="item.request.requestedBy" class="truncate">Request by: <span x-text="item.request.requestedBy"></span></p></div>
+                                            <div class="pl-3">
+                                                <p x-data="{date: new Date(item.request.requestedOn.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}" 
+                                                    x-bind:title="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})" 
+                                                    class="truncate">Requested on <time x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -264,7 +291,7 @@
                 organizations: [ // OrganizationArray
                     // { id: 0, name: '' }
                 ],
-                filter: {
+                filterBy: {
                     requestType: '',
                     organization: '',
                 },
@@ -273,7 +300,7 @@
                     // { id: 0, subject: '', application: '', module: '', requestedBy: '', requestedOn: '', approvers: [], bodyHTML: '' }
                 ], // Array of pending request
                 total: 9, // Total number of pending request by filter
-                page: 0, // Current page number
+                page: 1, // Current page number
                 isInitLoading: false,
                 isViewMoreLoading: false
             },
@@ -297,12 +324,13 @@
             pendingRequests: {
                 requestTypes: defaultState.pendingRequests.requestTypes,
                 organizations: defaultState.pendingRequests.organizations,
-                filter: {
-                    requestType: defaultState.pendingRequests.filter.requestType,
-                    organization: defaultState.pendingRequests.filter.organization,
+                filterBy: {
+                    requestType: defaultState.pendingRequests.filterBy.requestType,
+                    organization: defaultState.pendingRequests.filterBy.organization,
                 },
                 isSelectedAll: defaultState.pendingRequests.isSelectedAll,
                 requests: defaultState.pendingRequests.requests,
+                page: defaultState.pendingRequests.page,
                 total: defaultState.pendingRequests.total,
                 isInitLoading: defaultState.pendingRequests.isInitLoading,
                 isViewMoreLoading: defaultState.pendingRequests.isViewMoreLoading,
@@ -338,14 +366,33 @@
                     return { id: v, name: v }
                 })
             
-                this.loadPendingRequestTable()
+                await this.loadPendingRequestTable()
             },
             async fetchPendingRequests() {
                 // Fetch pending requests
-                const res = await fetch(
-                    `/api/approver/me/items`
-                )
+                let query = []
+                if (this.pendingRequests.filterBy.requestType != '') {
+                    query.push(`requestType=${this.pendingRequests.filterBy.requestType}`)
+                }
+                if (this.pendingRequests.filterBy.organization != '') {
+                    query.push(`organization=${this.pendingRequests.filterBy.organization}`)
+                }
+                if (this.pendingRequests.page > 0) {
+                    query.push(`page=${this.pendingRequests.page}`)
+                }
+
+                url = `/api/approver/me/items`
+                if (query.length > 0) {
+                    url += `?${query.join('&')}`
+                }
+
+                const res = await fetch(url)
                 const data = await res.json()
+
+                if (!Array.isArray(data.data)) {
+                    data.data = []
+                }
+
                 return data
             },
             async fetchRequestTypes() {
@@ -355,6 +402,12 @@
                 return data
             },
             async fetchOrganizations() {
+                return [
+                    'Organization 1',
+                    'Organization 2',
+                    'Organization 3',
+                    'Organization 4',
+                ]
                 // Fetch organizations
                 const url = this.data.OrganizationTypeUrl
                 const res = await fetch(url)
@@ -436,6 +489,8 @@
             },
             async loadPendingRequestTable(){
                 // Fetch pending requests
+                
+                this.pendingRequests.isInitLoading = true
                 const pendingRequests = await this.fetchPendingRequests()
                 this.pendingRequests.requests = pendingRequests.data.map((v) => {
                     return {
@@ -449,15 +504,19 @@
                         bodyHTML: v.body
                     }
                 })
+
                 this.pendingRequests.total = defaultState.pendingRequests.total // Must be the total number of pending request in the database
+                this.pendingRequests.isInitLoading = false
             },
 
             // Pending Requests Section
             onChangeSelectRequestType(e) {
                 // Filter pending requests by request type
+                this.loadPendingRequestTable()
             },
             onChangeSelectOrganization(e) {
                 // Filter pending requests by organization
+                this.loadPendingRequestTable()
             },
             onToggleSelectAllPendingRequests(e) {
                 // Select/Unselect all pending requests

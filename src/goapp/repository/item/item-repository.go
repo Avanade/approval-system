@@ -114,8 +114,9 @@ func (r *itemRepository) GetItemsByApprover(approver, requestType, organization 
 		params = append(params, sql.Named("Filter", filterOptions.Filter))
 	}
 
-	if filterOptions.Offset != 0 {
-		params = append(params, sql.Named("Offset", filterOptions.Offset))
+	if filterOptions.Page != 0 {
+		offset := filterOptions.Page * filterOptions.Filter
+		params = append(params, sql.Named("Offset", offset))
 	}
 
 	params = append(params, sql.Named("Approver", approver))
