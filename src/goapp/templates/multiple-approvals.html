@@ -3,7 +3,7 @@
 
 <div x-data="multipleApprovals">
     <div class="flex flex-row h-[calc(100vh-13rem)]">
-        <div class="flex flex-col w-1/2 border-1 border-red-500 p-1">
+        <div class="flex flex-col w-1/2 border-1 border-red-500 p-1 pr-2">
             <div class="border-1 shrink">
                 <h1 class="text-xl font-semibold text-gray-500">Pending Requests</h1>
             </div>
@@ -13,7 +13,7 @@
                         <div class="content-start">
                             <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
                             <select @change="onChangeSelectRequestType()" x-model="pendingRequests.filterBy.requestType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option value="">Select Request Type</option>
+                                <option value="">All Request Types</option>
                                 <template x-for="item in pendingRequests.requestTypes" :key="item.id">
                                     <option x-bind:value="item.id" x-text="item.name"></option>
                                 </template>
@@ -24,7 +24,7 @@
                         <div class="content-start">
                             <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
                             <select @change="onChangeSelectOrganization()" x-model="pendingRequests.filterBy.organization" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option value="">Select Organization</option>
+                                <option value="">All Organizations</option>
                                 <template x-for="item in pendingRequests.organizations" :key="item.id">
                                     <option x-bind:value="item.id" x-text="item.name"></option>
                                 </template>
@@ -100,9 +100,6 @@
                             <!-- PAGINATION -->
                             <li>
                                 <div class="relative text-center my-5">
-                                    <div class="absolute inset-0 flex items-center">
-                                        <div class="w-full border-b border-gray-300"></div>
-                                    </div>
                                     <span class="relative p-3 bg-white">
                                         <!-- LOAD MORE -->
                                         <template x-if="!pendingRequestLastPage()">
@@ -132,7 +129,7 @@
                 </template>
             </div>
         </div>
-        <div class="flex flex-col w-1/2 border-1 border-blue-500 p-1">
+        <div class="flex flex-col w-1/2 border-1 border-blue-500 p-1 pl-2">
             <div class="border-1">
                 <h1 class="text-xl font-semibold text-gray-500">Selected Requests</h1>
             </div>
@@ -245,36 +242,36 @@
         <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
     
         <div @click="closeModal()" class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full justify-center text-center items-center">
-            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-xl px-5 pt-5">
-                <button @click="closeModal()" class="group absolute right-5 top-5">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 group-hover:text-gray-500 group-hover:w-6 group-hover:h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <div @click.stop class="text-left">
-                <h3 class="text-base font-semibold text-gray-900 border-b pb-3" id="modal-title">Request Details</h3>
-                <div class="mt-2">
-                    <div class="flex items-center justify-between">
-                        <div class="grow">
-                            <div class="items-center justify-between">
-                                <p class="text-sm font-medium text-gray-800 truncate" x-text="requestDetailsModal.request.subject"></p>
+            <div class="flex min-h-full justify-center text-center items-center">
+                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-xl px-5 pt-5">
+                    <button @click="closeModal()" class="group absolute right-5 top-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 group-hover:text-gray-500 group-hover:w-6 group-hover:h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div @click.stop class="text-left">
+                        <h3 class="text-base font-semibold text-gray-900 border-b pb-3" id="modal-title">Request Details</h3>
+                        <div class="mt-2">
+                            <div class="flex items-center justify-between">
+                                <div class="grow">
+                                    <div class="items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-800 truncate" x-text="requestDetailsModal.request.subject"></p>
+                                    </div>
+                                    <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-sm text-gray-500">
+                                        <div><p class="truncate">Application: <span x-text="requestDetailsModal.request.application"></span></p></div>
+                                        <div class="pl-3"><p class="truncate">Module: <span x-text="requestDetailsModal.request.module"></span></p></div>
+                                        <div><p class="truncate">Requested by: <span x-text="requestDetailsModal.request.requestedBy"></span></p></div>
+                                        <div class="pl-3"><p class="truncate">Requested on <span x-text="requestDetailsModal.request.requestedOn"></span></p></div>
+                                        <div class="col-span-2" x-bind:title="requestDetailsModal.request.approvers"><p class="truncate">Approvers: <span x-text="requestDetailsModal.request.approvers"></span></p></div>
+                                    </div>
+                                    <!-- REQUEST EMAIL DETAILS -->
+                                    <div x-html="requestDetailsModal.request.bodyHTML" class="text-sm text-center py-5 my-5 h-96 overflow-y-auto"></div>
+                                </div>
                             </div>
-                            <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-sm text-gray-500">
-                                <div><p class="truncate">Application: <span x-text="requestDetailsModal.request.application"></span></p></div>
-                                <div class="pl-3"><p class="truncate">Module: <span x-text="requestDetailsModal.request.module"></span></p></div>
-                                <div><p class="truncate">Requested by: <span x-text="requestDetailsModal.request.requestedBy"></span></p></div>
-                                <div class="pl-3"><p class="truncate">Requested on <span x-text="requestDetailsModal.request.requestedOn"></span></p></div>
-                                <div class="col-span-2" x-bind:title="requestDetailsModal.request.approvers"><p class="truncate">Approvers: <span x-text="requestDetailsModal.request.approvers"></span></p></div>
-                            </div>
-                            <!-- REQUEST EMAIL DETAILS -->
-                            <div x-html="requestDetailsModal.request.bodyHTML" class="text-sm text-center py-5 my-5"></div>
                         </div>
                     </div>
                 </div>
-                </div>
             </div>
-        </div>
         </div>
     </div>
 </div>
@@ -399,6 +396,7 @@
                 return data
             },
             async fetchOrganizations() {
+                return ['Organization 1', 'Organization 2', 'Organization 3']
                 // Fetch organizations
                 const url = this.data.OrganizationTypeUrl
                 const res = await fetch(url)
@@ -441,7 +439,9 @@
                         id: request.id,
                         subject: request.subject,
                         application: request.application,
+                        applicationId: request.applicationId,
                         module: request.module,
+                        moduleId: request.moduleId,
                         requestedBy: request.requestedBy,
                         requestedOn: request.requestedOn,
                         approvers: request.approvers,
@@ -491,7 +491,9 @@
                         id: v.id,
                         subject: v.subject,
                         application: v.application,
+                        applicationId: v.applicationId,
                         module: v.module,
+                        moduleId: v.moduleId,
                         requestedBy: v.requestedBy,
                         requestedOn: v.requestedOn,
                         approvers: v.approvers,
@@ -590,9 +592,35 @@
                 this.removeSelectedRequest(id)
             },
             async onSubmit(e) {
+                console.log(this.selectedRequests)
+                const data = [
+                    // {
+                    //     itemID: 0,
+                    //     applicationId: 0,
+                    //     applicationModuleId: 0,
+                    //     approverEmail: '',
+                    //     remarks: '',
+                    //     isApproved: true,
+                    //     username: ''
+                    // }
+                ]
                 // Submit selected requests
-                console.log('Pending Requests : ', this.pendingRequests)
-                console.log('Selected Requests', this.selectedRequests)
+                this.selectedRequests.items.forEach(element => {
+                    let request = {
+                        itemID: element.request.id,
+                        applicationId: element.request.applicationId,
+                        applicationModuleId: element.request.moduleId,
+                        isApproved: true,
+                        username: element.request.requestedBy
+                    }
+                    if (element.hasCustomRemarks) {
+                        request.remarks = element.customRemarks
+                    } else {
+                        request.remarks = this.selectedRequests.generalRemarks
+                    }
+                    data.push(request)
+                });
+                console.log(data)
             }
         }
     }
