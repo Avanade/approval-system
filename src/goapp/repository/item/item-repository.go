@@ -134,13 +134,15 @@ func (r *itemRepository) GetItemsByApprover(approver, requestType, organization 
 
 	for _, v := range result {
 		item := model.Item{
-			Id:          v["Id"].(string),
-			Subject:     v["Subject"].(string),
-			Application: v["ApplicationName"].(string),
-			Module:      v["ApplicationModuleName"].(string),
-			Created:     v["Created"].(time.Time).String(),
-			RequestedBy: v["RequestedBy"].(string),
-			Body:        v["Body"].(string),
+			Id:            v["Id"].(string),
+			Subject:       v["Subject"].(string),
+			Application:   v["ApplicationName"].(string),
+			ApplicationId: v["ApplicationId"].(string),
+			Module:        v["ApplicationModuleName"].(string),
+			ModuleId:      v["ApplicationModuleId"].(string),
+			Created:       v["Created"].(time.Time).String(),
+			RequestedBy:   v["RequestedBy"].(string),
+			Body:          v["Body"].(string),
 		}
 		approvers := v["Approvers"].(string)
 		approversArray := strings.Split(approvers, ",")

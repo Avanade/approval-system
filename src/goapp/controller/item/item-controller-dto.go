@@ -32,13 +32,19 @@ type GetItemsByApproverResponse struct {
 	Total  int    `json:"total"`
 }
 
+type PostProcessMultipleResponseRequest struct {
+	Requests []model.ProcessResponseRequest `json:"request"`
+}
+
 type Item struct {
-	Id          string   `json:"id"`
-	Subject     string   `json:"subject"`
-	Application string   `json:"application"`
-	Module      string   `json:"module"`
-	RequestedBy string   `json:"requestedBy"`
-	RequestedOn string   `json:"requestedOn"`
-	Approvers   []string `json:"approvers"`
-	Body        string   `json:"body"`
+	Id            string   `json:"id"`
+	Subject       string   `json:"subject"`
+	Application   string   `json:"application"`
+	ApplicationId string   `json:"applicationId"`
+	Module        string   `json:"module"`
+	ModuleId      string   `json:"moduleId"`
+	RequestedBy   string   `json:"requestedBy"`
+	RequestedOn   string   `json:"requestedOn"`
+	Approvers     []string `json:"approvers"`
+	Body          string   `json:"body"`
 }

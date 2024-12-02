@@ -8,6 +8,7 @@ import (
 	"main/service"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -153,14 +154,16 @@ func (c *itemController) GetItemsByApprover(w http.ResponseWriter, r *http.Reque
 	var response GetItemsByApproverResponse
 	for _, item := range result {
 		itemResponse := Item{
-			Id:          item.Id,
-			Subject:     item.Subject,
-			Application: item.Application,
-			Module:      item.Module,
-			RequestedBy: item.RequestedBy,
-			RequestedOn: item.Created,
-			Approvers:   item.Approvers,
-			Body:        item.Body,
+			Id:            item.Id,
+			Subject:       item.Subject,
+			Application:   item.Application,
+			ApplicationId: item.ApplicationId,
+			Module:        item.Module,
+			ModuleId:      item.ModuleId,
+			RequestedBy:   item.RequestedBy,
+			RequestedOn:   item.Created,
+			Approvers:     item.Approvers,
+			Body:          item.Body,
 		}
 
 		response.Data = append(response.Data, itemResponse)
@@ -277,6 +280,54 @@ func (c *itemController) ProcessResponse(w http.ResponseWriter, r *http.Request)
 	c.postCallback(req.ItemId)
 
 	// Prepare response
+	w.WriteHeader(http.StatusOK)
+}
+
+func (c *itemController) ProcessMultipleResponse(w http.ResponseWriter, r *http.Request) {
+	// Decode payload
+	var req PostProcessMultipleResponseRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var wg sync.WaitGroup
+	concurrencyLimit := make(chan struct{}, 50) // Limit to 50 concurrent goroutines
+
+	// Validate All Requests
+	for _, request := range req.Requests {
+		wg.Add(1)
+		concurrencyLimit <- struct{}{} // Acquire a slot
+
+		go func() {
+			defer wg.Done()
+			defer func() { <-concurrencyLimit }() // Release the slot
+
+			// Validate payload
+			valid, err := c.Service.Item.ValidateItem(request)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if !valid {
+				http.Error(w, "Invalid request", http.StatusBadRequest)
+				return
+			}
+
+			// Update item response
+			err = c.Service.Item.UpdateItemResponse(request)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			// Post callback
+			c.postCallback(request.ItemId)
+		}()
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
 
