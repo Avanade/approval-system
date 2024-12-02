@@ -10,9 +10,9 @@ BEGIN
         SELECT
             [dbo].[UidToString]([I].[Id]) AS [Id],
             [I].[Subject] AS [Subject],
-            [A].[Id] AS [ApplicationId],
+            [dbo].[UidToString]([A].[Id]) AS [ApplicationId],
             [A].[Name] AS [ApplicationName],
-            [AM].[Id] AS [ApplicationModuleId],
+            [dbo].[UidToString]([AM].[Id]) AS [ApplicationModuleId],
             [AM].[Name] AS [ApplicationModuleName],
             [I].[Created] AS [Created],
             [I].[CreatedBy] AS [RequestedBy],
