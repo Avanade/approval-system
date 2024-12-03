@@ -6,6 +6,7 @@ import (
 	db "main/infrastructure/database"
 	"main/model"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -96,6 +97,72 @@ func (r *itemRepository) GetItemById(id string) (*model.Item, error) {
 	}
 
 	return &item, nil
+}
+
+func (r *itemRepository) GetItemsByApprover(approver, requestType, organization string, filterOptions model.FilterOptions) (items []model.Item, total int, err error) {
+	var params []interface{}
+
+	if requestType != "" {
+		params = append(params, sql.Named("RequestType", requestType))
+	}
+
+	if organization != "" {
+		params = append(params, sql.Named("Organization", organization))
+	}
+
+	if filterOptions.Filter != 0 {
+		params = append(params, sql.Named("Filter", filterOptions.Filter))
+	}
+
+	if filterOptions.Page != 0 {
+		offset := filterOptions.Page * filterOptions.Filter
+		params = append(params, sql.Named("Offset", offset))
+	}
+
+	params = append(params, sql.Named("Approver", approver))
+
+	rows, err := r.Query("PR_Items_Select_ByApprover", params...)
+	if err != nil {
+		return []model.Item{}, 0, err
+	}
+	defer rows.Close()
+
+	result, err := r.RowsToMap(rows)
+	if err != nil {
+		return []model.Item{}, 0, err
+	}
+
+	for _, v := range result {
+		item := model.Item{
+			Id:            v["Id"].(string),
+			Subject:       v["Subject"].(string),
+			Application:   v["ApplicationName"].(string),
+			ApplicationId: v["ApplicationId"].(string),
+			Module:        v["ApplicationModuleName"].(string),
+			ModuleId:      v["ApplicationModuleId"].(string),
+			Created:       v["Created"].(time.Time).String(),
+			RequestedBy:   v["RequestedBy"].(string),
+			Body:          v["Body"].(string),
+		}
+		approvers := v["Approvers"].(string)
+		approversArray := strings.Split(approvers, ",")
+		if len(approversArray) > 0 {
+			item.Approvers = approversArray
+		}
+
+		items = append(items, item)
+	}
+
+	if rows.NextResultSet() {
+		if rows.Next() {
+			err = rows.Scan(&total)
+			if err != nil {
+				return []model.Item{}, 0, err
+			}
+		}
+	}
+
+	return items, total, nil
 }
 
 func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item, error) {
