@@ -292,6 +292,30 @@ func (c *itemController) ProcessMultipleResponse(w http.ResponseWriter, r *http.
 		return
 	}
 
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	vars := mux.Vars(r)
+	response := vars["response"]
+
+	var isApproved string
+	if response == "approve" {
+		isApproved = "true"
+	} else if response == "reject" {
+		isApproved = "false"
+	} else {
+		http.Error(w, "Invalid response", http.StatusBadRequest)
+		return
+	}
+
+	for index, _ := range req.Requests {
+		req.Requests[index].ApproverEmail = user.Email
+		req.Requests[index].IsApproved = isApproved
+	}
+
 	var wg sync.WaitGroup
 	concurrencyLimit := make(chan struct{}, 50) // Limit to 50 concurrent goroutines
 
