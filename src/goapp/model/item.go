@@ -3,6 +3,7 @@ package model
 type Item struct {
 	Id                  string   `json:"id"`
 	Application         string   `json:"application"`
+	ApplicationId       string   `json:"applicationId"`
 	ApproverRemarks     string   `json:"approverRemarks"`
 	Body                string   `json:"body"`
 	Created             string   `json:"created"`
@@ -10,6 +11,7 @@ type Item struct {
 	DateSent            string   `json:"dateSent"`
 	IsApproved          bool     `json:"isApproved"`
 	Module              string   `json:"module"`
+	ModuleId            string   `json:"moduleId"`
 	Subject             string   `json:"subject"`
 	ApproveText         string   `json:"approveText"`
 	CallbackUrl         string   `json:"callbackUrl"`

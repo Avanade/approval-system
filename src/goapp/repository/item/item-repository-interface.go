@@ -7,6 +7,7 @@ import (
 type ItemRepository interface {
 	GetFailedCallbacks() ([]string, error)
 	GetItemById(id string) (*model.Item, error)
+	GetItemsByApprover(approver, requestType, organization string, filterOptions model.FilterOptions) (items []model.Item, total int, err error)
 	GetItemsBy(itemOptions model.ItemOptions) ([]model.Item, error)
 	GetTotalItemsBy(itemOptions model.ItemOptions) (int, error)
 	InsertItem(appModuleId, subject, body, requesterEmail string) (string, error)

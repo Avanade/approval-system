@@ -83,6 +83,14 @@ func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, err
 	return result, nil
 }
 
+func (s *itemService) GetByApprover(approver, requestType, organization string, filterOptions model.FilterOptions) (items []model.Item, total int, err error) {
+	items, total, err = s.Repository.Item.GetItemsByApprover(approver, requestType, organization, filterOptions)
+	if err != nil {
+		return nil, 0, err
+	}
+	return items, total, nil
+}
+
 func (s *itemService) InsertItem(item model.ItemInsertRequest) (string, error) {
 	id, err := s.Repository.Item.InsertItem(item.ApplicationModuleId, item.Subject, item.Body, item.RequesterEmail)
 	if err != nil {

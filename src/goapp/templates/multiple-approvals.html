@@ -1,0 +1,733 @@
+{{ define "content" }}
+<div id="pageTitle">Approve Multiple Requests</div>
+
+<div x-data="multipleApprovals">
+    <div class="flex flex-row h-[calc(100vh-13rem)]">
+        <div class="flex flex-col w-1/2 border-1 border-red-500 p-1 pr-2">
+            <div class="border-1 shrink">
+                <h1 class="text-xl font-semibold text-gray-500">Pending Requests</h1>
+            </div>
+            <div class="border-1 pt-3">
+                <nav class="grid grid-cols-2" aria-label="header">
+                    <div class="sm:block px-1">
+                        <div class="content-start">
+                            <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Request Type</label>
+                            <select @change="onChangeSelectRequestType()" x-model="pendingRequests.filterBy.requestType" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <option value="">All Request Types</option>
+                                <template x-for="item in pendingRequests.requestTypes" :key="item.id">
+                                    <option x-bind:value="item.id" x-text="item.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="sm:block px-1">
+                        <div class="content-start">
+                            <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
+                            <select @change="onChangeSelectOrganization()" x-model="pendingRequests.filterBy.organization" class="w-full block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <option value="">All Organizations</option>
+                                <template x-for="item in pendingRequests.organizations" :key="item.id">
+                                    <option x-bind:value="item.id" x-text="item.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+            <div class="border-1 ml-1 mt-3">
+                <div class="relative flex items-start">
+                    <div class="flex h-6 items-center">
+                        <input @change="onToggleSelectAllPendingRequests" type="checkbox" x-model="pendingRequests.isSelectedAll"
+                            class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
+                    </div>
+                    <div class="ml-1 text-sm/6">
+                        <label for="select" class="text-sm font-medium text-gray-700">Select/Unselect All</label>
+                    </div>
+                </div>
+            </div>
+            <div class="border mx-1 grow rounded-md overflow-y-auto overflow-hidden">
+                <div x-show='pendingRequests.isInitLoading' x-transition>
+                    <svg 
+                        role="status" 
+                        class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] m-auto my-5"
+                        viewBox="0 0 100 101" 
+                        fill="none" 
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                        fill="currentColor" />
+                        <path
+                        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                        fill="currentFill" />
+                    </svg>
+                </div>
+                <template x-if="!pendingRequests.isInitLoading">
+                    <div>
+                        <ul x-show="pendingRequests.requests.length > 0" x-transition role="list" class="divide-y divide-gray-300">
+                            <template x-for="item in pendingRequests.requests" :key="item.id">
+                                <li class="cursor-pointer">
+                                    <div class="hover:bg-gray-50">
+                                        <div class="group flex flex-row">
+                                            <div class="flex items-center justify-center">
+                                                <div @change="(e) => onToggleSelectPendingRequest(e, item)" class="group-hover:block pl-5 pr-2">
+                                                    <input id="select" name="select" type="checkbox" x-bind:value="item.id" x-model="selectedRequests.ids"
+                                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
+                                                </div>
+                                            </div>
+                                            <div @click="onClickRowPendingRequest(item)" class="p-3">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="grow">
+                                                        <div class="items-center justify-between">
+                                                            <p class="text-sm font-medium text-gray-800 truncate" x-bind:title="item.subject" x-text="item.subject"></p>
+                                                        </div>
+                                                        <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-gray-500">
+                                                            <div><p x-bind:title="item.application" class="truncate">Application: <span x-text="item.application"></span></p></div>
+                                                            <div class="pl-3"><p x-bind:title="item.module" class="truncate">Module: <span x-text="item.module"></span></p></div>
+                                                            <div><p x-bind:title="item.requestedBy" class="truncate">Request by: <span x-text="item.requestedBy"></span></p></div>
+                                                            <div class="pl-3">
+                                                                <p x-data="{date: new Date(item.requestedOn.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}" 
+                                                                    x-bind:title="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})" 
+                                                                    class="truncate">Requested on <time x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </template>
+                            <!-- PAGINATION -->
+                            <li>
+                                <div class="relative text-center my-5">
+                                    <span class="relative p-3 bg-white">
+                                        <!-- LOAD MORE -->
+                                        <template x-if="!pendingRequestLastPage()">
+                                            <button @click="onClickViewMore" x-bind:class="pendingRequests.isViewMoreLoading ? 'hidden' : ''" class="bg-[#FF5800] hover:bg-[#FF4300] text-white text-sm font-bold px-3 py-1 rounded">
+                                                Load More
+                                            </button>
+                                        </template>
+                                        <!-- LAST PAGE -->
+                                        <template x-if="pendingRequestLastPage()">
+                                            <span x-bind:class="pendingRequests.isViewMoreLoading ? 'hidden' : ''" class="text-sm font-medium text-gray-500">
+                                                No more requests to load
+                                            </span>
+                                        </template>
+                                        <!-- LOADING -->
+                                        <span x-bind:class="pendingRequests.isViewMoreLoading ? '' : 'hidden'" class="relative flex flex-col justify-center items-center">
+                                            <svg role="status" class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] bg-white rounded-full p-2" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+                                                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+                                            </svg>
+                                        </span>
+                                    </span>
+                                </div>
+                            </li>
+                        </ul>
+                        <p x-show="pendingRequests.requests.length == 0" x-transition class="text-center my-5">NO RESULT FOUND</p>       
+                    </div>
+                </template>
+            </div>
+        </div>
+        <div class="flex flex-col w-1/2 border-1 border-blue-500 p-1 pl-2">
+            <div class="border-1">
+                <h1 class="text-xl font-semibold text-gray-500">Selected Requests</h1>
+            </div>
+            <div class="border m-1 mt-3 grow rounded-md overflow-y-auto">
+                <ul role="list" class="divide-y divide-gray-300">
+                    <template x-for="item in selectedRequests.items">
+                        <li class="cursor-pointer p-3 hover:bg-gray-50">
+                            <div>
+                                <div @click="onClickRowSelectedRequest(item)" class="flex items-center justify-between">
+                                    <div class="grow">
+                                        <div class="items-center justify-between">
+                                            <p class="text-sm font-medium text-gray-800 truncate" x-bind:title="item.request.subject" x-text="item.request.subject"></p>
+                                        </div>
+                                        <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-xs text-sm text-gray-500">
+                                            <div><p x-bind:title="item.request.application" class="truncate">Application: <span x-text="item.request.application"></span></p></div>
+                                            <div class="pl-3"><p x-bind:title="item.request.module" class="truncate">Module: <span x-text="item.request.module"></span></p></div>
+                                            <div><p x-bind:title="item.request.requestedBy" class="truncate">Request by: <span x-text="item.request.requestedBy"></span></p></div>
+                                            <div class="pl-3">
+                                                <p x-data="{date: new Date(item.request.requestedOn.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}" 
+                                                    x-bind:title="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})" 
+                                                    class="truncate">Requested on <time x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute flex flex-col right-1 bottom-10">
+                                        <button @click="onRemoveSelectedRequest(item.request.id)" class="group text-center text-sm font-semibold text-gray-400" title="Remove">
+                                            <!-- DEFAULT REMOVE ICON (OUTLINE) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 group-hover:hidden">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                            </svg>                                          
+                                            <!-- HOVERED REMOVE ICON (SOLID) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 hidden group-hover:block">
+                                                <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                            </svg>                                                                                            
+                                        </button>
+                                    </div>
+                                    <div class="absolute flex flex-col right-0 bottom-0" x-bind:class="item.hasCustomRemarks ? 'hidden' : ''">
+                                        <button @click="onClickAddCustomRemarks(item.request.id)" class="group px-1 text-center text-sm font-semibold text-gray-400" title="Custom Remarks">
+                                            <!-- DEFAULT CUSTOM REMARKS ICON (OUTLINE) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 group-hover:hidden">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                            </svg>
+                                            <!-- HOVERED CUSTOM REMARKS ICON (SOLID) -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 hidden group-hover:block">
+                                                <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                                <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                            </svg>                                                                              
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 relative" x-bind:class="item.hasCustomRemarks ? '' : 'hidden'">
+                                <div class="absolute flex flex-col right-1 top-0">
+                                    <button @click="onClickRemoveCustomRemarks(item.request.id)" class="group text-center text-sm font-semibold text-gray-400" title="Remove">
+                                        <!-- DEFAULT REMOVE CUSTOM REMARKS ICON (OUTLINE) -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 group-hover:hidden">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>                                                                       
+                                        <!-- HOVERED REMOVE CUSTOM REMARKS ICON (SOLID) -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 hidden group-hover:block">
+                                            <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div>
+                                    <label for="remarks" class="block text-sm font-medium text-gray-700">
+                                        Custom Remarks
+                                    </label>
+                                    <div class="mt-1">
+                                        <textarea x-model='item.customRemarks' id="remarks" name="remarks" maxlength="255" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md resize-none"></textarea>
+                                    </div>
+                                    <p class="text-xs text-gray-500">
+                                        Custom remarks will override the general remarks.
+                                    </p>
+                                </div>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+            <div class="border-1 p-1 text-xs text-right text-gray-500">
+                Total items selected: <span x-text="selectedRequests.items.length"></span>
+            </div>
+            <div class="border-1 p-1">
+                <div>
+                    <label for="generalRemarks" class="block text-sm font-medium text-gray-700">
+                    General Remarks
+                    </label>
+                    <div class="mt-1">
+                        <textarea x-model="selectedRequests.generalRemarks" id="generalRemarks" name="generalRemarks" maxlength="255" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md resize-none"></textarea>
+                    </div>
+                    <p class="text-xs text-gray-500">
+                        General remarks will apply to all requests without any custom remarks.
+                    </p>
+                </div>
+            </div>
+            <div class="flex border-1 p-1">
+                <button @click="onSubmit" value="reject" class="w-1/2 inline-flex justify-center py-2 px-4 mr-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" x-bind:class="selectedRequests.items.length === 0 ? 'bg-gray-200' : 'bg-gray-500 hover:bg-gray-700'" x-bind:disabled="selectedRequests.items.length === 0">
+                    Reject
+                </button>
+                <button @click="onSubmit" value="approve" class="w-1/2 inline-flex justify-center py-2 px-4 ml-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" x-bind:class="selectedRequests.items.length === 0 ? 'bg-orange-200' : 'bg-orange-600 hover:bg-orange-700'" x-bind:disabled="selectedRequests.items.length === 0">
+                    Approve
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW REQUEST DETAILS MODAL -->
+    <div x-show="requestDetailsModal.isShow" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+    
+        <div @click="closeModal()" class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full justify-center text-center items-center">
+                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-xl px-5 pt-5">
+                    <button @click="closeModal()" class="group absolute right-5 top-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 group-hover:text-gray-500 group-hover:w-6 group-hover:h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div @click.stop class="text-left">
+                        <h3 class="text-base font-semibold text-gray-900 border-b pb-3" id="modal-title">Request Details</h3>
+                        <div class="mt-2">
+                            <div class="flex items-center justify-between">
+                                <div class="grow">
+                                    <div class="items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-800 truncate" x-text="requestDetailsModal.request.subject"></p>
+                                    </div>
+                                    <div class="grid grid-flow-row grid-cols-2 grid-rows-2 text-sm text-gray-500">
+                                        <div><p class="truncate">Application: <span x-text="requestDetailsModal.request.application"></span></p></div>
+                                        <div class="pl-3"><p class="truncate">Module: <span x-text="requestDetailsModal.request.module"></span></p></div>
+                                        <div><p class="truncate">Requested by: <span x-text="requestDetailsModal.request.requestedBy"></span></p></div>
+                                        <div class="pl-3"><p class="truncate">Requested on <span x-text="requestDetailsModal.request.requestedOn"></span></p></div>
+                                        <div class="col-span-2" x-bind:title="requestDetailsModal.request.approvers"><p class="truncate">Approvers: <span x-text="requestDetailsModal.request.approvers"></span></p></div>
+                                    </div>
+                                    <!-- REQUEST EMAIL DETAILS -->
+                                    <div x-html="requestDetailsModal.request.bodyHTML" class="text-sm text-center py-5 my-5 h-96 overflow-y-auto"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBMIT RESPONSE MODAL -->
+    <div x-show="submitResponseModal.isShow" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+        <div class="fixed z-10 inset-0 overflow-y-auto">
+            <div class="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
+                <div class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-sm sm:w-full sm:p-6">
+                    <div>
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100" x-bind:class="submitResponseModal.status == 'success' ? '':'hidden'">
+                            <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100" x-bind:class="submitResponseModal.status === 'error' ? '':'hidden'">
+                            <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full" x-bind:class="submitResponseModal.status === 'submitted' ? '':'hidden'">
+                            <svg role="status" class="inline w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600" viewBox="0 0 100 101" fill="#ff5800" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-5">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" x-text="submitResponseModal.text"></h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500" x-text="submitResponseModal.description"></p>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-5" @click="submitResponseModal.isShow = false" x-bind:hidden="submitResponseModal.status!='success'">
+                            <a href="/myapprovals">Go back to approvals page</a>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-5" @click="submitResponseModal.isShow = false" x-bind:hidden="submitResponseModal.status!='error'">
+                            Close
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    const multipleApprovals = () => {
+        const defaultState = {
+            pendingRequests: {
+                requestTypes: [ // RequestTypeArray
+                    // { id: 0, name: '' }
+                ],
+                organizations: [ // OrganizationArray
+                    // { id: 0, name: '' }
+                ],
+                filterBy: {
+                    requestType: '',
+                    organization: '',
+                },
+                isSelectedAll: false,
+                requests: [ // pendingRequestArray
+                    // { id: 0, subject: '', application: '', module: '', requestedBy: '', requestedOn: '', approvers: [], bodyHTML: '' }
+                ], // Array of pending request
+                total: 0, // Total number of pending request by filter
+                page: 1, // Current page number
+                isInitLoading: false,
+                isViewMoreLoading: false
+            },
+            selectedRequests: {
+                ids: [], // Array of selected request id
+                items: [ // SelectedRequestArray
+                    // { customRemarks: '', hasCustomRemarks: false,
+                    // request: { id: 0, subject: '', application: '', module: '', requestedBy: '', requestedOn: '', approvers: [], bodyHTML: '' }
+                ],
+                generalRemarks: '', // General remarks string
+            },
+            requestDetailsModal: {
+                isShow: false,
+                request: { // RequestObject
+                    // { id: 0, subject: '', application: '', module: '', requestedBy: '', requestedOn: '', approvers: '', bodyHTML: '' }
+                }
+            },
+            submitResponseModal: {
+                isShow: false,
+                status: '', // success, error, submitted
+                text: '', // Title
+                description: '' // Description
+            }
+        }
+        return {
+            data: JSON.parse('{{ . }}'),
+            pendingRequests: {
+                requestTypes: defaultState.pendingRequests.requestTypes,
+                organizations: defaultState.pendingRequests.organizations,
+                filterBy: {
+                    requestType: defaultState.pendingRequests.filterBy.requestType,
+                    organization: defaultState.pendingRequests.filterBy.organization,
+                },
+                isSelectedAll: defaultState.pendingRequests.isSelectedAll,
+                requests: defaultState.pendingRequests.requests,
+                page: defaultState.pendingRequests.page,
+                total: defaultState.pendingRequests.total,
+                isInitLoading: defaultState.pendingRequests.isInitLoading,
+                isViewMoreLoading: defaultState.pendingRequests.isViewMoreLoading,
+            },
+            selectedRequests: {
+                ids: defaultState.selectedRequests.ids,
+                items: defaultState.selectedRequests.items,
+                generalRemarks: defaultState.selectedRequests.generalRemarks
+            },
+            requestDetailsModal: {
+                isShow: defaultState.requestDetailsModal.isShow,
+                request: {
+                    subject: defaultState.requestDetailsModal.request.subject,
+                    application: defaultState.requestDetailsModal.request.application,
+                    module: defaultState.requestDetailsModal.request.module,
+                    requestedBy: defaultState.requestDetailsModal.request.requestedBy,
+                    requestedOn: defaultState.requestDetailsModal.request.requestedOn,
+                    approvers: defaultState.requestDetailsModal.request.approvers,
+                    bodyHTML: defaultState.requestDetailsModal.request.bodyHTML
+                },
+            },
+            submitResponseModal: {
+                isShow: defaultState.submitResponseModal.isShow,
+                status: defaultState.submitResponseModal.status,
+                text: defaultState.submitResponseModal.text,
+                description: defaultState.submitResponseModal.description
+            },
+
+            async init() {
+                // Fetch request types
+                const requestTypes = await this.fetchRequestTypes()
+                this.pendingRequests.requestTypes = requestTypes.map((requestType) => {
+                    return { id: requestType.id, name: requestType.name }
+                })
+                // Fetch organizations
+                const organizations = await this.fetchOrganizations()
+                this.pendingRequests.organizations = organizations.map((v) => {
+                    return { id: v, name: v }
+                })
+            
+                await this.loadPendingRequestTable()
+            },
+            async fetchPendingRequests() {
+                // Fetch pending requests
+                let query = []
+                if (this.pendingRequests.filterBy.requestType != '') {
+                    query.push(`requestType=${this.pendingRequests.filterBy.requestType}`)
+                }
+                if (this.pendingRequests.filterBy.organization != '') {
+                    query.push(`organization=${this.pendingRequests.filterBy.organization}`)
+                }
+                if (this.pendingRequests.page > 0) {
+                    query.push(`page=${this.pendingRequests.page}`)
+                }
+
+                url = `/api/approver/me/items`
+                if (query.length > 0) {
+                    url += `?${query.join('&')}`
+                }
+
+                const res = await fetch(url)
+                const data = await res.json()
+
+                if (!Array.isArray(data.data)) {
+                    data.data = []
+                }
+
+                return data
+            },
+            async fetchRequestTypes() {
+                // Fetch request types
+                const res = await fetch(`/api/request/types`)
+                const data = await res.json()
+                return data
+            },
+            async fetchOrganizations() {
+                return ['Organization 1', 'Organization 2', 'Organization 3']
+                // Fetch organizations
+                const url = this.data.OrganizationTypeUrl
+                const res = await fetch(url)
+                const data = await res.json()
+                return data
+            },
+            openModal(subject, application, module, requestedBy, requestedOn, approvers, bodyHTML) {
+                // Open request details modal
+                this.requestDetailsModal.request.subject = subject
+                this.requestDetailsModal.request.application = application
+                this.requestDetailsModal.request.module = module
+                this.requestDetailsModal.request.requestedBy = requestedBy
+                this.requestDetailsModal.request.requestedOn = requestedOn
+                this.requestDetailsModal.request.bodyHTML = bodyHTML
+
+                if (approvers) {
+                    this.requestDetailsModal.request.approvers = approvers.join(', ')
+                }
+
+                this.requestDetailsModal.isShow = true
+            },
+            closeModal() {
+                // Close request details modal
+                this.requestDetailsModal.request.subject = defaultState.requestDetailsModal.request.subject
+                this.requestDetailsModal.request.application = defaultState.requestDetailsModal.request.application
+                this.requestDetailsModal.request.module = defaultState.requestDetailsModal.request.module
+                this.requestDetailsModal.request.requestedBy = defaultState.requestDetailsModal.request.requestedBy
+                this.requestDetailsModal.request.requestedOn = defaultState.requestDetailsModal.request.requestedOn
+                this.requestDetailsModal.request.approvers = defaultState.requestDetailsModal.request.approvers
+                this.requestDetailsModal.request.bodyHTML = defaultState.requestDetailsModal.request.bodyHTML
+
+                this.requestDetailsModal.isShow = false
+            },
+            addSelectedRequest(request) {
+                // Add selected request
+                this.selectedRequests.items.push({
+                    customRemarks: '',
+                    hasCustomRemarks: false,
+                    request: {
+                        id: request.id,
+                        subject: request.subject,
+                        application: request.application,
+                        applicationId: request.applicationId,
+                        module: request.module,
+                        moduleId: request.moduleId,
+                        requestedBy: request.requestedBy,
+                        requestedOn: request.requestedOn,
+                        approvers: request.approvers,
+                        bodyHTML: request.bodyHTML
+                    }
+                })
+                this.updateIsSelectedAll()
+            },
+            removeSelectedRequest(id) {
+                // Remove selected request                
+                this.selectedRequests.items = this.selectedRequests.items.filter((item) => item.request.id !== id)
+                this.updateIsSelectedAll()
+            },
+            isRequestSelected(id) {
+                // Check if request is selected
+                return this.selectedRequests.ids.some((selectedRequestId) =>  selectedRequestId == id)
+            },
+            pendingRequestLastPage() {
+                // Check if pending requests is on last page
+                return this.pendingRequests.requests.length === this.pendingRequests.total
+            },
+            clearSelectedRequests() {
+                // Clear selected requests
+                this.selectedRequests.ids = []
+                this.selectedRequests.items = []
+            },
+            updateIsSelectedAll(){
+                // Update isSelectedAll
+                let isSelectedAll = true
+                if (this.pendingRequests.requests.length === 0) {
+                    isSelectedAll = false
+                }
+                this.pendingRequests.requests.forEach((request) => {
+                    if (!this.isRequestSelected(request.id)) {
+                        isSelectedAll = false
+                    }
+                })
+                this.pendingRequests.isSelectedAll = isSelectedAll
+            },
+            displaySubmitResponseModal(status, title, description){
+                // Display submit response modal
+                this.submitResponseModal.status = status
+                this.submitResponseModal.text = title
+                this.submitResponseModal.description = description
+                this.submitResponseModal.isShow = true
+            },
+            async loadPendingRequestTable(){
+                // Fetch pending requests
+                this.pendingRequests.isInitLoading = true
+                this.pendingRequests.page = 1
+                const pendingRequests = await this.fetchPendingRequests()
+                this.pendingRequests.requests = pendingRequests.data.map((v) => {
+                    return {
+                        id: v.id,
+                        subject: v.subject,
+                        application: v.application,
+                        applicationId: v.applicationId,
+                        module: v.module,
+                        moduleId: v.moduleId,
+                        requestedBy: v.requestedBy,
+                        requestedOn: v.requestedOn,
+                        approvers: v.approvers,
+                        bodyHTML: v.body
+                    }
+                })
+
+                this.pendingRequests.total = pendingRequests.total // Must be the total number of pending request in the database
+                this.pendingRequests.isInitLoading = false
+                this.updateIsSelectedAll()
+            },
+
+            // Pending Requests Section
+            onChangeSelectRequestType(e) {
+                // Filter pending requests by request type
+                this.loadPendingRequestTable()
+            },
+            onChangeSelectOrganization(e) {
+                // Filter pending requests by organization
+                this.loadPendingRequestTable()
+            },
+            onToggleSelectAllPendingRequests(e) {
+                // Select/Unselect all pending requests
+                if (e.target.checked) {
+                    this.pendingRequests.requests.forEach((request) => {
+                        if (!this.isRequestSelected(request.id))
+                        {
+                            this.selectedRequests.ids.push(request.id)
+                            this.addSelectedRequest(request)
+                        }
+                    })
+                } else {
+                    this.clearSelectedRequests()
+                }
+            },
+            onClickRowPendingRequest(data) {
+                // Show request details modal
+                this.openModal(data.subject, data.application, data.module, data.requestedBy, data.requestedOn, data.approvers, data.bodyHTML)
+            },
+            async onClickViewMore() {
+                // Fetch more pending requests
+                if (this.pendingRequests.total === this.pendingRequests.requests.length) {
+                    return
+                }
+                this.pendingRequests.isViewMoreLoading = true
+                this.pendingRequests.page++
+                const pendingRequests = await this.fetchPendingRequests()
+                pendingRequests.data.forEach((v) => {
+                    this.pendingRequests.requests.push({
+                        id: v.id,
+                        subject: v.subject,
+                        application: v.application,
+                        module: v.module,
+                        requestedBy: v.requestedBy,
+                        requestedOn: v.requestedOn,
+                        approvers: v.approvers,
+                        bodyHTML: v.body
+                    })
+                })
+                this.pendingRequests.isViewMoreLoading = false
+                this.updateIsSelectedAll()
+            },
+            onToggleSelectPendingRequest(e, data) {
+                // Select/Unselect pending request
+                if (e.target.checked) {
+                    this.addSelectedRequest(data)
+                } else {
+                    this.removeSelectedRequest(data.id)
+                }
+            },
+
+            // Selected Requests Section
+            onClickRowSelectedRequest(item) {
+                // Show request details modal
+                this.openModal(item.request.subject, item.request.application, item.request.module, item.request.requestedBy, item.request.requestedOn, item.request.approvers, item.request.bodyHTML)
+            },
+            onClickAddCustomRemarks(id){
+                // Show custom remarks
+                this.selectedRequests.items.forEach((item) => {
+                    if (item.request.id === id) {
+                        item.hasCustomRemarks = true
+                    }
+                })
+            },
+            onClickRemoveCustomRemarks(id){
+                // Remove custom remarks
+                this.selectedRequests.items.forEach((item) => {
+                    if (item.request.id === id) {
+                        item.hasCustomRemarks = false
+                    }
+                })
+            },
+            onRemoveSelectedRequest(id) {
+                // Remove selected request
+                this.selectedRequests.ids = this.selectedRequests.ids.filter((selectedId) => selectedId != id)
+                this.removeSelectedRequest(id)
+            },
+            async onSubmit(e) {
+                const data = [
+                    // {
+                    //     itemID: 0,
+                    //     applicationId: 0,
+                    //     applicationModuleId: 0,
+                    //     approverEmail: '',
+                    //     remarks: '',
+                    //     isApproved: true,
+                    //     username: ''
+                    // }
+                ]
+                // Submit selected requests
+                this.selectedRequests.items.forEach(element => {
+                    let request = {
+                        itemID: element.request.id,
+                        applicationId: element.request.applicationId,
+                        applicationModuleId: element.request.moduleId,
+                        isApproved: 'true',
+                        username: element.request.requestedBy
+                    }
+                    if (element.hasCustomRemarks) {
+                        request.remarks = element.customRemarks
+                    } else {
+                        request.remarks = this.selectedRequests.generalRemarks
+                    }
+                    data.push(request)
+                });
+
+                try {
+                    this.displaySubmitResponseModal(
+                        "submitted",
+                        "Processing",
+                        "Please wait while processing your request."
+                    );
+                    const response = await fetch(`/api/multiple/response/${e.target.value}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ request: data})
+                    });
+
+                    if (response.status == 200) {
+                        this.displaySubmitResponseModal(
+                            "success",
+                            "Successful",
+                            "Your response has been submitted."
+                        );
+                    }
+                    else if (response.status == 401) {
+                        this.displaySubmitResponseModal(
+                            "error",
+                            "Unauthorized",
+                            "You are not authorized to process this approval."
+                        );
+                    }
+                    else {
+                        this.displaySubmitResponseModal(
+                            "error",
+                            "Error",
+                            "An error occurred while submitting your response."
+                        );
+                    }
+                } catch (error) {
+                    this.displaySubmitResponseModal(
+                        "error",
+                        "Error",
+                        "An error occurred while submitting your response."
+                    );
+                }
+            }
+        }
+    }
+</script>
+{{ end }}

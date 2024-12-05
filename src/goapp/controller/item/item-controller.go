@@ -8,6 +8,7 @@ import (
 	"main/service"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -100,6 +101,84 @@ func (c *itemController) GetItems(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
+}
+
+func (c *itemController) GetItemsByApprover(w http.ResponseWriter, r *http.Request) {
+	// Get all items
+	var filterOptions model.FilterOptions
+
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	params := r.URL.Query()
+
+	var requestType string
+	if params.Has("requestType") {
+		requestType = params["requestType"][0]
+	}
+
+	var organization string
+	if params.Has("organization") {
+		organization = params["organization"][0]
+	}
+
+	filterOptions.Page = 0 // Default page is 1 which is 0 in the database
+	if params.Has("page") {
+		filterOptions.Page, err = strconv.Atoi(params["page"][0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		filterOptions.Page = filterOptions.Page - 1
+	}
+
+	if params.Has("filter") {
+		filterOptions.Filter, err = strconv.Atoi(params["filter"][0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		filterOptions.Filter = 50
+	}
+
+	result, total, err := c.Service.Item.GetByApprover(user.Email, requestType, organization, filterOptions)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var response GetItemsByApproverResponse
+	for _, item := range result {
+		itemResponse := Item{
+			Id:            item.Id,
+			Subject:       item.Subject,
+			Application:   item.Application,
+			ApplicationId: item.ApplicationId,
+			Module:        item.Module,
+			ModuleId:      item.ModuleId,
+			RequestedBy:   item.RequestedBy,
+			RequestedOn:   item.Created,
+			Approvers:     item.Approvers,
+			Body:          item.Body,
+		}
+
+		response.Data = append(response.Data, itemResponse)
+	}
+	if len(response.Data) == 0 {
+		response.Data = []Item{}
+	}
+	response.Page = filterOptions.Page + 1
+	response.Filter = filterOptions.Filter
+	response.Total = total
+
+	// Return the result
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (c *itemController) CreateItem(w http.ResponseWriter, r *http.Request) {
@@ -201,6 +280,78 @@ func (c *itemController) ProcessResponse(w http.ResponseWriter, r *http.Request)
 	c.postCallback(req.ItemId)
 
 	// Prepare response
+	w.WriteHeader(http.StatusOK)
+}
+
+func (c *itemController) ProcessMultipleResponse(w http.ResponseWriter, r *http.Request) {
+	// Decode payload
+	var req PostProcessMultipleResponseRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	vars := mux.Vars(r)
+	response := vars["response"]
+
+	var isApproved string
+	if response == "approve" {
+		isApproved = "true"
+	} else if response == "reject" {
+		isApproved = "false"
+	} else {
+		http.Error(w, "Invalid response", http.StatusBadRequest)
+		return
+	}
+
+	for index, _ := range req.Requests {
+		req.Requests[index].ApproverEmail = user.Email
+		req.Requests[index].IsApproved = isApproved
+	}
+
+	var wg sync.WaitGroup
+	concurrencyLimit := make(chan struct{}, 50) // Limit to 50 concurrent goroutines
+
+	// Validate All Requests
+	for _, request := range req.Requests {
+		wg.Add(1)
+		concurrencyLimit <- struct{}{} // Acquire a slot
+
+		go func() {
+			defer wg.Done()
+			defer func() { <-concurrencyLimit }() // Release the slot
+
+			// Validate payload
+			valid, err := c.Service.Item.ValidateItem(request)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if !valid {
+				http.Error(w, "Invalid request", http.StatusBadRequest)
+				return
+			}
+
+			// Update item response
+			err = c.Service.Item.UpdateItemResponse(request)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			// Post callback
+			c.postCallback(request.ItemId)
+		}()
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
 

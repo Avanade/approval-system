@@ -24,3 +24,27 @@ type RespondePageData struct {
 	ApproveText         string
 	RejectText          string
 }
+
+type GetItemsByApproverResponse struct {
+	Data   []Item `json:"data"`
+	Page   int    `json:"page"`
+	Filter int    `json:"filter"`
+	Total  int    `json:"total"`
+}
+
+type PostProcessMultipleResponseRequest struct {
+	Requests []model.ProcessResponseRequest `json:"request"`
+}
+
+type Item struct {
+	Id            string   `json:"id"`
+	Subject       string   `json:"subject"`
+	Application   string   `json:"application"`
+	ApplicationId string   `json:"applicationId"`
+	Module        string   `json:"module"`
+	ModuleId      string   `json:"moduleId"`
+	RequestedBy   string   `json:"requestedBy"`
+	RequestedOn   string   `json:"requestedOn"`
+	Approvers     []string `json:"approvers"`
+	Body          string   `json:"body"`
+}
