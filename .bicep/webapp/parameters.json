@@ -45,7 +45,10 @@
                 "COMMUNITY_PORTAL_APP_ID": "",
                 "CALLBACK_RETRY_FREQ": "",
                 "SESSION_KEY": "",
-                "SCOPE":""
+                "SCOPE":"",
+                "IPDR_MODULE_ID": "",
+                "IPDR_APP_ID": "",
+                "CTO": ""
             }
         }
     }
