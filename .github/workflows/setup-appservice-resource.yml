@@ -51,7 +51,7 @@ jobs:
           parameters.appServiceSettings.value.SCOPE: ${{ secrets.SCOPE}}
           parameters.appServiceSettings.value.IPDR_MODULE_ID: ${{ vars.IPDR_MODULE_ID }}
           parameters.appServiceSettings.value.IPDR_APP_ID: ${{ vars.IPDR_APP_ID }}
-          paramters.appServiceSettings.value.CTO: ${{ vars.CTO }}
+          parameters.appServiceSettings.value.CTO: ${{ vars.CTO }}
 
       - name: Deploy App Service Plan and Web App
         uses: azure/arm-deploy@v1
