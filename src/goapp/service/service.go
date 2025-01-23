@@ -9,6 +9,8 @@ import (
 	sApprovalRequestApprover "main/service/approval-request-approver"
 	sAuthenticator "main/service/authenticator"
 	sEmail "main/service/email"
+	sInvolvement "main/service/involvement"
+	sIPDisclosureRequest "main/service/ip-disclosure-request"
 	sItem "main/service/item"
 	sMsGraph "main/service/msgraph"
 	sTemplate "main/service/template"
@@ -17,12 +19,14 @@ import (
 type Service struct {
 	Application             sApplication.ApplicationService
 	ApplicationModule       sApplicationModule.ApplicationModuleService
-	Item                    sItem.ItemService
-	Email                   sEmail.EmailService
 	ApprovalRequestApprover sApprovalRequestApprover.ApprovalRequestApproverService
+	Authenticator           sAuthenticator.AuthenticatorService
+	Email                   sEmail.EmailService
+	Involvement             sInvolvement.InvolvementService
+	IPDisclosureRequest     sIPDisclosureRequest.IpDisclosureRequestService
+	Item                    sItem.ItemService
 	MsGraph                 sMsGraph.MsGraphService
 	Template                sTemplate.TemplateService
-	Authenticator           sAuthenticator.AuthenticatorService
 }
 
 type ServiceOptionFunc func(*Service)
@@ -52,6 +56,18 @@ func NewApplicationModuleService(repo *repository.Repository) ServiceOptionFunc 
 func NewAuthenticatorService(conf config.ConfigManager, session *session.ConnectSession) ServiceOptionFunc {
 	return func(s *Service) {
 		s.Authenticator = sAuthenticator.NewAuthenticatorService(conf, *session)
+	}
+}
+
+func NewInvolvementService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.Involvement = sInvolvement.NewInvolvementService(repo)
+	}
+}
+
+func NewIPDisclosureRequestService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.IPDisclosureRequest = sIPDisclosureRequest.NewIpDisclosureRequestService(repo)
 	}
 }
 

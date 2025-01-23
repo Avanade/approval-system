@@ -21,28 +21,36 @@ var (
 	repo = r.NewRepository(
 		r.NewApplication(&db),
 		r.NewApplicationModule(&db),
-		r.NewItem(&db),
 		r.NewApprovalRequestApprover(&db),
+		r.NewInvolvement(&db),
+		r.NewIPDRequest(&db),
+		r.NewIpdrInvolvement(&db),
+		r.NewItem(&db),
 	)
 
 	svc = s.NewService(
-		s.NewApplicationService(repo),
 		s.NewApplicationModuleService(repo),
-		s.NewItemService(repo, conf),
-		s.NewEmailService(conf),
+		s.NewApplicationService(repo),
 		s.NewApprovalRequestApproverService(repo),
+		s.NewAuthenticatorService(conf, &cs),
+		s.NewEmailService(conf),
+		s.NewInvolvementService(repo),
+		s.NewIPDisclosureRequestService(repo),
+		s.NewItemService(repo, conf),
 		s.NewMsGraphService(conf),
 		s.NewTemplateService(conf),
-		s.NewAuthenticatorService(conf, &cs),
 	)
 
 	ctrl = c.NewController(
-		c.NewItemController(svc),
 		c.NewApplicationModuleController(svc),
-		c.NewUserController(svc),
-		c.NewItemPageController(svc, conf),
-		c.NewFallbackController(svc),
 		c.NewAuthenticationController(svc),
+		c.NewFallbackController(svc),
+		c.NewInvolvementController(svc),
+		c.NewIPDisclosureController(svc, conf),
+		c.NewIPDisclosurePageController(svc),
+		c.NewItemController(svc),
+		c.NewItemPageController(svc, conf),
+		c.NewUserController(svc),
 	)
 
 	timedJobs = t.NewTimedJobs(svc, conf)

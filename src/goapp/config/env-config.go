@@ -22,8 +22,44 @@ func NewEnvConfigManager() *envConfigManager {
 	return &envConfigManager{}
 }
 
+func (ecm *envConfigManager) GetCallbackRetryFreq() string {
+	return os.Getenv("CALLBACK_RETRY_FREQ")
+}
+
+func (ecm *envConfigManager) GetClientID() string {
+	return os.Getenv("CLIENT_ID")
+}
+
+func (ecm *envConfigManager) GetClientSecret() string {
+	return os.Getenv("CLIENT_SECRET")
+}
+
+func (ecm *envConfigManager) GetCommunityPortalAppId() string {
+	return os.Getenv("COMMUNITY_PORTAL_APP_ID")
+}
+
 func (ecm *envConfigManager) GetDatabaseConnectionString() string {
 	return os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING")
+}
+
+func (ecm *envConfigManager) GetEmailClientID() string {
+	return os.Getenv("EMAIL_CLIENT_ID")
+}
+
+func (ecm *envConfigManager) GetEmailClientSecret() string {
+	return os.Getenv("EMAIL_CLIENT_SECRET")
+}
+
+func (ecm *envConfigManager) GetCTO() string {
+	return os.Getenv("CTO")
+}
+
+func (ecm *envConfigManager) GetEmailTenantID() string {
+	return os.Getenv("EMAIL_TENANT_ID")
+}
+
+func (ecm *envConfigManager) GetEmailUserID() string {
+	return os.Getenv("EMAIL_USER_ID")
 }
 
 func (ecm *envConfigManager) GetEnterpriseOwners() []string {
@@ -35,40 +71,20 @@ func (ecm *envConfigManager) GetEnterpriseOwners() []string {
 	return ownersArray
 }
 
-func (ecm *envConfigManager) GetEmailTenantID() string {
-	return os.Getenv("EMAIL_TENANT_ID")
-}
-
-func (ecm *envConfigManager) GetEmailClientID() string {
-	return os.Getenv("EMAIL_CLIENT_ID")
-}
-
-func (ecm *envConfigManager) GetEmailClientSecret() string {
-	return os.Getenv("EMAIL_CLIENT_SECRET")
-}
-
-func (ecm *envConfigManager) GetEmailUserID() string {
-	return os.Getenv("EMAIL_USER_ID")
-}
-
 func (ecm *envConfigManager) GetHomeURL() string {
 	return os.Getenv("HOME_URL")
 }
 
+func (ecm *envConfigManager) GetIPDRAppId() string {
+	return os.Getenv("IPDR_APP_ID")
+}
+
+func (ecm *envConfigManager) GetIPDRModuleId() string {
+	return os.Getenv("IPDR_MODULE_ID")
+}
+
 func (ecm *envConfigManager) GetIsEmailEnabled() bool {
 	return os.Getenv("EMAIL_ENABLED") == "true"
-}
-
-func (ecm *envConfigManager) GetTenantID() string {
-	return os.Getenv("TENANT_ID")
-}
-
-func (ecm *envConfigManager) GetClientID() string {
-	return os.Getenv("CLIENT_ID")
-}
-
-func (ecm *envConfigManager) GetClientSecret() string {
-	return os.Getenv("CLIENT_SECRET")
 }
 
 func (ecm *envConfigManager) GetLinkFooters() string {
@@ -79,22 +95,18 @@ func (ecm *envConfigManager) GetOrganizationName() string {
 	return os.Getenv("ORGANIZATION_NAME")
 }
 
-func (ecm *envConfigManager) GetCommunityPortalAppId() string {
-	return os.Getenv("COMMUNITY_PORTAL_APP_ID")
-}
-
-func (ecm *envConfigManager) GetCallbackRetryFreq() string {
-	return os.Getenv("CALLBACK_RETRY_FREQ")
-}
-
 func (ecm *envConfigManager) GetPort() string {
 	return os.Getenv("PORT")
+}
+
+func (ecm *envConfigManager) GetScope() string {
+	return os.Getenv("SCOPE")
 }
 
 func (ecm *envConfigManager) GetSessionKey() string {
 	return os.Getenv("SESSION_KEY")
 }
 
-func (ecm *envConfigManager) GetScope() string {
-	return os.Getenv("SCOPE")
+func (ecm *envConfigManager) GetTenantID() string {
+	return os.Getenv("TENANT_ID")
 }

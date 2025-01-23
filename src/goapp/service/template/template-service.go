@@ -25,6 +25,7 @@ func (t *templateService) UseTemplate(page, path string, user model.AzureUser, p
 	var menu []model.Menu
 	menu = append(menu, model.Menu{Name: "My Requests", Url: "/", IconPath: "/public/icons/projects.svg"})
 	menu = append(menu, model.Menu{Name: "My Approvals", Url: "/myapprovals", IconPath: "/public/icons/approvals.svg"})
+	menu = append(menu, model.Menu{Name: "Request IP Disclosure", Url: "/ipdisclosurerequest", IconPath: "/public/icons/ipdisclosure.svg"})
 	masterPageData := model.Headers{Menu: menu, Page: getUrlPath(path)}
 
 	//Footers

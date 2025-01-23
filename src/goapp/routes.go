@@ -4,6 +4,7 @@ func setPageRoutes() {
 	httpRouter.GET("/", m.Chain(ctrl.ItemPage.MyRequests, m.AzureAuth()))
 	httpRouter.GET("/multiple-approvals", m.Chain(ctrl.ItemPage.MultipleApprovals, m.AzureAuth()))
 	httpRouter.GET("/myapprovals", m.Chain(ctrl.ItemPage.MyApprovals, m.AzureAuth()))
+	httpRouter.GET("/ipdisclosurerequest", m.Chain(ctrl.IPDisclourePage.IpDisclosureRequest, m.AzureAuth()))
 	httpRouter.GET("/response/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", m.Chain(ctrl.ItemPage.RespondToItem, m.AzureAuth()))
 	httpRouter.GET("/responsereassigned/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}/{ApproveText}/{RejectText}", m.Chain(ctrl.ItemPage.ReassignApproval, m.AzureAuth()))
 
@@ -18,10 +19,12 @@ func setApiRoutes() {
 	httpRouter.POST("/api/request", m.Chain(ctrl.Item.CreateItem, m.ManagedIdentityAuth()))
 	httpRouter.POST("/api/process", m.Chain(ctrl.Item.ProcessResponse, m.AzureAuth()))
 	httpRouter.POST("/api/multiple/response/{response}", m.Chain(ctrl.Item.ProcessMultipleResponse, m.AzureAuth()))
+	httpRouter.GET("/api/involvement", m.Chain(ctrl.Involvement.GetInvolvementList, m.AzureAuth()))
 	httpRouter.GET("/api/approver/me/items", m.Chain(ctrl.Item.GetItemsByApprover, m.AzureAuth()))
 	httpRouter.GET("/api/items/type/{type:[0-2]+}/status/{status:[0-3]+}", m.Chain(ctrl.Item.GetItems, m.AzureAuth()))
 	httpRouter.GET("/api/search/users/{search}", m.Chain(ctrl.User.SearchUserFromActiveDirectory, m.AzureAuth()))
 	httpRouter.GET("/api/responsereassignedapi/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{ApproveText}/{RejectText}", m.Chain(ctrl.Item.ReassignItem, m.AzureAuth()))
+	httpRouter.POST("/api/ipdisclosurerequest", m.Chain(ctrl.IPDisclosure.InsertIPDisclosureRequest, m.AzureAuth()))
 }
 
 func serve() {
