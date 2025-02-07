@@ -58,6 +58,8 @@ func (r *itemRepository) GetItemById(id string) (*model.Item, error) {
 		Module:      result[0]["Module"].(string),
 		ApproveText: result[0]["ApproveText"].(string),
 		RejectText:  result[0]["RejectText"].(string),
+		Created:     result[0]["Created"].(time.Time).String(),
+		RequestedBy: result[0]["RequestedBy"].(string),
 	}
 
 	if result[0]["ApproverRemarks"] != nil {

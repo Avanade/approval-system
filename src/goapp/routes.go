@@ -25,6 +25,8 @@ func setApiRoutes() {
 	httpRouter.GET("/api/search/users/{search}", m.Chain(ctrl.User.SearchUserFromActiveDirectory, m.AzureAuth()))
 	httpRouter.GET("/api/responsereassignedapi/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{ApproveText}/{RejectText}", m.Chain(ctrl.Item.ReassignItem, m.AzureAuth()))
 	httpRouter.POST("/api/ipdisclosurerequest", m.Chain(ctrl.IPDisclosure.InsertIPDisclosureRequest, m.AzureAuth()))
+	httpRouter.POST("/api/activity", m.Chain(ctrl.ItemActivity.InsertItemActivity, m.AzureAuth()))
+	httpRouter.GET("/api/activity/{id}", m.Chain(ctrl.ItemActivity.GetItemActivity, m.AzureAuth()))
 }
 
 func serve() {

@@ -64,6 +64,53 @@ func (s *sdkEmailService) SendApprovalRequestEmail(req *model.ItemInsertRequest,
 	return nil
 }
 
+func (s *sdkEmailService) SendActivityEmail(req *model.ItemActivity, recipients []string, domain string) error {
+	bodyTempate := ` 
+			<tr style="color: #5c5c5c;"  >
+				<td class="center-table" align="center">
+					<table style="width: 100%; max-width: 700px;" class="margin-auto">
+						<tr>
+							<td style="padding: 15px 0 10px 0;">
+								<span><b>|User|</b></span> 
+								<span>commented on your request:</span>
+							</td>
+						</tr>
+						<tr>
+							<td align="center" style="padding: 10px;" bgcolor="#F8F8F8">
+								<p>|Comment|</p>
+							</td>
+						</tr>
+						<tr>
+							<td style="padding: 15px 0;">
+								<a href="|Domain|/response/|AppId|/|AppModuleId|/|ItemId|/1?view=activities">
+									View Conversation
+								</a>
+							</td>
+						</tr>
+					</table>
+				</td>
+            </tr>
+            `
+
+	replacer := strings.NewReplacer(
+		"|User|", req.CreatedBy,
+		"|Comment|", req.Content,
+		"|AppId|", req.AppId,
+		"|AppModuleId|", req.AppModuleId,
+		"|ItemId|", req.ItemId,
+		"|Domain|", domain,
+	)
+
+	htmlBody := s.buildHtmlBody(bodyTempate, replacer)
+
+	err := s.SendEmail(recipients, nil, "Approval Request Notification", htmlBody, Html, false)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *sdkEmailService) SendEmail(to, cc []string, subject, content string, contentType ContentType, isSaveToSentItem bool) error {
 	requestBody := graphusers.NewItemSendMailPostRequestBody()
 	message := graphmodels.NewMessage()

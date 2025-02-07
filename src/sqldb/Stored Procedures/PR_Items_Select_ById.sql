@@ -9,7 +9,8 @@ AS
 		T.ApproveText, T.RejectText,
 		AM.CallbackUrl,
 	    AM.ReassignCallbackUrl,
-		i.RespondedBy
+		i.RespondedBy,
+		I.Created, I.CreatedBy [RequestedBy]
 	FROM Items I
 	INNER JOIN ApplicationModules AM ON I.ApplicationModuleId = AM.Id
 	INNER JOIN Applications A ON AM.ApplicationId = A.Id

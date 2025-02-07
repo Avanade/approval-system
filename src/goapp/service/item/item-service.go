@@ -91,6 +91,27 @@ func (s *itemService) GetByApprover(approver, requestType, organization string, 
 	return items, total, nil
 }
 
+func (s *itemService) GetInvolvedUsers(itemId string) ([]string, error) {
+	var users []string
+	approvers, err := s.Repository.ApprovalRequestApprover.GetApproversByItemId(itemId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, approver := range approvers {
+		users = append(users, approver)
+	}
+
+	item, err := s.Repository.Item.GetItemById(itemId)
+	if err != nil {
+		return nil, err
+	}
+
+	users = append(users, item.RequestedBy)
+
+	return users, nil
+}
+
 func (s *itemService) InsertItem(item model.ItemInsertRequest) (string, error) {
 	id, err := s.Repository.Item.InsertItem(item.ApplicationModuleId, item.Subject, item.Body, item.RequesterEmail)
 	if err != nil {

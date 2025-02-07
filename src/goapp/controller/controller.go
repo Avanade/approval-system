@@ -8,6 +8,7 @@ import (
 	cInvolvement "main/controller/involvement"
 	cIPDiscloure "main/controller/ip-disclosure"
 	cItem "main/controller/item"
+	cItemActivity "main/controller/item-activity"
 	cUser "main/controller/user"
 	"main/service"
 )
@@ -20,6 +21,7 @@ type Controller struct {
 	IPDisclosure       cIPDiscloure.IpDisclosureController
 	IPDisclourePage    cIPDiscloure.IpDisclosurePageController
 	Item               cItem.ItemController
+	ItemActivity       cItemActivity.ItemActivityController
 	ItemPage           cItem.ItemPageController
 	User               cUser.UserController
 }
@@ -63,6 +65,12 @@ func NewIPDisclosureController(svc *service.Service, conf config.ConfigManager) 
 func NewItemController(svc *service.Service) ControllerOptionFunc {
 	return func(c *Controller) {
 		c.Item = cItem.NewItemController(svc)
+	}
+}
+
+func NewItemActivityController(svc *service.Service, conf config.ConfigManager) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.ItemActivity = cItemActivity.NewItemActivityController(svc, conf)
 	}
 }
 
