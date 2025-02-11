@@ -17,7 +17,7 @@
       <div x-show="view==='details'">
         <span x-html="body"></span>
         <div class="max-w-[700px] mx-auto">
-          <template x-init="console.log(isApprover)" x-if="isApprover && !alreadyProcessed">
+          <template x-if="isApprover && !alreadyProcessed">
             <form
               onsubmit="event.preventDefault()"
               x-show="requireRemarks=='true'"
@@ -203,11 +203,9 @@
       url: new URL(window.location.href),
       activities: null,
       onLoad() {
-        console.log("onload")
-        if (this.requireRemarks == "false") {
+        if (this.requireRemarks == "false" && this.isApprover) {
           this.submit();
         }
-        // document.getElementById("form").attributes.removeNamedItem("hidden");
       },
       submit() {
         Alpine.store('master').modal.reset()

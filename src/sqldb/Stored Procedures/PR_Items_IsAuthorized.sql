@@ -34,6 +34,9 @@ IF EXISTS (
 	END
 ELSE
 	BEGIN
-		SELECT '0' [IsAuthorized]
+		SELECT '0' [IsAuthorized], I.IsApproved, AM.RequireRemarks
+		FROM Items I
+		INNER JOIN ApplicationModules AM ON I.ApplicationModuleId = AM.Id
+		WHERE I.Id = @ItemId
 		return 0
 	END
