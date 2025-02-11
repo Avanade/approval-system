@@ -9,6 +9,7 @@ import (
 	rIpdrInvolvement "main/repository/ipdr-involvement"
 	rIPDRequest "main/repository/ipdrequest"
 	rItem "main/repository/item"
+	rItemActivity "main/repository/item-activity"
 )
 
 type Repository struct {
@@ -19,6 +20,7 @@ type Repository struct {
 	IPDRequest              rIPDRequest.IpdRequestRepository
 	IpdrInvolvement         rIpdrInvolvement.IpdrInvolvementRepository
 	Item                    rItem.ItemRepository
+	ItemActivity            rItemActivity.ItemActivityRepository
 }
 
 type RepositoryOptionFunc func(*Repository)
@@ -72,5 +74,11 @@ func NewItem(db *database.Database) RepositoryOptionFunc {
 func NewApprovalRequestApprover(db *database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.ApprovalRequestApprover = rApprovalRequestApprover.NewApprovalRequestApproverRepository(db)
+	}
+}
+
+func NewItemActivity(db *database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.ItemActivity = rItemActivity.NewItemActivityRepository(db)
 	}
 }

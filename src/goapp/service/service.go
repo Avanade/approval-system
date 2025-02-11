@@ -12,6 +12,7 @@ import (
 	sInvolvement "main/service/involvement"
 	sIPDisclosureRequest "main/service/ip-disclosure-request"
 	sItem "main/service/item"
+	sItemActivity "main/service/item-activity"
 	sMsGraph "main/service/msgraph"
 	sTemplate "main/service/template"
 )
@@ -25,6 +26,7 @@ type Service struct {
 	Involvement             sInvolvement.InvolvementService
 	IPDisclosureRequest     sIPDisclosureRequest.IpDisclosureRequestService
 	Item                    sItem.ItemService
+	ItemActivity            sItemActivity.ItemActivityService
 	MsGraph                 sMsGraph.MsGraphService
 	Template                sTemplate.TemplateService
 }
@@ -74,6 +76,12 @@ func NewIPDisclosureRequestService(repo *repository.Repository) ServiceOptionFun
 func NewItemService(repo *repository.Repository, conf config.ConfigManager) ServiceOptionFunc {
 	return func(s *Service) {
 		s.Item = sItem.NewItemService(repo, conf)
+	}
+}
+
+func NewItemActivityService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.ItemActivity = sItemActivity.NewItemActivityService(repo)
 	}
 }
 

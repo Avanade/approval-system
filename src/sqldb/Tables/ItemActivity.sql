@@ -1,0 +1,9 @@
+CREATE TABLE [dbo].[ItemActivity] (
+    [Id] INT IDENTITY (1, 1) NOT NULL,
+    [CreatedBy] VARCHAR (50) NOT NULL,
+    [Created] DATETIME NOT NULL,
+    [Content] VARCHAR (8000) NOT NULL,
+    [ItemId] UNIQUEIDENTIFIER NOT NULL,
+    CONSTRAINT [PK_ItemActivity] PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT FK_ItemActivity_Items FOREIGN KEY (ItemId) REFERENCES Items(Id)
+);

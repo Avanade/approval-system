@@ -5,7 +5,7 @@ func setPageRoutes() {
 	httpRouter.GET("/multiple-approvals", m.Chain(ctrl.ItemPage.MultipleApprovals, m.AzureAuth()))
 	httpRouter.GET("/myapprovals", m.Chain(ctrl.ItemPage.MyApprovals, m.AzureAuth()))
 	httpRouter.GET("/ipdisclosurerequest", m.Chain(ctrl.IPDisclourePage.IpDisclosureRequest, m.AzureAuth()))
-	httpRouter.GET("/response/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", m.Chain(ctrl.ItemPage.RespondToItem, m.AzureAuth()))
+	httpRouter.GET("/{action}/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", m.Chain(ctrl.ItemPage.RespondToItem, m.AzureAuth()))
 	httpRouter.GET("/responsereassigned/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}/{ApproveText}/{RejectText}", m.Chain(ctrl.ItemPage.ReassignApproval, m.AzureAuth()))
 
 	httpRouter.GET("/loginredirect", ctrl.AuthenticationPage.LoginRedirectHandler)
@@ -25,6 +25,8 @@ func setApiRoutes() {
 	httpRouter.GET("/api/search/users/{search}", m.Chain(ctrl.User.SearchUserFromActiveDirectory, m.AzureAuth()))
 	httpRouter.GET("/api/responsereassignedapi/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{ApproveText}/{RejectText}", m.Chain(ctrl.Item.ReassignItem, m.AzureAuth()))
 	httpRouter.POST("/api/ipdisclosurerequest", m.Chain(ctrl.IPDisclosure.InsertIPDisclosureRequest, m.AzureAuth()))
+	httpRouter.POST("/api/activity", m.Chain(ctrl.ItemActivity.InsertItemActivity, m.AzureAuth()))
+	httpRouter.GET("/api/activity/{id}", m.Chain(ctrl.ItemActivity.GetItemActivity, m.AzureAuth()))
 }
 
 func serve() {

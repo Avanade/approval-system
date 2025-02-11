@@ -23,6 +23,9 @@ type RespondePageData struct {
 	Response            string
 	ApproveText         string
 	RejectText          string
+	IsApprover          bool
+	AlreadyProcessed    bool
+	ApproverResponse    string
 }
 
 type GetItemsByApproverResponse struct {

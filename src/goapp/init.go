@@ -26,6 +26,7 @@ var (
 		r.NewIPDRequest(&db),
 		r.NewIpdrInvolvement(&db),
 		r.NewItem(&db),
+		r.NewItemActivity(&db),
 	)
 
 	svc = s.NewService(
@@ -37,6 +38,7 @@ var (
 		s.NewInvolvementService(repo),
 		s.NewIPDisclosureRequestService(repo),
 		s.NewItemService(repo, conf),
+		s.NewItemActivityService(repo),
 		s.NewMsGraphService(conf),
 		s.NewTemplateService(conf),
 	)
@@ -48,6 +50,7 @@ var (
 		c.NewInvolvementController(svc),
 		c.NewIPDisclosureController(svc, conf),
 		c.NewIPDisclosurePageController(svc),
+		c.NewItemActivityController(svc, conf),
 		c.NewItemController(svc),
 		c.NewItemPageController(svc, conf),
 		c.NewUserController(svc),
