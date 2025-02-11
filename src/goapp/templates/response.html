@@ -214,11 +214,6 @@
         Alpine.store('master').modal.show()
         Alpine.store('master').postData("/api/process", this.form, "Your response has been recorded.",
             "Go to your approvals", "/myapprovals")
-        this.showResult(
-          "submitted",
-          "Processing",
-          "Please wait while processing your request."
-        );
       },
       submitActivity() {
         let action = this.isApprover ? "response" : "view";
