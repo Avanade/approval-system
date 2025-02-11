@@ -153,7 +153,7 @@
   //PENDING REQUEST
   function pendingRenderItem(item){
     return `<div class="block hover:bg-gray-50">
-              <div class="px-4 py-4 sm:px-6">
+              <div class="px-4 py-4 sm:px-6 cursor-pointer" x-data="{url: item.approveUrl.replace('response','view')}" @click="window.location.href=url">
                 <div class="flex items-center justify-between">
                   <div class="grow">
                     <div class="items-center justify-between">
@@ -197,7 +197,7 @@
                     </div>
                   </div>
                   <div class="relative mt-1">
-                    <button class="ml-auto" x-on:click="item.show = !item.show">
+                    <button class="ml-auto" x-on:click="item.show = !item.show" @click.stop>
                       <template x-if="!item.show">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
@@ -225,7 +225,7 @@
   //CLOSED REQUEST
   function closedRenderItem(item){
     return `<div class="block hover:bg-gray-50">
-              <div class="px-4 py-4 sm:px-6">
+              <div class="px-4 py-4 sm:px-6 cursor-pointer" x-data="{ url : item.approveUrl.replace('response','view')}" @click="window.location.href=url">
                 <div class="flex items-center justify-between">
                   <div class="grow">
                     <div class="flex items-center justify-between">
@@ -277,7 +277,7 @@
                     </div>
                   </div>
                   <div class="relative mt-1">
-                    <button class="ml-auto" x-on:click="item.show = !item.show">
+                    <button class="ml-auto" x-on:click="item.show = !item.show" @click.stop>
                       <template x-if="!item.show">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20"
                           stroke="currentColor" stroke-width="2">

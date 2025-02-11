@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"main/config"
+	"main/model"
 	"main/service"
 	"net/http"
 
@@ -85,6 +86,14 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 
 	params := mux.Vars(r)
 
+	action := params["action"]
+	isApprover := action == "response"
+
+	isApproved := params["isApproved"]
+	if isApproved == "" {
+		isApproved = "true"
+	}
+
 	itemIsAuthorized, err := c.Service.Item.ItemIsAuthorized(
 		params["appGuid"],
 		params["appModuleGuid"],
@@ -96,53 +105,50 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if !itemIsAuthorized.IsAuthorized {
+	var approverResponse string
+	if itemIsAuthorized.IsApproved == nil {
+		itemIsAuthorized.IsApproved = &model.NullBool{Value: false}
+	} else {
+		if itemIsAuthorized.IsApproved.Value {
+			approverResponse = "approved"
+		} else {
+			approverResponse = "rejected"
+		}
+	}
+	item, err := c.Service.Item.GetItemById(params["itemGuid"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// If the user is not the approver nor the requestor, show unauthorized page
+	if (!itemIsAuthorized.IsAuthorized && isApprover) || (item.RequestedBy != user.Email) {
 		t, d := c.Service.Template.UseTemplate("Unauthorized", r.URL.Path, *user, nil)
 		err = t.Execute(w, d)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-	} else {
-		if itemIsAuthorized.IsApproved != nil {
-			var text string
-			if itemIsAuthorized.IsApproved.Value {
-				text = "approved"
-			} else {
-				text = "rejected"
-			}
+		return
+	}
 
-			data := RespondePageData{
-				Response: text,
-			}
+	// If the user is the approver or the requestor, show the response page
+	data := RespondePageData{
+		ApplicationId:       params["appGuid"],
+		ApplicationModuleId: params["appModuleGuid"],
+		ItemId:              params["itemGuid"],
+		ApproverEmail:       user.Email,
+		IsApproved:          isApproved,
+		Data:                *item,
+		RequireRemarks:      itemIsAuthorized.RequireRemarks,
+		IsApprover:          isApprover, // show remarks and approve/reject buttons
+		AlreadyProcessed:    itemIsAuthorized.IsApproved.Value,
+		ApproverResponse:    approverResponse,
+	}
 
-			t, d := c.Service.Template.UseTemplate("already-processed", r.URL.Path, *user, data)
-			err = t.Execute(w, d)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-		} else {
-			item, err := c.Service.Item.GetItemById(params["itemGuid"])
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			data := RespondePageData{
-				ApplicationId:       params["appGuid"],
-				ApplicationModuleId: params["appModuleGuid"],
-				ItemId:              params["itemGuid"],
-				ApproverEmail:       user.Email,
-				IsApproved:          params["isApproved"],
-				Data:                *item,
-				RequireRemarks:      itemIsAuthorized.RequireRemarks,
-			}
-
-			t, d := c.Service.Template.UseTemplate("response", r.URL.Path, *user, data)
-			err = t.Execute(w, d)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-		}
+	t, d := c.Service.Template.UseTemplate("response", r.URL.Path, *user, data)
+	err = t.Execute(w, d)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 

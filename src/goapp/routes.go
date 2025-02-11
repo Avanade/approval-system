@@ -5,7 +5,7 @@ func setPageRoutes() {
 	httpRouter.GET("/multiple-approvals", m.Chain(ctrl.ItemPage.MultipleApprovals, m.AzureAuth()))
 	httpRouter.GET("/myapprovals", m.Chain(ctrl.ItemPage.MyApprovals, m.AzureAuth()))
 	httpRouter.GET("/ipdisclosurerequest", m.Chain(ctrl.IPDisclourePage.IpDisclosureRequest, m.AzureAuth()))
-	httpRouter.GET("/response/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", m.Chain(ctrl.ItemPage.RespondToItem, m.AzureAuth()))
+	httpRouter.GET("/{action}/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}", m.Chain(ctrl.ItemPage.RespondToItem, m.AzureAuth()))
 	httpRouter.GET("/responsereassigned/{appGuid}/{appModuleGuid}/{itemGuid}/{isApproved}/{ApproveText}/{RejectText}", m.Chain(ctrl.ItemPage.ReassignApproval, m.AzureAuth()))
 
 	httpRouter.GET("/loginredirect", ctrl.AuthenticationPage.LoginRedirectHandler)

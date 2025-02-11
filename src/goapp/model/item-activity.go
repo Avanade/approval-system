@@ -9,3 +9,9 @@ type ItemActivity struct {
 	AppId       string `json:"appId"`
 	AppModuleId string `json:"appModuleId"`
 }
+
+type InvolvedUsers struct {
+	Requestor   string
+	Approvers   []string
+	Consultants []string
+}

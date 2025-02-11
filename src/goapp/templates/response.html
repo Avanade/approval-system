@@ -17,86 +17,87 @@
       <div x-show="view==='details'">
         <span x-html="body"></span>
         <div class="max-w-[700px] mx-auto">
-          <form
-            onsubmit="event.preventDefault()"
-            x-show="requireRemarks=='true'"
-            hidden
-            id="form"
-          >
-            <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-              <div class="sm:col-span-6">
-                <label for="remarks" class="block text-sm font-medium text-gray-700">
-                  Remarks
-                </label>
-                <div class="mt-1">
-                  <textarea
-                    id="remarks"
-                    name="remarks"
-                    maxlength="255"
-                    x-model="form.remarks"
-                    rows="3"
-                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-                  ></textarea>
-                </div>
-                <p class="mt-2 text-sm text-gray-500">
-                  Specify remarks for your response.
-                </p>
-              </div>
-              <fieldset class="mt-6">
-                <legend class="contents text-base font-medium text-gray-900">
-                  Response
-                </legend>
-                <!-- <p class="text-sm text-gray-500">Approve/Reject</p> -->
-                <div class="mt-4 space-y-4">
-                  <div class="flex items-center">
-                    <input
-                      id="approve"
-                      value="1"
-                      name="isApproved"
-                      x-model="form.isApproved"
-                      type="radio"
-                      class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300"
-                    />
-                    <label
-                      for="approve"
-                      class="ml-3 block text-sm font-medium text-gray-700"
-                    >
-                      Approve
-                    </label>
+          <template x-init="console.log(isApprover)" x-if="isApprover && !alreadyProcessed">
+            <form
+              onsubmit="event.preventDefault()"
+              x-show="requireRemarks=='true'"
+              id="form"
+            >
+              <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="sm:col-span-6">
+                  <label for="remarks" class="block text-sm font-medium text-gray-700">
+                    Remarks
+                  </label>
+                  <div class="mt-1">
+                    <textarea
+                      id="remarks"
+                      name="remarks"
+                      maxlength="255"
+                      x-model="form.remarks"
+                      rows="3"
+                      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"
+                    ></textarea>
                   </div>
-                  <div class="flex items-center">
-                    <input
-                      id="reject"
-                      value="0"
-                      name="isApproved"
-                      x-model="form.isApproved"
-                      type="radio"
-                      class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300"
-                    />
-                    <label
-                      for="reject"
-                      class="ml-3 block text-sm font-medium text-gray-700"
-                    >
-                      Reject
-                    </label>
-                  </div>
+                  <p class="mt-2 text-sm text-gray-500">
+                    Specify remarks for your response.
+                  </p>
                 </div>
-              </fieldset>
-            </div>
-            <div class="pt-5">
-              <div class="flex justify-center">
-                <button
-                  type="submit"
-                  @click="submit()"
-                  class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  :class="!isValid ? 'bg-orange-200' : 'bg-orange-600 hover:bg-orange-700'"
-                  x-bind:disabled="!isValid"
-                >
-                  Submit
-                </button>
+                <fieldset class="mt-6">
+                  <legend class="contents text-base font-medium text-gray-900">
+                    Response
+                  </legend>
+                  <!-- <p class="text-sm text-gray-500">Approve/Reject</p> -->
+                  <div class="mt-4 space-y-4">
+                    <div class="flex items-center">
+                      <input
+                        id="approve"
+                        value="1"
+                        name="isApproved"
+                        x-model="form.isApproved"
+                        type="radio"
+                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300"
+                      />
+                      <label
+                        for="approve"
+                        class="ml-3 block text-sm font-medium text-gray-700"
+                      >
+                        Approve
+                      </label>
+                    </div>
+                    <div class="flex items-center">
+                      <input
+                        id="reject"
+                        value="0"
+                        name="isApproved"
+                        x-model="form.isApproved"
+                        type="radio"
+                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300"
+                      />
+                      <label
+                        for="reject"
+                        class="ml-3 block text-sm font-medium text-gray-700"
+                      >
+                        Reject
+                      </label>
+                    </div>
+                  </div>
+                </fieldset>
               </div>
-            </div>
-          </form>
+              <div class="pt-5">
+                <div class="flex justify-center">
+                  <button
+                    type="submit"
+                    @click="submit()"
+                    class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    :class="!isValid ? 'bg-orange-200' : 'bg-orange-600 hover:bg-orange-700'"
+                    x-bind:disabled="!isValid"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </form>
+          </template>
         </div>
       </div>
       <div x-show="view==='activities'">
@@ -137,11 +138,22 @@
           </ul>
           
           <!-- New comment form -->
-          <div class="mt-6 flex gap-x-3">
+          <div class="mt-6 flex gap-x-4">
             <div class="relative flex size-6 flex-none items-center justify-center bg-white">
               <div class="size-1.5 rounded-full bg-gray-100 ring-1 ring-gray-300"></div>
             </div>
-            <div action="#" class="relative flex-auto">
+            <!-- Already processed -->
+             <div x-show="alreadyProcessed" class="w-full">
+              <div class="flex w-full">
+                <div class="flex-auto py-0.5 text-xs/5 text-gray-500"><span class="font-medium text-gray-900">{{.Data.RequestedBy}}</span> {{.ApproverResponse}} the request.</div>
+                <div x-data="{date: new Date('{{.Data.DateResponded}}')}"
+                  x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"
+                  class="flex-none py-0.5 text-xs/5 text-gray-500 ml-auto"></div>
+              </div>
+              <div class="text-xs/5 text-gray-500 overflow-hidden rounded-lg p-3 outline outline-1 -outline-offset-1 outline-gray-300 mt-1"><b>Remarks:</b> {{.Data.ApproverRemarks}}</div>
+            </div>
+            <!-- Not yet processed -->
+            <div action="#" class="relative flex-auto" x-show="!alreadyProcessed">
               <div class="overflow-hidden rounded-lg pb-12 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-orange-500">
                 <label for="comment" class="sr-only">Add your comment</label>
                 <textarea x-model="commentForm.content" rows="2" name="comment" id="comment" class="block w-full resize-none bg-transparent px-3 py-1.5 text-base text-gray-900 placeholder:text-gray-400  focus:outline-0 sm:text-sm/6 border-0" style="--tw-ring-shadow: 0 0 #000 !important;" placeholder="Add your comment..."></textarea>
@@ -170,6 +182,8 @@
     return {
       body: `{{.Data.Body}}`,
       view: urlParams.get("view") || "details",
+      isApprover: "{{.IsApprover}}" === "true",
+      alreadyProcessed: "{{.AlreadyProcessed}}" === "true",
       form: {
         applicationId: "{{.ApplicationId}}",
         applicationModuleId: "{{.ApplicationModuleId}}",
@@ -189,11 +203,11 @@
       url: new URL(window.location.href),
       activities: null,
       onLoad() {
+        console.log("onload")
         if (this.requireRemarks == "false") {
           this.submit();
         }
-        document.getElementById("form").attributes.removeNamedItem("hidden");
-        // this.getActivities();
+        // document.getElementById("form").attributes.removeNamedItem("hidden");
       },
       submit() {
         Alpine.store('master').modal.reset()
@@ -207,11 +221,12 @@
         );
       },
       submitActivity() {
+        let action = this.isApprover ? "response" : "view";
         Alpine.store('master').modal.reset()
         Alpine.store('master').modal.update("loading", "Please wait...", "Posting your commment.", "/")
         Alpine.store('master').modal.show()
         Alpine.store('master').postData("/api/activity", this.commentForm, "Your comment has been posted.",
-            "Refresh page", "/response/{{.ApplicationId}}/{{.ApplicationModuleId}}/{{.ItemId}}/1?view=activities")  
+            "Refresh page", `/${action}/{{.ApplicationId}}/{{.ApplicationModuleId}}/{{.ItemId}}/1?view=activities`)  
       },
       get isCommentValid() {
         if (

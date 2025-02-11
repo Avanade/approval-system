@@ -64,7 +64,7 @@ func (s *sdkEmailService) SendApprovalRequestEmail(req *model.ItemInsertRequest,
 	return nil
 }
 
-func (s *sdkEmailService) SendActivityEmail(req *model.ItemActivity, recipients []string, domain string) error {
+func (s *sdkEmailService) SendActivityEmail(req *model.ItemActivity, recipients []string, domain, action string) error {
 	bodyTempate := ` 
 			<tr style="color: #5c5c5c;"  >
 				<td class="center-table" align="center">
@@ -82,7 +82,7 @@ func (s *sdkEmailService) SendActivityEmail(req *model.ItemActivity, recipients 
 						</tr>
 						<tr>
 							<td style="padding: 15px 0;">
-								<a href="|Domain|/response/|AppId|/|AppModuleId|/|ItemId|/1?view=activities">
+								<a href="|Domain|/|Action|/|AppId|/|AppModuleId|/|ItemId|/1?view=activities">
 									View Conversation
 								</a>
 							</td>
@@ -99,6 +99,7 @@ func (s *sdkEmailService) SendActivityEmail(req *model.ItemActivity, recipients 
 		"|AppModuleId|", req.AppModuleId,
 		"|ItemId|", req.ItemId,
 		"|Domain|", domain,
+		"|Action|", action,
 	)
 
 	htmlBody := s.buildHtmlBody(bodyTempate, replacer)
