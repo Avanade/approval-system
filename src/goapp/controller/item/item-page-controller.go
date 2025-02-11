@@ -122,7 +122,7 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 	}
 
 	// If the user is not the approver nor the requestor, show unauthorized page
-	if (!itemIsAuthorized.IsAuthorized && isApprover) || (item.RequestedBy != user.Email) {
+	if (!itemIsAuthorized.IsAuthorized && isApprover) || (item.RequestedBy != user.Email && !isApprover) {
 		t, d := c.Service.Template.UseTemplate("Unauthorized", r.URL.Path, *user, nil)
 		err = t.Execute(w, d)
 		if err != nil {
