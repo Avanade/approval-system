@@ -13,6 +13,7 @@ import (
 	sIPDisclosureRequest "main/service/ip-disclosure-request"
 	sItem "main/service/item"
 	sItemActivity "main/service/item-activity"
+	sLegalConsultation "main/service/legal-consultation"
 	sMsGraph "main/service/msgraph"
 	sTemplate "main/service/template"
 )
@@ -27,6 +28,7 @@ type Service struct {
 	IPDisclosureRequest     sIPDisclosureRequest.IpDisclosureRequestService
 	Item                    sItem.ItemService
 	ItemActivity            sItemActivity.ItemActivityService
+	LegalConsultation       sLegalConsultation.LegalConsultationService
 	MsGraph                 sMsGraph.MsGraphService
 	Template                sTemplate.TemplateService
 }
@@ -94,6 +96,12 @@ func NewEmailService(conf config.ConfigManager) ServiceOptionFunc {
 func NewApprovalRequestApproverService(repo *repository.Repository) ServiceOptionFunc {
 	return func(s *Service) {
 		s.ApprovalRequestApprover = sApprovalRequestApprover.NewApprovalRequestApproverService(repo)
+	}
+}
+
+func NewLegalConsultationService(repo *repository.Repository, conf config.ConfigManager) ServiceOptionFunc {
+	return func(s *Service) {
+		s.LegalConsultation = sLegalConsultation.NewLegalConsultationService(repo, conf)
 	}
 }
 

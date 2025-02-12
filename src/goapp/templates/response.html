@@ -11,6 +11,13 @@
           x-bind:class="view==='activities' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> 
         Activities
       </div>
+      <div style="margin-left: auto !important;" x-show="consultLegalButton">
+        <button @click="consultLegal()"
+          class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded" @click="location.href='/multiple-approvals'">
+          Consult Legal
+        </button>
+      </div>
+      
     </div>
     <div class="px-5">
       <h3 class="text-xl mb-7">{{.Data.Subject}}</h3>
@@ -118,20 +125,43 @@
             <!-- Loop for activities -->
             <template x-if="activitiesNotNull()">
               <template x-for="activity in activities" >
-                <li class="relative flex gap-x-4" >
-                  <div class="absolute -bottom-6 left-0 top-0 flex w-6 justify-center">
-                    <div class="w-px bg-gray-200"></div>
-                  </div>
-                  <div class="relative flex size-6 flex-none items-center justify-center bg-white">
-                    <div class="size-1.5 rounded-full bg-gray-100 ring-1 ring-gray-300"></div>
-                  </div>
-                  <div class="flex-auto rounded-md p-3 ring-1 ring-inset ring-gray-200">
-                    <div class="flex justify-between gap-x-4">
-                      <div class="py-0.5 text-xs/5 text-gray-500"><span class="font-medium text-gray-900" x-text="activity.createdBy"></span> commented</div>
-                      <time datetime="2023-01-23T15:56" class="flex-none py-0.5 text-xs/5 text-gray-500" x-text="new Date(activity.created).toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                <li class="relative flex gap-x-4">
+                  <template x-data="{activity}" x-init="console.log(activity.action)" x-if="activity.action === 'comment'">
+                    <div class="w-full relative flex gap-x-4">
+                      <div class="absolute -bottom-6 left-0 top-0 flex w-6 justify-center">
+                        <div class="w-px bg-gray-200"></div>
+                      </div>
+                      <div class="relative flex size-6 flex-none items-center justify-center bg-white">
+                        <div class="size-1.5 rounded-full bg-gray-100 ring-1 ring-gray-300"></div>
+                      </div>
+                      <div class="flex-auto rounded-md p-3 ring-1 ring-inset ring-gray-200" x-init="console.log(activity.action)">
+                        <div class="flex justify-between gap-x-4">
+                          <div class="py-0.5 text-xs/5 text-gray-500"><span class="font-medium text-gray-900" x-text="activity.details.createdBy"></span> commented</div>
+                          <time datetime="2023-01-23T15:56" class="flex-none py-0.5 text-xs/5 text-gray-500" x-text="new Date(activity.details.created).toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                        </div>
+                        <p class="text-sm/6 text-gray-500" x-text="activity.details.content"></p>
+                      </div>
                     </div>
-                    <p class="text-sm/6 text-gray-500" x-text="activity.content"></p>
-                  </div>
+                  </template>
+                  <template x-data="{activity}" x-init="console.log(activity.action)" x-if="activity.action === 'consult'">
+                    <div class="w-full relative flex gap-x-4">
+                      <div class="absolute -bottom-6 left-0 top-0 flex w-6 justify-center">
+                        <div class="w-px bg-gray-200"></div>
+                      </div>
+                      <div class="relative flex size-6 flex-none items-center justify-center bg-white">
+                        <div class="size-1.5 rounded-full bg-gray-100 ring-1 ring-gray-300"></div>
+                      </div>
+                      <div class="w-full">
+                        <div class="flex w-full">
+                          <div class="flex-auto py-0.5 text-xs/5 text-gray-500"><span class="font-medium text-gray-900" x-text="activity.actor"></span> asked for input from the legal team. The following user/s have been added to the conversation:
+                          <span x-text="activity.details.content"></span></div>
+                          <div x-data="{date: new Date(activity.created)}"
+                            x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"
+                            class="flex-none py-0.5 text-xs/5 text-gray-500 ml-auto"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
                 </li>
               </template>
             </template>
@@ -184,6 +214,7 @@
       view: urlParams.get("view") || "details",
       isApprover: "{{.IsApprover}}" === "true",
       alreadyProcessed: "{{.AlreadyProcessed}}" === "true",
+      consultLegalButton: "{{.ConsultLegalButton}}" === "true",
       form: {
         applicationId: "{{.ApplicationId}}",
         applicationModuleId: "{{.ApplicationModuleId}}",
@@ -197,6 +228,11 @@
         content: "",
         appId: "{{.ApplicationId}}",
         appModuleId: "{{.ApplicationModuleId}}",
+      },
+      consultLegalForm: {
+        applicationId: "{{.ApplicationId}}",
+        applicationModuleId: "{{.ApplicationModuleId}}",
+        itemId: "{{.ItemId}}",
       },
       requireRemarks: "{{.RequireRemarks}}",
       status: "",
@@ -219,7 +255,19 @@
         Alpine.store('master').modal.update("loading", "Please wait...", "Posting your commment.", "/")
         Alpine.store('master').modal.show()
         Alpine.store('master').postData("/api/activity", this.commentForm, "Your comment has been posted.",
-            "Refresh page", `/${action}/{{.ApplicationId}}/{{.ApplicationModuleId}}/{{.ItemId}}/1?view=activities`)  
+            "Refresh page", `/${action}/{{.ApplicationId}}/{{.ApplicationModuleId}}/{{.ItemId}}/2?view=activities`)  
+      },
+      consultLegal() {
+        let f = () => {
+          Alpine.store('master').modal.show()
+          Alpine.store('master').postData(`/api/ipdisclosurerequest/consultlegal`, this.consultLegalForm,
+            "An email will be sent to the legal team.", "Refresh page",
+            "/response/{{.ApplicationId}}/{{.ApplicationModuleId}}/{{.ItemId}}/2")
+        }
+        let title = "Confirmation"
+        let message = `Do you want to ask for input from the legal team?`
+        Alpine.store('master').confirmationModal.update(title, message, f)
+        Alpine.store('master').confirmationModal.show()
       },
       get isCommentValid() {
         if (

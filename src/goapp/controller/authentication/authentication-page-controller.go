@@ -37,12 +37,35 @@ func (a *authenticationPageController) CallbackHandler(w http.ResponseWriter, r 
 		return
 	}
 
+	// Pull list of legal approvers by using the endpoint /api/repository-approvers/legal
+	token, err := a.Service.Authenticator.GenerateToken()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	legalApprovers, err := a.Service.LegalConsultation.GetLegalConsultants(token)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Check if user is a legal approver
+	isLegalApprover := false
+	for _, v := range legalApprovers {
+		if v.ApproverEmail == u.Profile["preferred_username"].(string) {
+			isLegalApprover = true
+			break
+		}
+	}
+
 	data := map[string]interface{}{
-		"id_token":      u.IdToken,
-		"access":        u.AccessToken,
-		"profile":       u.Profile,
-		"refresh_token": u.RefreshToken,
-		"expiry":        u.Expiry,
+		"id_token":        u.IdToken,
+		"access":          u.AccessToken,
+		"profile":         u.Profile,
+		"refresh_token":   u.RefreshToken,
+		"expiry":          u.Expiry,
+		"isLegalApprover": isLegalApprover,
 	}
 
 	err = a.Authenticator.SaveOnSession(&w, r, "auth-session", data)

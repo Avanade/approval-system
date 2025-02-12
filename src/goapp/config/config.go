@@ -12,6 +12,7 @@ type ConfigManager interface {
 	GetClientSecret() string
 	GetCTO() string
 	GetCommunityPortalAppId() string
+	GetCommunityPortalDomain() string
 	GetDatabaseConnectionString() string
 	GetEmailClientID() string
 	GetEmailClientSecret() string

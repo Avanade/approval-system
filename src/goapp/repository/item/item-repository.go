@@ -98,6 +98,10 @@ func (r *itemRepository) GetItemById(id string) (*model.Item, error) {
 		item.RespondedBy = result[0]["RespondedBy"].(string)
 	}
 
+	if result[0]["ApplicationModuleId"] != nil {
+		item.ModuleId = result[0]["ApplicationModuleId"].(string)
+	}
+
 	return &item, nil
 }
 

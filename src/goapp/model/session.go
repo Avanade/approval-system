@@ -11,6 +11,7 @@ type SessionMapValue struct {
 }
 
 type AzureUser struct {
-	Name  string `json:"name"`
-	Email string `json:"preferred_username"`
+	Name            string `json:"name"`
+	Email           string `json:"preferred_username"`
+	IsLegalApprover bool
 }

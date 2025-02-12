@@ -7,6 +7,7 @@ import (
 	"main/model"
 	"main/service"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -14,12 +15,43 @@ import (
 type itemPageController struct {
 	*service.Service
 	CommunityPortalAppId string
+	IPDRModuleId         string
+	CTO                  string
 }
 
 func NewItemPageController(s *service.Service, conf config.ConfigManager) ItemPageController {
 	return &itemPageController{
 		Service:              s,
 		CommunityPortalAppId: conf.GetCommunityPortalAppId(),
+		IPDRModuleId:         conf.GetIPDRModuleId(),
+		CTO:                  conf.GetCTO(),
+	}
+}
+
+func (c *itemPageController) ForReview(w http.ResponseWriter, r *http.Request) {
+	user, err := c.Service.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	application, err := c.Service.Application.GetApplicationById(c.CommunityPortalAppId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	b, err := json.Marshal(application)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	t, d := c.Service.Template.UseTemplate("forreview", r.URL.Path, *user, string(b))
+
+	err = t.Execute(w, d)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -131,6 +163,26 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Check if the item is an IP Disclosure Request
+	consultLegalButton := strings.EqualFold(item.ModuleId, c.IPDRModuleId)
+
+	// Check if the user is the CTO
+	if consultLegalButton && user.Email != c.CTO {
+		consultLegalButton = false
+	}
+
+	// Check if legal has been involved
+	if consultLegalButton {
+		consultations, err := c.Service.LegalConsultation.GetLegalConsultationByItemId(params["itemGuid"])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if len(consultations) > 0 {
+			consultLegalButton = false
+		}
+	}
+
 	// If the user is the approver or the requestor, show the response page
 	data := RespondePageData{
 		ApplicationId:       params["appGuid"],
@@ -143,6 +195,7 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 		IsApprover:          isApprover, // show remarks and approve/reject buttons
 		AlreadyProcessed:    itemIsAuthorized.IsApproved.Value,
 		ApproverResponse:    approverResponse,
+		ConsultLegalButton:  consultLegalButton,
 	}
 
 	t, d := c.Service.Template.UseTemplate("response", r.URL.Path, *user, data)
