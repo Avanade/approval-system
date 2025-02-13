@@ -36,18 +36,9 @@
     return {
       tabs : ['pending', 'closed'],
       activeTab : '',
-      requestTypes : [{id : '', name: 'All'}],
-      organizations : ['all'],
       data: JSON.parse('{{ . }}'),
       async init(){
         this.activeTab = this.tabs[0];
-        requestTypes = await getRequestTypes()
-        this.requestTypes = [...this.requestTypes, ...requestTypes]
-        this.organizations = [...this.organizations, ...organizations]
-      },
-      isRequestTypeWithOrg(requestType) {
-        const withOrg = ['OrgAccess', 'Organization', 'GitHubCopilot']
-        return withOrg.includes(requestType)
       },
       onChangeTabs(tab){
         this.activeTab = this.tabs[tab];
@@ -57,7 +48,7 @@
   //PENDING REQUEST
   function pendingRenderItem(item){
     return `<div class="block hover:bg-gray-50">
-              <div class="px-4 py-4 sm:px-6 cursor-pointer" x-data="{url: item.approveUrl.replace('response','view')}" @click="window.location.href=url">
+              <div class="px-4 py-4 sm:px-6 cursor-pointer" @click="window.location.href='/review/' + item.applicationId + '/' + item.moduleId + '/' + item.id + '/3'">
                 <div class="flex items-center justify-between">
                   <div class="grow">
                     <div class="items-center justify-between">
@@ -65,7 +56,7 @@
                     </div>
                     <div class="grid grid-cols-2 text-sm text-sm text-gray-500">
                       <div>
-                        <p x-data="{ app: 'Application: ' + item.application}" x-text="app"></p>
+                        <p x-data="{ app: 'Requestor: ' + item.requestedBy}" x-text="app"></p>
                       </div>
                       <div>
                         <p>
@@ -73,9 +64,6 @@
                           <time x-data="{date: new Date(item.created.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}"
                             x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
                         </p>
-                      </div>
-                      <div>
-                        <p x-data="{ mod: 'Module: ' + item.module}" x-text="mod"></p>
                       </div>
                       <template x-if="item.approvers != null">
                         <template x-if="item.approvers.length != 0">

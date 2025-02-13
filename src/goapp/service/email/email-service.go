@@ -151,7 +151,7 @@ func (s *sdkEmailService) SendLegalConsultationRequestEmail(req *model.ConsultLe
 
 	htmlBody := s.buildHtmlBody(bodyTempate, replacer)
 
-	err := s.SendEmail(recipients, nil, "Legal Input is Requested", htmlBody, Html, false)
+	err := s.SendEmail(recipients, nil, "IP Disclosure Request", htmlBody, Html, false)
 	if err != nil {
 		return err
 	}
