@@ -23,7 +23,7 @@ func NewItemActivityController(s *service.Service, c config.ConfigManager) ItemA
 
 func (c *itemActivityController) InsertItemActivity(w http.ResponseWriter, r *http.Request) {
 	// Decode payload
-	var req model.ItemActivity
+	var req model.NewItemActivityRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -37,33 +37,64 @@ func (c *itemActivityController) InsertItemActivity(w http.ResponseWriter, r *ht
 		return
 	}
 
-	req.CreatedBy = user.Email
-
-	// Insert Item Activity
-	_, err = c.Service.ItemActivity.AddItemActivity(&req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	req.Details.CreatedBy = user.Email
 
 	// Get Involved Users
-	involvedUsers, err := c.Service.Item.GetInvolvedUsers(req.ItemId)
+	involvedUsers, err := c.Service.Item.GetInvolvedUsers(req.Details.ItemId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Remove user from involvedUserr.Approvers if user is an approver
-	for i, v := range involvedUsers.Approvers {
-		if v == user.Email {
-			involvedUsers.Approvers = append(involvedUsers.Approvers[:i], involvedUsers.Approvers[i+1:]...)
-			break
+	// Check is user is one among the involved users
+	userIsInvolved := false
+	if user.Email == involvedUsers.Requestor {
+		userIsInvolved = true
+	}
+
+	if !userIsInvolved {
+		for _, v := range involvedUsers.Approvers {
+			if user.Email == v {
+				userIsInvolved = true
+				break
+			}
+		}
+	}
+
+	if !userIsInvolved {
+		for _, v := range involvedUsers.Consultants {
+			if user.Email == v {
+				userIsInvolved = true
+				break
+			}
+		}
+	}
+
+	if !userIsInvolved {
+		http.Error(w, "User is forbidden to execute action", http.StatusForbidden)
+		return
+	}
+
+	// Insert Item Activity
+	_, err = c.Service.ItemActivity.AddItemActivity(&req.Details)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Remove user from involvedUser.Approvers if user is an approver
+	if req.Action == "response" {
+		for i, v := range involvedUsers.Approvers {
+			if v == user.Email {
+				involvedUsers.Approvers = append(involvedUsers.Approvers[:i], involvedUsers.Approvers[i+1:]...)
+				break
+			}
 		}
 	}
 
 	// Send email notification to approvers
 	if len(involvedUsers.Approvers) > 0 {
-		err = c.Service.Email.SendActivityEmail(&req, involvedUsers.Approvers, c.Config.GetHomeURL(), "response")
+		err = c.Service.Email.SendActivityEmail(&req.Details, involvedUsers.Approvers, c.Config.GetHomeURL(), "response")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -71,8 +102,27 @@ func (c *itemActivityController) InsertItemActivity(w http.ResponseWriter, r *ht
 	}
 
 	// Send email notification to requestor if user is not the requestor
-	if involvedUsers.Requestor != user.Email {
-		err = c.Service.Email.SendActivityEmail(&req, []string{involvedUsers.Requestor}, c.Config.GetHomeURL(), "view")
+	if req.Action != "view" {
+		err = c.Service.Email.SendActivityEmail(&req.Details, []string{involvedUsers.Requestor}, c.Config.GetHomeURL(), "view")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Remove user from involvedUser.Consultants if user is a consultant
+	if req.Action == "review" {
+		for i, v := range involvedUsers.Consultants {
+			if v == user.Email {
+				involvedUsers.Consultants = append(involvedUsers.Consultants[:i], involvedUsers.Consultants[i+1:]...)
+				break
+			}
+		}
+	}
+
+	// Send email notification to consultants
+	if len(involvedUsers.Consultants) > 0 {
+		err = c.Service.Email.SendActivityEmail(&req.Details, involvedUsers.Consultants, c.Config.GetHomeURL(), "review")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

@@ -22,3 +22,8 @@ type Activity struct {
 	Actor   string       `json:"actor"`
 	Comment ItemActivity `json:"details"`
 }
+
+type NewItemActivityRequest struct {
+	Action  string       `json:"action"`
+	Details ItemActivity `json:"details"`
+}

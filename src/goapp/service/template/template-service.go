@@ -25,9 +25,9 @@ func (t *templateService) UseTemplate(page, path string, user model.AzureUser, p
 	var menu []model.Menu
 	menu = append(menu, model.Menu{Name: "My Requests", Url: "/", IconPath: "/public/icons/projects.svg"})
 	menu = append(menu, model.Menu{Name: "My Approvals", Url: "/myapprovals", IconPath: "/public/icons/approvals.svg"})
-	menu = append(menu, model.Menu{Name: "Request IP Disclosure", Url: "/ipdisclosurerequest", IconPath: "/public/icons/ipdisclosure.svg"})
+	menu = append(menu, model.Menu{Name: "Create IP Disclosure Request", Url: "/ipdisclosurerequest", IconPath: "/public/icons/ipdisclosure.svg"})
 	if user.IsLegalApprover {
-		menu = append(menu, model.Menu{Name: "For Review", Url: "/review", IconPath: "/public/icons/review.svg"})
+		menu = append(menu, model.Menu{Name: "Review IP Disclosure Request", Url: "/review", IconPath: "/public/icons/review.svg"})
 	}
 	masterPageData := model.Headers{Menu: menu, Page: getUrlPath(path)}
 

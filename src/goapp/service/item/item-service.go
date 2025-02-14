@@ -128,6 +128,15 @@ func (s *itemService) GetInvolvedUsers(itemId string) (*model.InvolvedUsers, err
 
 	users.Requestor = item.RequestedBy
 
+	consultants, err := s.Repository.LegalConsultation.GetLegalConsultationByItemId(itemId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, consultant := range consultants {
+		users.Consultants = append(users.Consultants, consultant.Email)
+	}
+
 	return &users, nil
 }
 
