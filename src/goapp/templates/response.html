@@ -253,12 +253,11 @@
             "Go to your approvals", "/myapprovals")
       },
       submitActivity() {
-        let action = this.isApprover ? "response" : "view";
         Alpine.store('master').modal.reset()
         Alpine.store('master').modal.update("loading", "Please wait...", "Posting your commment.", "/")
         Alpine.store('master').modal.show()
         Alpine.store('master').postData("/api/activity", this.commentForm, "Your comment has been posted.",
-            "Refresh page", `/${action}/{{.ApplicationId}}/{{.ApplicationModuleId}}/{{.ItemId}}/2?view=activities`)  
+            "Refresh page", `/{{.Action}}/{{.ApplicationId}}/{{.ApplicationModuleId}}/{{.ItemId}}/2?view=activities`)  
       },
       consultLegal() {
         let f = () => {

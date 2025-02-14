@@ -130,7 +130,7 @@ func (s *sdkEmailService) SendLegalConsultationRequestEmail(req *model.ConsultLe
 						</tr>
 						<tr>
 							<td style="padding: 15px 0;">
-								<a href="|Domain|/view/|AppId|/|AppModuleId|/|ItemId|/1">
+								<a href="|Domain|/review/|AppId|/|AppModuleId|/|ItemId|/1">
 									View Request
 								</a>
 							</td>
