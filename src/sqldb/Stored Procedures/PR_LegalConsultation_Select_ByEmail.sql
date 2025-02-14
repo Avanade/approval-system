@@ -35,7 +35,7 @@ BEGIN
 			(@IsApproved = 3 AND i.IsApproved IS NOT NULL) -- Closed (Rejected, Approved)
 			-- If the value of IsApproved is 4 then select all
 		)
-    ORDER BY [LC].[Created] DESC
+    ORDER BY [I].[Created] DESC
     OFFSET @Offset ROWS 
     FETCH NEXT @Filter ROWS ONLY
 END
