@@ -28,6 +28,33 @@ func NewItemPageController(s *service.Service, conf config.ConfigManager) ItemPa
 	}
 }
 
+func (c *itemPageController) ForAudit(w http.ResponseWriter, r *http.Request) {
+	user, err := c.Service.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	application, err := c.Service.Application.GetApplicationById(c.CommunityPortalAppId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	b, err := json.Marshal(application)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	t, d := c.Service.Template.UseTemplate("audit", r.URL.Path, *user, string(b))
+
+	err = t.Execute(w, d)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func (c *itemPageController) ForReview(w http.ResponseWriter, r *http.Request) {
 	user, err := c.Service.Authenticator.GetAuthenticatedUser(r)
 	if err != nil {

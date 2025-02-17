@@ -17,6 +17,78 @@ func NewLegalConsultationRepository(db *db.Database) LegalConsultationRepository
 	}
 }
 
+func (r *legalConsultationRepository) GetLegalConsultation(filterOptions model.FilterOptions, status int) ([]model.Item, error) {
+	var items []model.Item
+	offset := filterOptions.Page
+	if filterOptions.Page != 0 {
+		offset = filterOptions.Page * filterOptions.Filter
+	}
+
+	row, err := r.Query("PR_LegalConsultation_Select",
+		sql.Named("Offset", offset),
+		sql.Named("Filter", filterOptions.Filter),
+		sql.Named("IsApproved", status))
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+
+	result, err := r.RowsToMap(row)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range result {
+		item := model.Item{
+			Id:          v["ItemId"].(string),
+			Application: v["Application"].(string),
+			Module:      v["Module"].(string),
+			Created:     v["Created"].(time.Time).String(),
+			RequestedBy: v["CreatedBy"].(string),
+		}
+
+		if v["ApproverRemarks"] != nil {
+			item.ApproverRemarks = v["ApproverRemarks"].(string)
+		}
+
+		if v["Body"] != nil {
+			item.Body = v["Body"].(string)
+		}
+
+		if v["DateResponded"] != nil {
+			item.DateResponded = v["DateResponded"].(time.Time).Format("2006-01-02T15:04:05.000Z")
+		}
+
+		if v["DateSent"] != nil {
+			item.DateSent = v["DateSent"].(time.Time).String()
+		}
+
+		if v["IsApproved"] != nil {
+			item.IsApproved = v["IsApproved"].(bool)
+		}
+
+		if v["Subject"] != nil {
+			item.Subject = v["Subject"].(string)
+		}
+
+		if v["RespondedBy"] != nil {
+			item.RespondedBy = v["RespondedBy"].(string)
+		}
+
+		if v["ApplicationModuleId"] != nil {
+			item.ModuleId = v["ApplicationModuleId"].(string)
+		}
+
+		if v["ApplicationId"] != nil {
+			item.ApplicationId = v["ApplicationId"].(string)
+		}
+
+		items = append(items, item)
+	}
+
+	return items, nil
+}
+
 func (r *legalConsultationRepository) GetLegalConsultationByEmail(email string, filterOptions model.FilterOptions, status int) ([]model.Item, error) {
 	var items []model.Item
 	offset := filterOptions.Page

@@ -7,6 +7,7 @@ type ItemController interface {
 	CreateItem(w http.ResponseWriter, r *http.Request)
 	GetItems(w http.ResponseWriter, r *http.Request)
 	GetItemsByApprover(w http.ResponseWriter, r *http.Request)
+	GetItemsForAudit(w http.ResponseWriter, r *http.Request)
 	GetItemsForReviewByConsultant(w http.ResponseWriter, r *http.Request)
 	ProcessResponse(w http.ResponseWriter, r *http.Request)
 	ProcessMultipleResponse(w http.ResponseWriter, r *http.Request)
@@ -14,6 +15,7 @@ type ItemController interface {
 }
 
 type ItemPageController interface {
+	ForAudit(w http.ResponseWriter, r *http.Request)
 	ForReview(w http.ResponseWriter, r *http.Request)
 	MyRequests(w http.ResponseWriter, r *http.Request)
 	MyApprovals(w http.ResponseWriter, r *http.Request)

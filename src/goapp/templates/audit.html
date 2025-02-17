@@ -1,6 +1,6 @@
 {{ define "content" }}
 
-<div id="pageTitle">IP Disclosure Requests For Your Review</div>
+<div id="pageTitle">IP Disclosure Requests</div>
 
 <div class="px-4" x-data="initHome()">
   <nav class="flex space-x-4 mb-3" aria-label="Tabs">
@@ -48,7 +48,7 @@
   //PENDING REQUEST
   function pendingRenderItem(item){
     return `<div class="block hover:bg-gray-50">
-              <div class="px-4 py-4 sm:px-6 cursor-pointer" @click="window.location.href='/review/' + item.applicationId + '/' + item.moduleId + '/' + item.id + '/3'">
+              <div class="px-4 py-4 sm:px-6 cursor-pointer" @click="window.location.href='/audit/' + item.applicationId + '/' + item.moduleId + '/' + item.id + '/3'">
                 <div class="flex items-center justify-between">
                   <div class="grow">
                     <div class="items-center justify-between">
@@ -117,7 +117,7 @@
   //CLOSED REQUEST
   function closedRenderItem(item){
     return `<div class="block hover:bg-gray-50">
-              <div class="px-4 py-4 sm:px-6 cursor-pointer" @click="window.location.href='/review/' + item.applicationId + '/' + item.moduleId + '/' + item.id + '/3'">
+              <div class="px-4 py-4 sm:px-6 cursor-pointer" @click="window.location.href='/audit/' + item.applicationId + '/' + item.moduleId + '/' + item.id + '/3'">
                 <div class="flex items-center justify-between">
                   <div class="grow">
                     <div class="flex items-center justify-between">
@@ -210,7 +210,7 @@
 
   async function getItemsBy(type, status, filter, page){
     page += 1;
-    const res = await fetch(`/api/items/forreview/${status}?filter=${filter}&page=${page}`)
+    const res = await fetch(`/api/items/foraudit/${status}?filter=${filter}&page=${page}`)
     const data = await res.json()
     return data
   }

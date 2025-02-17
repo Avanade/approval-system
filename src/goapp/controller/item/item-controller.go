@@ -250,6 +250,59 @@ func (c *itemController) GetItemsByApprover(w http.ResponseWriter, r *http.Reque
 	json.NewEncoder(w).Encode(response)
 }
 
+func (c *itemController) GetItemsForAudit(w http.ResponseWriter, r *http.Request) {
+	// Get user info
+	//Check if user can audit
+
+	// Check for status of items to query
+	vars := mux.Vars(r)
+
+	status, err := strconv.Atoi(vars["status"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get query params for pagination
+	params := r.URL.Query()
+	page := 0
+	filter := 50
+
+	if params.Has("page") {
+		page, err = strconv.Atoi(params["page"][0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		page = page - 1
+	}
+
+	if params.Has("filter") {
+		filter, err = strconv.Atoi(params["filter"][0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Get items for review
+	items, err := c.Service.LegalConsultation.GetAllLegalConsulations(model.FilterOptions{Page: page, Filter: filter}, status)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(items)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
 func (c *itemController) GetItemsForReviewByConsultant(w http.ResponseWriter, r *http.Request) {
 	// Get user info
 	user, err := c.Authenticator.GetAuthenticatedUser(r)
