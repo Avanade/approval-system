@@ -168,10 +168,18 @@ func (a *authenticatorService) GetAuthenticatedUser(r *http.Request) (*model.Azu
 		isLegalApprover, _ = b.(bool)
 	}
 
+	// Check if user is an auditor
+	isAuditor := false
+	b, err = s.Get("isAuditor")
+	if err == nil {
+		isAuditor, _ = b.(bool)
+	}
+
 	return &model.AzureUser{
 		Name:            profile["name"].(string),
 		Email:           profile["preferred_username"].(string),
 		IsLegalApprover: isLegalApprover,
+		IsAuditor:       isAuditor,
 	}, nil
 }
 

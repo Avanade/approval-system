@@ -22,11 +22,13 @@ BEGIN
         [I].[ApproverRemarks],
         [I].[RespondedBy],
         [I].[Created],
-        [I].[CreatedBy]
+        [I].[CreatedBy],
+        [IPDR].[IPTitle]
     FROM [dbo].[LegalConsultation] AS [LC]
     INNER JOIN [dbo].[Items] AS [I] ON [I].[Id] = [LC].[ItemId]
     INNER JOIN [dbo].[ApplicationModules] AS [AM] ON [I].[ApplicationModuleId] = [AM].[Id]
     INNER JOIN [dbo].[Applications] AS [A] ON [AM].[ApplicationId] = [A].[Id]
+    INNER JOIN [dbo].[IPDisclosureRequest] AS [IPDR] ON [I].[Id] = [IPDR].[ApprovalRequestId]
     WHERE [LC].[Email] = @Email AND
 		(
 			(@IsApproved = 0 AND i.IsApproved IS NULL) OR -- Pending

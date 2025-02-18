@@ -29,7 +29,9 @@ func (t *templateService) UseTemplate(page, path string, user model.AzureUser, p
 	if user.IsLegalApprover {
 		menu = append(menu, model.Menu{Name: "Review IP Disclosure Request", Url: "/review", IconPath: "/public/icons/review.svg"})
 	}
-	menu = append(menu, model.Menu{Name: "Audit IP Disclosure Request", Url: "/audit", IconPath: "/public/icons/audit.svg"})
+	if user.IsAuditor {
+		menu = append(menu, model.Menu{Name: "Audit IP Disclosure Request", Url: "/audit", IconPath: "/public/icons/audit.svg"})
+	}
 	masterPageData := model.Headers{Menu: menu, Page: getUrlPath(path)}
 
 	//Footers

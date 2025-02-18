@@ -15,6 +15,7 @@ import (
 	sItemActivity "main/service/item-activity"
 	sLegalConsultation "main/service/legal-consultation"
 	sMsGraph "main/service/msgraph"
+	sPermission "main/service/permission"
 	sTemplate "main/service/template"
 )
 
@@ -30,6 +31,7 @@ type Service struct {
 	ItemActivity            sItemActivity.ItemActivityService
 	LegalConsultation       sLegalConsultation.LegalConsultationService
 	MsGraph                 sMsGraph.MsGraphService
+	Permission              sPermission.PermissionService
 	Template                sTemplate.TemplateService
 }
 
@@ -108,6 +110,12 @@ func NewLegalConsultationService(repo *repository.Repository, conf config.Config
 func NewMsGraphService(conf config.ConfigManager) ServiceOptionFunc {
 	return func(s *Service) {
 		s.MsGraph = sMsGraph.NewMsGraphService(conf)
+	}
+}
+
+func NewPermissionService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.Permission = sPermission.NewPermissionService(repo)
 	}
 }
 

@@ -28,6 +28,7 @@ var (
 		r.NewItem(&db),
 		r.NewItemActivity(&db),
 		r.NewLegalConsultation(&db),
+		r.NewPermission(&db),
 	)
 
 	svc = s.NewService(
@@ -42,6 +43,7 @@ var (
 		s.NewItemActivityService(repo),
 		s.NewLegalConsultationService(repo, conf),
 		s.NewMsGraphService(conf),
+		s.NewPermissionService(repo),
 		s.NewTemplateService(conf),
 	)
 

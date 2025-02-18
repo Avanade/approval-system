@@ -83,6 +83,10 @@ func (r *legalConsultationRepository) GetLegalConsultation(filterOptions model.F
 			item.ApplicationId = v["ApplicationId"].(string)
 		}
 
+		if v["IPTitle"] != nil {
+			item.IPDRTitle = v["IPTitle"].(string)
+		}
+
 		items = append(items, item)
 	}
 
@@ -154,6 +158,10 @@ func (r *legalConsultationRepository) GetLegalConsultationByEmail(email string, 
 
 		if v["ApplicationId"] != nil {
 			item.ApplicationId = v["ApplicationId"].(string)
+		}
+
+		if v["IPTitle"] != nil {
+			item.IPDRTitle = v["IPTitle"].(string)
 		}
 
 		items = append(items, item)

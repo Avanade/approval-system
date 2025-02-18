@@ -59,6 +59,22 @@ func (a *authenticationPageController) CallbackHandler(w http.ResponseWriter, r 
 		}
 	}
 
+	// Get List of users with "audit" permission
+	auditors, err := a.Service.Permission.GetUserWithPermission("audit")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Check if user is in the audit list
+	isAuditor := false
+	for _, v := range auditors {
+		if v == u.Profile["preferred_username"].(string) {
+			isAuditor = true
+			break
+		}
+	}
+
 	data := map[string]interface{}{
 		"id_token":        u.IdToken,
 		"access":          u.AccessToken,
@@ -66,6 +82,7 @@ func (a *authenticationPageController) CallbackHandler(w http.ResponseWriter, r 
 		"refresh_token":   u.RefreshToken,
 		"expiry":          u.Expiry,
 		"isLegalApprover": isLegalApprover,
+		"isAuditor":       isAuditor,
 	}
 
 	err = a.Authenticator.SaveOnSession(&w, r, "auth-session", data)

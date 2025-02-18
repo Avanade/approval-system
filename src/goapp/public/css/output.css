@@ -3674,21 +3674,6 @@ select {
   background-color: rgb(254 249 195 / var(--tw-bg-opacity, 1));
 }
 
-.bg-gray-300 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1));
-}
-
-.bg-gray-800 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));
-}
-
-.bg-gray-950 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(3 7 18 / var(--tw-bg-opacity, 1));
-}
-
 .bg-opacity-75 {
   --tw-bg-opacity: 0.75;
 }
@@ -4614,26 +4599,6 @@ select {
 .ring-gray-300 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(209 213 219 / var(--tw-ring-opacity, 1));
-}
-
-.ring-gray-500 {
-  --tw-ring-opacity: 1;
-  --tw-ring-color: rgb(107 114 128 / var(--tw-ring-opacity, 1));
-}
-
-.ring-gray-800 {
-  --tw-ring-opacity: 1;
-  --tw-ring-color: rgb(31 41 55 / var(--tw-ring-opacity, 1));
-}
-
-.ring-gray-600 {
-  --tw-ring-opacity: 1;
-  --tw-ring-color: rgb(75 85 99 / var(--tw-ring-opacity, 1));
-}
-
-.ring-gray-400 {
-  --tw-ring-opacity: 1;
-  --tw-ring-color: rgb(156 163 175 / var(--tw-ring-opacity, 1));
 }
 
 .ring-opacity-5 {

@@ -11,6 +11,7 @@ import (
 	rItem "main/repository/item"
 	rItemActivity "main/repository/item-activity"
 	rLegalConsultation "main/repository/legal-consultation"
+	rPermission "main/repository/permission"
 )
 
 type Repository struct {
@@ -23,6 +24,7 @@ type Repository struct {
 	Item                    rItem.ItemRepository
 	ItemActivity            rItemActivity.ItemActivityRepository
 	LegalConsultation       rLegalConsultation.LegalConsultationRepository
+	Permission              rPermission.PermissionRepository
 }
 
 type RepositoryOptionFunc func(*Repository)
@@ -88,5 +90,11 @@ func NewItemActivity(db *database.Database) RepositoryOptionFunc {
 func NewLegalConsultation(db *database.Database) RepositoryOptionFunc {
 	return func(r *Repository) {
 		r.LegalConsultation = rLegalConsultation.NewLegalConsultationRepository(db)
+	}
+}
+
+func NewPermission(db *database.Database) RepositoryOptionFunc {
+	return func(r *Repository) {
+		r.Permission = rPermission.NewPermissionRepository(db)
 	}
 }
