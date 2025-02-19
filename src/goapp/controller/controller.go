@@ -62,9 +62,9 @@ func NewIPDisclosureController(svc *service.Service, conf config.ConfigManager) 
 	}
 }
 
-func NewItemController(svc *service.Service) ControllerOptionFunc {
+func NewItemController(svc *service.Service, conf config.ConfigManager) ControllerOptionFunc {
 	return func(c *Controller) {
-		c.Item = cItem.NewItemController(svc)
+		c.Item = cItem.NewItemController(svc, conf)
 	}
 }
 

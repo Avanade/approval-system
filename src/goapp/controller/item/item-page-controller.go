@@ -7,6 +7,7 @@ import (
 	"main/model"
 	"main/service"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -14,12 +15,70 @@ import (
 type itemPageController struct {
 	*service.Service
 	CommunityPortalAppId string
+	IPDRModuleId         string
+	CTO                  string
 }
 
 func NewItemPageController(s *service.Service, conf config.ConfigManager) ItemPageController {
 	return &itemPageController{
 		Service:              s,
 		CommunityPortalAppId: conf.GetCommunityPortalAppId(),
+		IPDRModuleId:         conf.GetIPDRModuleId(),
+		CTO:                  conf.GetCTO(),
+	}
+}
+
+func (c *itemPageController) ForAudit(w http.ResponseWriter, r *http.Request) {
+	user, err := c.Service.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	application, err := c.Service.Application.GetApplicationById(c.CommunityPortalAppId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	b, err := json.Marshal(application)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	t, d := c.Service.Template.UseTemplate("audit", r.URL.Path, *user, string(b))
+
+	err = t.Execute(w, d)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (c *itemPageController) ForReview(w http.ResponseWriter, r *http.Request) {
+	user, err := c.Service.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	application, err := c.Service.Application.GetApplicationById(c.CommunityPortalAppId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	b, err := json.Marshal(application)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	t, d := c.Service.Template.UseTemplate("forreview", r.URL.Path, *user, string(b))
+
+	err = t.Execute(w, d)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -78,12 +137,14 @@ func (c *itemPageController) MyApprovals(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Request) {
+	// Get the authenticated user
 	user, err := c.Service.Authenticator.GetAuthenticatedUser(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// Get the parameters from the URL
 	params := mux.Vars(r)
 
 	action := params["action"]
@@ -121,14 +182,50 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Get involved users
+	involvedUsers, err := c.Service.Item.GetInvolvedUsers(params["itemGuid"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Check if the user is one among the consultants
+	isConsultant := false
+	for _, consultant := range involvedUsers.Consultants {
+		if user.Email == consultant {
+			isConsultant = true
+			break
+		}
+	}
+
 	// If the user is not the approver nor the requestor, show unauthorized page
-	if (!itemIsAuthorized.IsAuthorized && isApprover) || (item.RequestedBy != user.Email && !isApprover) {
+	if (!itemIsAuthorized.IsAuthorized && isApprover) || (item.RequestedBy != user.Email && action == "view") || (!isConsultant && action == "review") {
 		t, d := c.Service.Template.UseTemplate("Unauthorized", r.URL.Path, *user, nil)
 		err = t.Execute(w, d)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 		return
+	}
+
+	// Check if the item is an IP Disclosure Request
+	consultLegalButton := strings.EqualFold(item.ModuleId, c.IPDRModuleId)
+
+	// Check if the user is the CTO
+	if consultLegalButton && user.Email != c.CTO {
+		consultLegalButton = false
+	}
+
+	// Check if legal has been involved
+	if consultLegalButton {
+		consultations, err := c.Service.LegalConsultation.GetLegalConsultationByItemId(params["itemGuid"])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if len(consultations) > 0 {
+			consultLegalButton = false
+		}
 	}
 
 	// If the user is the approver or the requestor, show the response page
@@ -143,6 +240,8 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 		IsApprover:          isApprover, // show remarks and approve/reject buttons
 		AlreadyProcessed:    itemIsAuthorized.IsApproved.Value,
 		ApproverResponse:    approverResponse,
+		ConsultLegalButton:  consultLegalButton,
+		Action:              action,
 	}
 
 	t, d := c.Service.Template.UseTemplate("response", r.URL.Path, *user, data)

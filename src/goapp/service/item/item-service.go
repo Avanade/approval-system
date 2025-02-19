@@ -21,22 +21,6 @@ func NewItemService(repo *repository.Repository, configManager config.ConfigMana
 	}
 }
 
-func (s *itemService) GetFailedCallbacks() ([]string, error) {
-	failedCallbacks, err := s.Repository.Item.GetFailedCallbacks()
-	if err != nil {
-		return []string{}, err
-	}
-	return failedCallbacks, nil
-}
-
-func (s *itemService) GetItemById(id string) (*model.Item, error) {
-	item, err := s.Repository.Item.GetItemById(id)
-	if err != nil {
-		return nil, err
-	}
-	return item, nil
-}
-
 func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, error) {
 	var result model.Response
 
@@ -83,6 +67,60 @@ func (s *itemService) GetAll(itemOptions model.ItemOptions) (model.Response, err
 	return result, nil
 }
 
+func (s *itemService) GetFailedCallbacks() ([]string, error) {
+	failedCallbacks, err := s.Repository.Item.GetFailedCallbacks()
+	if err != nil {
+		return []string{}, err
+	}
+	return failedCallbacks, nil
+}
+
+func (s *itemService) GetItemById(id string) (*model.Item, error) {
+	item, err := s.Repository.Item.GetItemById(id)
+	if err != nil {
+		return nil, err
+	}
+	return item, nil
+}
+
+func (s *itemService) GetItemsByModuleId(appModuleId string, filterOptions model.FilterOptions, status int) (*model.Response, error) {
+	total, err := s.Repository.Item.GetTotalItemsByModuleId(appModuleId, status)
+	if err != nil {
+		return nil, err
+	}
+
+	items, err := s.Repository.Item.GetItemsByModuleId(appModuleId, filterOptions, status)
+	if err != nil {
+		return nil, err
+	}
+
+	result := model.Response{
+		Data:  items,
+		Total: total,
+	}
+
+	return &result, nil
+}
+
+func (s *itemService) GetItemsForReviewByEmail(email string, page, filter, status int) (*model.Response, error) {
+	total, err := s.Repository.LegalConsultation.GetTotalLegalConsultationByEmail(email, status)
+	if err != nil {
+		return nil, err
+	}
+
+	items, err := s.Repository.LegalConsultation.GetLegalConsultationByEmail(email, model.FilterOptions{Page: page, Filter: filter}, status)
+	if err != nil {
+		return nil, err
+	}
+
+	result := model.Response{
+		Data:  items,
+		Total: total,
+	}
+
+	return &result, nil
+}
+
 func (s *itemService) GetByApprover(approver, requestType, organization string, filterOptions model.FilterOptions) (items []model.Item, total int, err error) {
 	items, total, err = s.Repository.Item.GetItemsByApprover(approver, requestType, organization, filterOptions)
 	if err != nil {
@@ -108,6 +146,15 @@ func (s *itemService) GetInvolvedUsers(itemId string) (*model.InvolvedUsers, err
 	}
 
 	users.Requestor = item.RequestedBy
+
+	consultants, err := s.Repository.LegalConsultation.GetLegalConsultationByItemId(itemId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, consultant := range consultants {
+		users.Consultants = append(users.Consultants, consultant.Email)
+	}
 
 	return &users, nil
 }

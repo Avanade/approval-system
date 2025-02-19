@@ -27,6 +27,8 @@ var (
 		r.NewIpdrInvolvement(&db),
 		r.NewItem(&db),
 		r.NewItemActivity(&db),
+		r.NewLegalConsultation(&db),
+		r.NewPermission(&db),
 	)
 
 	svc = s.NewService(
@@ -39,7 +41,9 @@ var (
 		s.NewIPDisclosureRequestService(repo),
 		s.NewItemService(repo, conf),
 		s.NewItemActivityService(repo),
+		s.NewLegalConsultationService(repo, conf),
 		s.NewMsGraphService(conf),
+		s.NewPermissionService(repo),
 		s.NewTemplateService(conf),
 	)
 
@@ -51,7 +55,7 @@ var (
 		c.NewIPDisclosureController(svc, conf),
 		c.NewIPDisclosurePageController(svc),
 		c.NewItemActivityController(svc, conf),
-		c.NewItemController(svc),
+		c.NewItemController(svc, conf),
 		c.NewItemPageController(svc, conf),
 		c.NewUserController(svc),
 	)

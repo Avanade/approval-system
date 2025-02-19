@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"main/config"
 	"main/model"
 	"main/service"
 	"net/http"
@@ -16,12 +17,80 @@ import (
 
 type itemController struct {
 	*service.Service
+	Config config.ConfigManager
 }
 
-func NewItemController(svc *service.Service) ItemController {
+func NewItemController(svc *service.Service, conf config.ConfigManager) ItemController {
 	return &itemController{
 		Service: svc,
+		Config:  conf,
 	}
+}
+
+func (c *itemController) ConsultLegal(w http.ResponseWriter, r *http.Request) {
+	// Decode payload
+	var req model.ConsultLegalRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Get user info
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Check if user is the CTO
+	if user.Email != c.Config.GetCTO() {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Generate token
+	token, err := c.Authenticator.GenerateToken()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Pull list of legal approvers by using the endpoint /api/repository-approvers/legal
+	legalApprovers, err := c.Service.LegalConsultation.GetLegalConsultants(token)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get all emails of legal approvers
+	var emails []string
+	for _, approver := range legalApprovers {
+		emails = append(emails, approver.ApproverEmail)
+	}
+
+	// Insert legal consultation to database
+	for _, approver := range emails {
+		err := c.Service.LegalConsultation.InsertLegalConsultation(&model.LegalConsultation{
+			ItemId:    req.ItemId,
+			Email:     approver,
+			CreatedBy: user.Email,
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Send email to legal approvers
+	err = c.Service.Email.SendLegalConsultationRequestEmail(&req, user, c.Config.GetHomeURL(), emails)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare response
+	w.WriteHeader(http.StatusOK)
 }
 
 // GetItems is a function to get all items
@@ -179,6 +248,132 @@ func (c *itemController) GetItemsByApprover(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
+}
+
+func (c *itemController) GetItemsForAudit(w http.ResponseWriter, r *http.Request) {
+	// Get user info
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//Check if user can audit
+	if !user.IsAuditor {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Check for status of items to query
+	vars := mux.Vars(r)
+
+	status, err := strconv.Atoi(vars["status"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get query params for pagination
+	params := r.URL.Query()
+	page := 0
+	filter := 50
+
+	if params.Has("page") {
+		page, err = strconv.Atoi(params["page"][0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		page = page - 1
+	}
+
+	if params.Has("filter") {
+		filter, err = strconv.Atoi(params["filter"][0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Get items for review
+	items, err := c.Service.Item.GetItemsByModuleId(c.Config.GetIPDRModuleId(), model.FilterOptions{Page: page, Filter: filter}, status)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(items)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func (c *itemController) GetItemsForReviewByConsultant(w http.ResponseWriter, r *http.Request) {
+	// Get user info
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Check if user is a legal consultant
+	if !user.IsLegalApprover {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Check for status of items to query
+	vars := mux.Vars(r)
+
+	status, err := strconv.Atoi(vars["status"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get query params for pagination
+	params := r.URL.Query()
+	page := 0
+	filter := 50
+
+	if params.Has("page") {
+		page, err = strconv.Atoi(params["page"][0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		page = page - 1
+	}
+
+	if params.Has("filter") {
+		filter, err = strconv.Atoi(params["filter"][0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Get items for review
+	items, err := c.Service.Item.GetItemsForReviewByEmail(user.Email, page, filter, status)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	jsonResp, err := json.Marshal(items)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonResp)
 }
 
 func (c *itemController) CreateItem(w http.ResponseWriter, r *http.Request) {

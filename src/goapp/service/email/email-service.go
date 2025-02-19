@@ -104,7 +104,54 @@ func (s *sdkEmailService) SendActivityEmail(req *model.ItemActivity, recipients 
 
 	htmlBody := s.buildHtmlBody(bodyTempate, replacer)
 
-	err := s.SendEmail(recipients, nil, "Approval Request Notification", htmlBody, Html, false)
+	err := s.SendEmail(recipients, nil, "New Comment Notification", htmlBody, Html, false)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *sdkEmailService) SendLegalConsultationRequestEmail(req *model.ConsultLegalRequest, user *model.AzureUser, domain string, recipients []string) error {
+	bodyTempate := ` 
+			<tr style="color: #5c5c5c;"  >
+				<td class="center-table" align="center">
+					<table style="width: 100%; max-width: 700px;" class="margin-auto">
+						<tr>
+							<td style="padding: 15px 0 0px 0;">
+								<span>Hi,</span> 
+							</td>
+						</tr>
+						<tr>
+							<td style="padding: 10px 0 10px 0;">
+								<span><a href="mailto:|UserEmail|">|User|</a></span> 
+								<span>is requesting for legal review and your input in an IP disclosure request.</span>
+							</td>
+						</tr>
+						<tr>
+							<td style="padding: 15px 0;">
+								<a href="|Domain|/review/|AppId|/|AppModuleId|/|ItemId|/1">
+									View Request
+								</a>
+							</td>
+						</tr>
+					</table>
+				</td>
+            </tr>
+            `
+
+	replacer := strings.NewReplacer(
+		"|User|", user.Name,
+		"|UserEmail|", user.Email,
+		"|AppId|", req.ApplicationId,
+		"|AppModuleId|", req.ApplicationModuleId,
+		"|ItemId|", req.ItemId,
+		"|Domain|", domain,
+	)
+
+	htmlBody := s.buildHtmlBody(bodyTempate, replacer)
+
+	err := s.SendEmail(recipients, nil, "IP Disclosure Request", htmlBody, Html, false)
 	if err != nil {
 		return err
 	}

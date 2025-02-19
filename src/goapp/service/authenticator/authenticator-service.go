@@ -148,7 +148,7 @@ func (a *authenticatorService) GetAuthCodeURL(state string) string {
 }
 
 func (a *authenticatorService) GetAuthenticatedUser(r *http.Request) (*model.AzureUser, error) {
-
+	//Get Azure user profile
 	var profile map[string]interface{}
 	s := a.Session.ConnectSession(nil, r, "auth-session")
 	u, err := s.Get("profile")
@@ -161,9 +161,25 @@ func (a *authenticatorService) GetAuthenticatedUser(r *http.Request) (*model.Azu
 		return nil, fmt.Errorf("error getting user data")
 	}
 
+	// Check if user is a legal approver
+	isLegalApprover := false
+	b, err := s.Get("isLegalApprover")
+	if err == nil {
+		isLegalApprover, _ = b.(bool)
+	}
+
+	// Check if user is an auditor
+	isAuditor := false
+	b, err = s.Get("isAuditor")
+	if err == nil {
+		isAuditor, _ = b.(bool)
+	}
+
 	return &model.AzureUser{
-		Name:  profile["name"].(string),
-		Email: profile["preferred_username"].(string),
+		Name:            profile["name"].(string),
+		Email:           profile["preferred_username"].(string),
+		IsLegalApprover: isLegalApprover,
+		IsAuditor:       isAuditor,
 	}, nil
 }
 

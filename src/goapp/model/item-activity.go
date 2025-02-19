@@ -15,3 +15,15 @@ type InvolvedUsers struct {
 	Approvers   []string
 	Consultants []string
 }
+
+type Activity struct {
+	Action  string       `json:"action"`
+	Created string       `json:"created"`
+	Actor   string       `json:"actor"`
+	Comment ItemActivity `json:"details"`
+}
+
+type NewItemActivityRequest struct {
+	Action  string       `json:"action"`
+	Details ItemActivity `json:"details"`
+}

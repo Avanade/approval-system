@@ -26,6 +26,8 @@ type RespondePageData struct {
 	IsApprover          bool
 	AlreadyProcessed    bool
 	ApproverResponse    string
+	ConsultLegalButton  bool
+	Action              string
 }
 
 type GetItemsByApproverResponse struct {

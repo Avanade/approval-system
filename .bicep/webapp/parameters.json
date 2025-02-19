@@ -48,7 +48,8 @@
                 "SCOPE":"",
                 "IPDR_MODULE_ID": "",
                 "IPDR_APP_ID": "",
-                "CTO": ""
+                "CTO": "",
+                "COMMUNITY_PORTAL_DOMAIN": ""
             }
         }
     }

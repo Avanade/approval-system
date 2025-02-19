@@ -38,6 +38,10 @@ func (ecm *envConfigManager) GetCommunityPortalAppId() string {
 	return os.Getenv("COMMUNITY_PORTAL_APP_ID")
 }
 
+func (ecm *envConfigManager) GetCommunityPortalDomain() string {
+	return os.Getenv("COMMUNITY_PORTAL_DOMAIN")
+}
+
 func (ecm *envConfigManager) GetDatabaseConnectionString() string {
 	return os.Getenv("APPROVALSYSTEMDB_CONNECTION_STRING")
 }
