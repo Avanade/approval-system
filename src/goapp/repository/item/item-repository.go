@@ -171,6 +171,84 @@ func (r *itemRepository) GetItemsByApprover(approver, requestType, organization 
 	return items, total, nil
 }
 
+func (r *itemRepository) GetItemsByModuleId(moduleId string, filterOptions model.FilterOptions, status int) ([]model.Item, error) {
+	var items []model.Item
+	offset := filterOptions.Page
+	if filterOptions.Page != 0 {
+		offset = filterOptions.Page * filterOptions.Filter
+	}
+
+	row, err := r.Query("PR_Items_Select_ByModuleId",
+		sql.Named("ModuleId", moduleId),
+		sql.Named("Offset", offset),
+		sql.Named("Filter", filterOptions.Filter),
+		sql.Named("Search", filterOptions.Search),
+		sql.Named("IsApproved", status))
+	if err != nil {
+		return nil, err
+	}
+	defer row.Close()
+
+	result, err := r.RowsToMap(row)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range result {
+		item := model.Item{
+			Id:          v["ItemId"].(string),
+			Application: v["Application"].(string),
+			Module:      v["Module"].(string),
+			Created:     v["Created"].(time.Time).String(),
+			RequestedBy: v["RequestedBy"].(string),
+		}
+
+		if v["ApproverRemarks"] != nil {
+			item.ApproverRemarks = v["ApproverRemarks"].(string)
+		}
+
+		if v["Body"] != nil {
+			item.Body = v["Body"].(string)
+		}
+
+		if v["DateResponded"] != nil {
+			item.DateResponded = v["DateResponded"].(time.Time).Format("2006-01-02T15:04:05.000Z")
+		}
+
+		if v["DateSent"] != nil {
+			item.DateSent = v["DateSent"].(time.Time).String()
+		}
+
+		if v["IsApproved"] != nil {
+			item.IsApproved = v["IsApproved"].(bool)
+		}
+
+		if v["Subject"] != nil {
+			item.Subject = v["Subject"].(string)
+		}
+
+		if v["RespondedBy"] != nil {
+			item.RespondedBy = v["RespondedBy"].(string)
+		}
+
+		if v["ApplicationModuleId"] != nil {
+			item.ModuleId = v["ApplicationModuleId"].(string)
+		}
+
+		if v["ApplicationId"] != nil {
+			item.ApplicationId = v["ApplicationId"].(string)
+		}
+
+		if v["IPTitle"] != nil {
+			item.IPDRTitle = v["IPTitle"].(string)
+		}
+
+		items = append(items, item)
+	}
+
+	return items, nil
+}
+
 func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item, error) {
 	var params []interface{}
 
@@ -253,6 +331,25 @@ func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item
 	}
 
 	return items, nil
+}
+
+func (r *itemRepository) GetTotalItemsByModuleId(appModuleId string, status int) (int, error) {
+	row, err := r.QueryRow("PR_Items_Total_ByModuleId",
+		sql.Named("IsApproved", status),
+		sql.Named("ModuleId", appModuleId),
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	var total int
+	err = row.Scan(&total)
+	if err != nil {
+		return 0, err
+	}
+
+	return total, nil
 }
 
 func (r *itemRepository) GetTotalItemsBy(itemOptions model.ItemOptions) (int, error) {

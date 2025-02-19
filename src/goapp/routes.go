@@ -25,7 +25,7 @@ func setApiRoutes() {
 	httpRouter.GET("/api/approver/me/items", m.Chain(ctrl.Item.GetItemsByApprover, m.AzureAuth()))
 	httpRouter.GET("/api/items/type/{type:[0-2]+}/status/{status:[0-3]+}", m.Chain(ctrl.Item.GetItems, m.AzureAuth()))
 	httpRouter.GET("/api/items/forreview/{status}", m.Chain(ctrl.Item.GetItemsForReviewByConsultant, m.AzureAuth()))
-	httpRouter.GET("/api/items/foraudit/{status}", m.Chain(ctrl.Item.GetItemsForReviewByConsultant, m.AzureAuth()))
+	httpRouter.GET("/api/items/foraudit/{status}", m.Chain(ctrl.Item.GetItemsForAudit, m.AzureAuth()))
 	httpRouter.GET("/api/search/users/{search}", m.Chain(ctrl.User.SearchUserFromActiveDirectory, m.AzureAuth()))
 	httpRouter.GET("/api/responsereassignedapi/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{ApproveText}/{RejectText}", m.Chain(ctrl.Item.ReassignItem, m.AzureAuth()))
 	httpRouter.POST("/api/ipdisclosurerequest", m.Chain(ctrl.IPDisclosure.InsertIPDisclosureRequest, m.AzureAuth()))

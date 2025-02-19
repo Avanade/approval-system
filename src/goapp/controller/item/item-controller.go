@@ -252,7 +252,17 @@ func (c *itemController) GetItemsByApprover(w http.ResponseWriter, r *http.Reque
 
 func (c *itemController) GetItemsForAudit(w http.ResponseWriter, r *http.Request) {
 	// Get user info
+	user, err := c.Authenticator.GetAuthenticatedUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	//Check if user can audit
+	if !user.IsAuditor {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	// Check for status of items to query
 	vars := mux.Vars(r)
@@ -286,7 +296,7 @@ func (c *itemController) GetItemsForAudit(w http.ResponseWriter, r *http.Request
 	}
 
 	// Get items for review
-	items, err := c.Service.LegalConsultation.GetAllLegalConsulations(model.FilterOptions{Page: page, Filter: filter}, status)
+	items, err := c.Service.Item.GetItemsByModuleId(c.Config.GetIPDRModuleId(), model.FilterOptions{Page: page, Filter: filter}, status)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

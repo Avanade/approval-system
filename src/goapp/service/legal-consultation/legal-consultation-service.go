@@ -21,10 +21,6 @@ func NewLegalConsultationService(repo *repository.Repository, conf config.Config
 	}
 }
 
-func (s *legalConsultationService) GetAllLegalConsulations(filterOptions model.FilterOptions, status int) ([]model.Item, error) {
-	return s.Repository.LegalConsultation.GetLegalConsultation(filterOptions, status)
-}
-
 func (s *legalConsultationService) GetLegalConsultants(token string) ([]model.Approver, error) {
 	url := s.Config.GetCommunityPortalDomain() + "/api/repository-approvers/legal"
 	httpReq, err := http.NewRequest("GET", url, nil)

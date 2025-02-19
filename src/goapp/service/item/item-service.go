@@ -83,6 +83,25 @@ func (s *itemService) GetItemById(id string) (*model.Item, error) {
 	return item, nil
 }
 
+func (s *itemService) GetItemsByModuleId(appModuleId string, filterOptions model.FilterOptions, status int) (*model.Response, error) {
+	total, err := s.Repository.Item.GetTotalItemsByModuleId(appModuleId, status)
+	if err != nil {
+		return nil, err
+	}
+
+	items, err := s.Repository.Item.GetItemsByModuleId(appModuleId, filterOptions, status)
+	if err != nil {
+		return nil, err
+	}
+
+	result := model.Response{
+		Data:  items,
+		Total: total,
+	}
+
+	return &result, nil
+}
+
 func (s *itemService) GetItemsForReviewByEmail(email string, page, filter, status int) (*model.Response, error) {
 	total, err := s.Repository.LegalConsultation.GetTotalLegalConsultationByEmail(email, status)
 	if err != nil {
