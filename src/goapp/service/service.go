@@ -9,20 +9,30 @@ import (
 	sApprovalRequestApprover "main/service/approval-request-approver"
 	sAuthenticator "main/service/authenticator"
 	sEmail "main/service/email"
+	sInvolvement "main/service/involvement"
+	sIPDisclosureRequest "main/service/ip-disclosure-request"
 	sItem "main/service/item"
+	sItemActivity "main/service/item-activity"
+	sLegalConsultation "main/service/legal-consultation"
 	sMsGraph "main/service/msgraph"
+	sPermission "main/service/permission"
 	sTemplate "main/service/template"
 )
 
 type Service struct {
 	Application             sApplication.ApplicationService
 	ApplicationModule       sApplicationModule.ApplicationModuleService
-	Item                    sItem.ItemService
-	Email                   sEmail.EmailService
 	ApprovalRequestApprover sApprovalRequestApprover.ApprovalRequestApproverService
-	MsGraph                 sMsGraph.MsGraphService
-	Template                sTemplate.TemplateService
 	Authenticator           sAuthenticator.AuthenticatorService
+	Email                   sEmail.EmailService
+	Involvement             sInvolvement.InvolvementService
+	IPDisclosureRequest     sIPDisclosureRequest.IpDisclosureRequestService
+	Item                    sItem.ItemService
+	ItemActivity            sItemActivity.ItemActivityService
+	LegalConsultation       sLegalConsultation.LegalConsultationService
+	MsGraph                 sMsGraph.MsGraphService
+	Permission              sPermission.PermissionService
+	Template                sTemplate.TemplateService
 }
 
 type ServiceOptionFunc func(*Service)
@@ -55,9 +65,27 @@ func NewAuthenticatorService(conf config.ConfigManager, session *session.Connect
 	}
 }
 
+func NewInvolvementService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.Involvement = sInvolvement.NewInvolvementService(repo)
+	}
+}
+
+func NewIPDisclosureRequestService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.IPDisclosureRequest = sIPDisclosureRequest.NewIpDisclosureRequestService(repo)
+	}
+}
+
 func NewItemService(repo *repository.Repository, conf config.ConfigManager) ServiceOptionFunc {
 	return func(s *Service) {
 		s.Item = sItem.NewItemService(repo, conf)
+	}
+}
+
+func NewItemActivityService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.ItemActivity = sItemActivity.NewItemActivityService(repo)
 	}
 }
 
@@ -73,9 +101,21 @@ func NewApprovalRequestApproverService(repo *repository.Repository) ServiceOptio
 	}
 }
 
+func NewLegalConsultationService(repo *repository.Repository, conf config.ConfigManager) ServiceOptionFunc {
+	return func(s *Service) {
+		s.LegalConsultation = sLegalConsultation.NewLegalConsultationService(repo, conf)
+	}
+}
+
 func NewMsGraphService(conf config.ConfigManager) ServiceOptionFunc {
 	return func(s *Service) {
 		s.MsGraph = sMsGraph.NewMsGraphService(conf)
+	}
+}
+
+func NewPermissionService(repo *repository.Repository) ServiceOptionFunc {
+	return func(s *Service) {
+		s.Permission = sPermission.NewPermissionService(repo)
 	}
 }
 

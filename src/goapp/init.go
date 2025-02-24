@@ -21,28 +21,43 @@ var (
 	repo = r.NewRepository(
 		r.NewApplication(&db),
 		r.NewApplicationModule(&db),
-		r.NewItem(&db),
 		r.NewApprovalRequestApprover(&db),
+		r.NewInvolvement(&db),
+		r.NewIPDRequest(&db),
+		r.NewIpdrInvolvement(&db),
+		r.NewItem(&db),
+		r.NewItemActivity(&db),
+		r.NewLegalConsultation(&db),
+		r.NewPermission(&db),
 	)
 
 	svc = s.NewService(
-		s.NewApplicationService(repo),
 		s.NewApplicationModuleService(repo),
-		s.NewItemService(repo, conf),
-		s.NewEmailService(conf),
+		s.NewApplicationService(repo),
 		s.NewApprovalRequestApproverService(repo),
-		s.NewMsGraphService(conf),
-		s.NewTemplateService(conf),
 		s.NewAuthenticatorService(conf, &cs),
+		s.NewEmailService(conf),
+		s.NewInvolvementService(repo),
+		s.NewIPDisclosureRequestService(repo),
+		s.NewItemService(repo, conf),
+		s.NewItemActivityService(repo),
+		s.NewLegalConsultationService(repo, conf),
+		s.NewMsGraphService(conf),
+		s.NewPermissionService(repo),
+		s.NewTemplateService(conf),
 	)
 
 	ctrl = c.NewController(
-		c.NewItemController(svc),
 		c.NewApplicationModuleController(svc),
-		c.NewUserController(svc),
-		c.NewItemPageController(svc, conf),
-		c.NewFallbackController(svc),
 		c.NewAuthenticationController(svc),
+		c.NewFallbackController(svc),
+		c.NewInvolvementController(svc),
+		c.NewIPDisclosureController(svc, conf),
+		c.NewIPDisclosurePageController(svc),
+		c.NewItemActivityController(svc, conf),
+		c.NewItemController(svc, conf),
+		c.NewItemPageController(svc, conf),
+		c.NewUserController(svc),
 	)
 
 	timedJobs = t.NewTimedJobs(svc, conf)

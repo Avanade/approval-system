@@ -64,6 +64,101 @@ func (s *sdkEmailService) SendApprovalRequestEmail(req *model.ItemInsertRequest,
 	return nil
 }
 
+func (s *sdkEmailService) SendActivityEmail(req *model.ItemActivity, recipients []string, domain, action string) error {
+	bodyTempate := ` 
+			<tr style="color: #5c5c5c;"  >
+				<td class="center-table" align="center">
+					<table style="width: 100%; max-width: 700px;" class="margin-auto">
+						<tr>
+							<td style="padding: 15px 0 10px 0;">
+								<span><b>|User|</b></span> 
+								<span>commented on your request:</span>
+							</td>
+						</tr>
+						<tr>
+							<td align="center" style="padding: 10px;" bgcolor="#F8F8F8">
+								<p>|Comment|</p>
+							</td>
+						</tr>
+						<tr>
+							<td style="padding: 15px 0;">
+								<a href="|Domain|/|Action|/|AppId|/|AppModuleId|/|ItemId|/1?view=activities">
+									View Conversation
+								</a>
+							</td>
+						</tr>
+					</table>
+				</td>
+            </tr>
+            `
+
+	replacer := strings.NewReplacer(
+		"|User|", req.CreatedBy,
+		"|Comment|", req.Content,
+		"|AppId|", req.AppId,
+		"|AppModuleId|", req.AppModuleId,
+		"|ItemId|", req.ItemId,
+		"|Domain|", domain,
+		"|Action|", action,
+	)
+
+	htmlBody := s.buildHtmlBody(bodyTempate, replacer)
+
+	err := s.SendEmail(recipients, nil, "New Comment Notification", htmlBody, Html, false)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *sdkEmailService) SendLegalConsultationRequestEmail(req *model.ConsultLegalRequest, user *model.AzureUser, domain string, recipients []string) error {
+	bodyTempate := ` 
+			<tr style="color: #5c5c5c;"  >
+				<td class="center-table" align="center">
+					<table style="width: 100%; max-width: 700px;" class="margin-auto">
+						<tr>
+							<td style="padding: 15px 0 0px 0;">
+								<span>Hi,</span> 
+							</td>
+						</tr>
+						<tr>
+							<td style="padding: 10px 0 10px 0;">
+								<span><a href="mailto:|UserEmail|">|User|</a></span> 
+								<span>is requesting for legal review and your input in an IP disclosure request.</span>
+							</td>
+						</tr>
+						<tr>
+							<td style="padding: 15px 0;">
+								<a href="|Domain|/review/|AppId|/|AppModuleId|/|ItemId|/1">
+									View Request
+								</a>
+							</td>
+						</tr>
+					</table>
+				</td>
+            </tr>
+            `
+
+	replacer := strings.NewReplacer(
+		"|User|", user.Name,
+		"|UserEmail|", user.Email,
+		"|AppId|", req.ApplicationId,
+		"|AppModuleId|", req.ApplicationModuleId,
+		"|ItemId|", req.ItemId,
+		"|Domain|", domain,
+	)
+
+	htmlBody := s.buildHtmlBody(bodyTempate, replacer)
+
+	err := s.SendEmail(recipients, nil, "IP Disclosure Request", htmlBody, Html, false)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *sdkEmailService) SendEmail(to, cc []string, subject, content string, contentType ContentType, isSaveToSentItem bool) error {
 	requestBody := graphusers.NewItemSendMailPostRequestBody()
 	message := graphmodels.NewMessage()

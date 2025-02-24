@@ -37,12 +37,52 @@ func (a *authenticationPageController) CallbackHandler(w http.ResponseWriter, r 
 		return
 	}
 
+	// Pull list of legal approvers by using the endpoint /api/repository-approvers/legal
+	token, err := a.Service.Authenticator.GenerateToken()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	legalApprovers, err := a.Service.LegalConsultation.GetLegalConsultants(token)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Check if user is a legal approver
+	isLegalApprover := false
+	for _, v := range legalApprovers {
+		if v.ApproverEmail == u.Profile["preferred_username"].(string) {
+			isLegalApprover = true
+			break
+		}
+	}
+
+	// Get List of users with "audit" permission
+	auditors, err := a.Service.Permission.GetUserWithPermission("audit")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Check if user is in the audit list
+	isAuditor := false
+	for _, v := range auditors {
+		if v == u.Profile["preferred_username"].(string) {
+			isAuditor = true
+			break
+		}
+	}
+
 	data := map[string]interface{}{
-		"id_token":      u.IdToken,
-		"access":        u.AccessToken,
-		"profile":       u.Profile,
-		"refresh_token": u.RefreshToken,
-		"expiry":        u.Expiry,
+		"id_token":        u.IdToken,
+		"access":          u.AccessToken,
+		"profile":         u.Profile,
+		"refresh_token":   u.RefreshToken,
+		"expiry":          u.Expiry,
+		"isLegalApprover": isLegalApprover,
+		"isAuditor":       isAuditor,
 	}
 
 	err = a.Authenticator.SaveOnSession(&w, r, "auth-session", data)

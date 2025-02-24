@@ -1,195 +1,209 @@
 {{ define "content" }}
-<div x-data="data()" x-init="onLoad()">
-  <h1 class="text-2xl mb-5">{{.Data.Subject}}</h1>
-  <span x-html="body"></span>
-  <form
-    onsubmit="event.preventDefault()"
-    x-show="requireRemarks=='true'"
-    hidden
-    id="form"
-  >
-    <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-      <div class="sm:col-span-6">
-        <label for="remarks" class="block text-sm font-medium text-gray-700">
-          Remarks
-        </label>
-        <div class="mt-1">
-          <textarea
-            id="remarks"
-            name="remarks"
-            maxlength="255"
-            x-model="form.remarks"
-            rows="3"
-            class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-          ></textarea>
-        </div>
-        <p class="mt-2 text-sm text-gray-500">
-          Specify remarks for your response.
-        </p>
+<div x-data="data()" x-init="onLoad(); getActivities();">
+  
+  <div>
+    <div class="flex space-x-4 mb-5">
+      <div @click="switchTo('details')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
+          x-bind:class="view==='details' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> 
+        Request Details
       </div>
-      <fieldset class="mt-6">
-        <legend class="contents text-base font-medium text-gray-900">
-          Response
-        </legend>
-        <!-- <p class="text-sm text-gray-500">Approve/Reject</p> -->
-        <div class="mt-4 space-y-4">
-          <div class="flex items-center">
-            <input
-              id="approve"
-              value="1"
-              name="isApproved"
-              x-model="form.isApproved"
-              type="radio"
-              class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300"
-            />
-            <label
-              for="approve"
-              class="ml-3 block text-sm font-medium text-gray-700"
-            >
-              Approve
-            </label>
-          </div>
-          <div class="flex items-center">
-            <input
-              id="reject"
-              value="0"
-              name="isApproved"
-              x-model="form.isApproved"
-              type="radio"
-              class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300"
-            />
-            <label
-              for="reject"
-              class="ml-3 block text-sm font-medium text-gray-700"
-            >
-              Reject
-            </label>
-          </div>
-        </div>
-      </fieldset>
-    </div>
-    <div class="pt-5">
-      <div class="flex justify-center">
-        <button
-          type="submit"
-          @click="submit()"
-          class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          :class="!isValid ? 'bg-orange-200' : 'bg-orange-600 hover:bg-orange-700'"
-          x-bind:disabled="!isValid"
-        >
-          Submit
+      <div @click="switchTo('activities')" class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer"
+          x-bind:class="view==='activities' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> 
+        Activities
+      </div>
+      <div style="margin-left: auto !important;" x-show="consultLegalButton && !alreadyProcessed">
+        <button @click="consultLegal()"
+          class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded" >
+          Consult Legal
         </button>
       </div>
+      
     </div>
-  </form>
-
-  <!-- Modal -->
-  <div
-    id="modal"
-    x-show="showModal"
-    class="relative z-10"
-    hidden
-    aria-labelledby="modal-title"
-    role="dialog"
-    aria-modal="true"
-  >
-    <div
-      class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-    ></div>
-
-    <div class="fixed z-10 inset-0 overflow-y-auto">
-      <div
-        class="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0"
-      >
-        <div
-          class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-sm sm:w-full sm:p-6"
-        >
-          <div>
-            <div
-              class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100"
-              x-bind:class="status === 'success' ? '':'hidden'"
+    <div class="px-5">
+      <h3 class="text-xl mb-7">{{.Data.Subject}}</h3>
+      <div x-show="view==='details'">
+        <span x-html="body"></span>
+        <div class="max-w-[700px] mx-auto">
+          <template x-if="isApprover && !alreadyProcessed">
+            <form
+              onsubmit="event.preventDefault()"
+              x-show="requireRemarks=='true'"
+              id="form"
             >
-              <svg
-                class="h-6 w-6 text-green-600"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+              <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="sm:col-span-6">
+                  <label for="remarks" class="block text-sm font-medium text-gray-700">
+                    Remarks
+                  </label>
+                  <div class="mt-1">
+                    <textarea
+                      id="remarks"
+                      name="remarks"
+                      maxlength="255"
+                      x-model="form.remarks"
+                      rows="3"
+                      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"
+                    ></textarea>
+                  </div>
+                  <p class="mt-2 text-sm text-gray-500">
+                    Specify remarks for your response.
+                  </p>
+                </div>
+                <fieldset class="mt-6">
+                  <legend class="contents text-base font-medium text-gray-900">
+                    Response
+                  </legend>
+                  <!-- <p class="text-sm text-gray-500">Approve/Reject</p> -->
+                  <div class="mt-4 space-y-4">
+                    <div class="flex items-center">
+                      <input
+                        id="approve"
+                        value="1"
+                        name="isApproved"
+                        x-model="form.isApproved"
+                        type="radio"
+                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300"
+                      />
+                      <label
+                        for="approve"
+                        class="ml-3 block text-sm font-medium text-gray-700"
+                      >
+                        Approve
+                      </label>
+                    </div>
+                    <div class="flex items-center">
+                      <input
+                        id="reject"
+                        value="0"
+                        name="isApproved"
+                        x-model="form.isApproved"
+                        type="radio"
+                        class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300"
+                      />
+                      <label
+                        for="reject"
+                        class="ml-3 block text-sm font-medium text-gray-700"
+                      >
+                        Reject
+                      </label>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+              <div class="pt-5">
+                <div class="flex justify-center">
+                  <button
+                    type="submit"
+                    @click="submit()"
+                    class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    :class="!isValid ? 'bg-orange-200' : 'bg-orange-600 hover:bg-orange-700'"
+                    x-bind:disabled="!isValid"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </form>
+          </template>
+        </div>
+      </div>
+      <div x-show="view==='activities'">
+        <div class="max-w-[700px] mx-auto">
+          <ul role="list" class="space-y-6">
+            <li class="relative flex gap-x-4">
+              <div class="absolute -bottom-6 left-0 top-0 flex w-6 justify-center">
+                <div class="w-px bg-gray-200"></div>
+              </div>
+              <div class="relative flex size-6 flex-none items-center justify-center bg-white">
+                <div class="size-1.5 rounded-full bg-gray-200 ring-1 ring-gray-300"></div>
+              </div>
+              <p class="flex-auto py-0.5 text-xs/5 text-gray-500"><span class="font-medium text-gray-900">{{.Data.RequestedBy}}</span> created the request.</p>
+              <time x-data="{date: new Date('{{.Data.Created}}')}"
+                x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"
+                class="flex-none py-0.5 text-xs/5 text-gray-500"></time>
+            </li>
+            <!-- Loop for activities -->
+            <template x-if="activitiesNotNull()">
+              <template x-for="activity in activities" >
+                <li class="relative flex gap-x-4">
+                  <template x-data="{activity}" x-if="activity.action === 'comment'">
+                    <div class="w-full relative flex gap-x-4">
+                      <div class="absolute -bottom-6 left-0 top-0 flex w-6 justify-center">
+                        <div class="w-px bg-gray-200"></div>
+                      </div>
+                      <div class="relative flex size-6 flex-none items-center justify-center bg-white">
+                        <div class="size-1.5 rounded-full bg-gray-200 ring-1 ring-gray-300"></div>
+                      </div>
+                      <div class="flex-auto rounded-md p-3 ring-1 ring-inset ring-gray-200 shadow-md">
+                        <div class="flex justify-between gap-x-4">
+                          <div class="py-0.5 text-xs/5 text-gray-500"><span class="font-medium text-gray-900" x-text="activity.details.createdBy"></span> commented</div>
+                          <time datetime="2023-01-23T15:56" class="flex-none py-0.5 text-xs/5 text-gray-500" x-text="new Date(activity.details.created).toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                        </div>
+                        <p class="text-sm/6 text-gray-500" x-text="activity.details.content"></p>
+                      </div>
+                    </div>
+                  </template>
+                  <template x-data="{activity}" x-init="console.log(activity.action)" x-if="activity.action === 'consult'">
+                    <div class="w-full relative flex gap-x-4">
+                      <div class="absolute -bottom-6 left-0 top-0 flex w-6 justify-center">
+                        <div class="w-px bg-gray-200"></div>
+                      </div>
+                      <div class="relative flex size-6 flex-none items-center justify-center bg-white">
+                        <div class="size-1.5 rounded-full bg-gray-200 ring-1 ring-gray-300"></div>
+                      </div>
+                      <div class="w-full">
+                        <div class="flex w-full">
+                          <div class="flex-auto py-0.5 text-xs/5 text-gray-500"><span class="font-medium text-gray-900" x-text="activity.actor"></span> asked for input from the legal team. The following user/s have been added to the conversation:
+                          <span x-text="activity.details.content"></span></div>
+                          <div x-data="{date: new Date(activity.created)}"
+                            x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"
+                            class="flex-none py-0.5 text-xs/5 text-gray-500 ml-auto"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </li>
+              </template>
+            </template>
+          </ul>
+          
+          <!-- New comment form -->
+          <div class="mt-6 flex gap-x-4">
+            <div class="relative flex size-6 flex-none items-center justify-center bg-white">
+              <div class="size-1.5 rounded-full bg-gray-200 ring-1 ring-gray-300"></div>
             </div>
-            <div
-              class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100"
-              x-bind:class="status === 'error' ? '':'hidden'"
-            >
-              <svg
-                class="h-6 w-6 text-red-600"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-            </div>
-            <div
-              class="mx-auto flex items-center justify-center h-12 w-12 rounded-full"
-              x-bind:class="status === 'submitted' ? '':'hidden'"
-            >
-              <svg
-                role="status"
-                class="inline w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600"
-                viewBox="0 0 100 101"
-                fill="#ff5800"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                  fill="currentFill"
-                />
-              </svg>
-            </div>
-            <div class="mt-3 text-center sm:mt-5">
-              <h3
-                class="text-lg leading-6 font-medium text-gray-900"
-                x-text="modalText"
-              ></h3>
-              <div class="mt-2">
-                <p class="text-sm text-gray-500" x-text="modalSubText"></p>
+            <!-- Already processed -->
+            <div x-show="'{{.Action}}' == 'audit'" class="w-full">
+              <div class="flex w-full">
+                <div class="flex-auto py-0.5 text-xs/5 text-gray-500">-- End of conversation --</div>
               </div>
             </div>
-            <div
-              class="mt-3 text-center sm:mt-5"
-              @click="showModal = false"
-              x-bind:hidden="status!='success'"
-            >
-              <a href="/myapprovals">Go back to approvals page</a>
+            <!-- Already processed -->
+             <div x-show="alreadyProcessed && '{{.Action}}' !== 'audit'" class="w-full">
+              <div class="flex w-full">
+                <div class="flex-auto py-0.5 text-xs/5 text-gray-500"><span class="font-medium text-gray-900">{{.Data.RequestedBy}}</span> {{.ApproverResponse}} the request.</div>
+                <div x-data="{date: new Date('{{.Data.DateResponded}}')}"
+                  x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"
+                  class="flex-none py-0.5 text-xs/5 text-gray-500 ml-auto"></div>
+              </div>
+              <div class="text-xs/5 text-gray-500 overflow-hidden rounded-lg p-3 outline outline-1 -outline-offset-1 outline-gray-300 mt-1"><b>Remarks:</b> {{.Data.ApproverRemarks}}</div>
             </div>
-            <div
-              class="mt-3 text-center sm:mt-5"
-              @click="showModal = false"
-              x-bind:hidden="status!='error'"
-            >
-              close
+            <!-- Not yet processed -->
+            <div action="#" class="relative flex-auto" x-show="!alreadyProcessed && '{{.Action}}' !== 'audit'">
+              <div class="overflow-hidden rounded-lg pb-12 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-orange-500">
+                <label for="comment" class="sr-only">Add your comment</label>
+                <textarea x-model="commentForm.details.content" rows="2" name="comment" id="comment" class="block w-full resize-none bg-transparent px-3 py-1.5 text-base text-gray-900 placeholder:text-gray-400  focus:outline-0 sm:text-sm/6 border-0" style="--tw-ring-shadow: 0 0 #000 !important;" placeholder="Add your comment..."></textarea>
+              </div>
+          
+              <div class="absolute inset-x-0 bottom-0 flex justify-between py-2 pl-3 pr-2">
+                <div class="flex items-center space-x-5">
+                  
+                </div>
+                <button class="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold shadow-sm ring-1 ring-inset ring-gray-300 " 
+                @click="submitActivity()" x-bind:disabled="!isCommentValid"  :class="!isCommentValid ? 'text-gray-300' : 'hover:bg-gray-50 text-gray-900'">Comment</button>
+              </div>
             </div>
-          </div>
+          </div>        
         </div>
       </div>
     </div>
@@ -198,8 +212,15 @@
 
 <script type="text/javascript">
   function data() {
+    let queryString = window.location.search;
+    let urlParams = new URLSearchParams(queryString);
+
     return {
       body: `{{.Data.Body}}`,
+      view: urlParams.get("view") || "details",
+      isApprover: "{{.IsApprover}}" === "true",
+      alreadyProcessed: "{{.AlreadyProcessed}}" === "true",
+      consultLegalButton: "{{.ConsultLegalButton}}" === "true",
       form: {
         applicationId: "{{.ApplicationId}}",
         applicationModuleId: "{{.ApplicationModuleId}}",
@@ -208,70 +229,74 @@
         remarks: "",
         isApproved: "{{.IsApproved}}",
       },
+      commentForm: {
+        action: "{{.Action}}",
+        details: {
+          itemId: "{{.ItemId}}",
+          content: "",
+          appId: "{{.ApplicationId}}",
+          appModuleId: "{{.ApplicationModuleId}}",
+        }
+      },
+      consultLegalForm: {
+        applicationId: "{{.ApplicationId}}",
+        applicationModuleId: "{{.ApplicationModuleId}}",
+        itemId: "{{.ItemId}}",
+      },
       requireRemarks: "{{.RequireRemarks}}",
-      showModal: false,
       status: "",
-      modalText: "Please wait...",
-      modalSubText: "Your request is being processed.",
+      url: new URL(window.location.href),
+      activities: null,
       onLoad() {
-        if (this.requireRemarks == "false") {
+        if (this.requireRemarks == "false" && this.isApprover) {
           this.submit();
         }
-        document.getElementById("modal").attributes.removeNamedItem("hidden");
-        document.getElementById("form").attributes.removeNamedItem("hidden");
-      },
-      showResult(status, title, subtext, show = true) {
-        this.status = status;
-        this.modalText = title;
-        this.modalSubText = subtext;
-        this.showModal = show;
       },
       submit() {
-        this.showResult(
-          "submitted",
-          "Processing",
-          "Please wait while processing your request."
-        );
-        fetch("/api/process", {
-          method: "post",
-          body: JSON.stringify(this.form),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then((r) => {
-            // Redirect to Home
-            switch (r.status) {
-              case 200:
-                this.showResult(
-                  "success",
-                  "Successful",
-                  "Your response has been submitted."
-                );
-                break;
-              case 401:
-                this.showResult(
-                  "error",
-                  "Failed",
-                  "You are unauthorized to process this approval."
-                );
-                break;
-              default:
-                this.showResult(
-                  "error",
-                  "Failed",
-                  "An error has occured while submitting your response."
-                );
-                break;
-            }
-          })
-          .catch((e) => {
-            this.showResult(
-              "error",
-              "Failed",
-              "An error has occured while submitting your response."
-            );
-          });
+        Alpine.store('master').modal.reset()
+        Alpine.store('master').modal.show()
+        Alpine.store('master').postData("/api/process", this.form, "Your response has been recorded.",
+            "Go to your approvals", "/myapprovals")
+      },
+      submitActivity() {
+        Alpine.store('master').modal.reset()
+        Alpine.store('master').modal.update("loading", "Please wait...", "Posting your commment.", "/")
+        Alpine.store('master').modal.show()
+        Alpine.store('master').postData("/api/activity", this.commentForm, "Your comment has been posted.",
+            "Refresh page", `/{{.Action}}/{{.ApplicationId}}/{{.ApplicationModuleId}}/{{.ItemId}}/2?view=activities`)  
+      },
+      consultLegal() {
+        let f = () => {
+          Alpine.store('master').modal.show()
+          Alpine.store('master').postData(`/api/ipdisclosurerequest/consultlegal`, this.consultLegalForm,
+            "An email will be sent to the legal team.", "Refresh page",
+            "/response/{{.ApplicationId}}/{{.ApplicationModuleId}}/{{.ItemId}}/2")
+        }
+        let title = "Confirmation"
+        let message = `Do you want to ask for input from the legal team?`
+        Alpine.store('master').confirmationModal.update(title, message, f)
+        Alpine.store('master').confirmationModal.show()
+      },
+      get isCommentValid() {
+        if (
+            !!this.commentForm.details.content
+        ) {
+            return true
+        } else {
+            return false
+        }
+      },
+      switchTo(view) {
+        this.view = view;
+        this.url.searchParams.set("view", view)
+
+        let urlPath = this.url.origin
+
+        if (this.url.pathname != '/') {
+            urlPath = `${urlPath}${this.url.pathname}`
+        }
+
+        window.history.pushState({}, '', `${urlPath}${this.url.search}`)
       },
       get isValid() {
         if (!!this.form.remarks && !!this.form.isApproved) {
@@ -279,6 +304,20 @@
         } else {
           return false;
         }
+      },
+      getActivities() {
+        fetch(`/api/activity/{{.ItemId}}`)
+            .then(r => {
+                r.json().then(body => {
+                    this.activities = body
+                })
+            })
+            .catch(e => {
+                console.log(e)
+            })
+      },
+      activitiesNotNull() {
+        return this.activities !== null
       },
     };
   }

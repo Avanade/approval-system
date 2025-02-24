@@ -5,18 +5,25 @@ import (
 	cApplicationModule "main/controller/app-module"
 	cAuthentication "main/controller/authentication"
 	cFallback "main/controller/fallback"
+	cInvolvement "main/controller/involvement"
+	cIPDiscloure "main/controller/ip-disclosure"
 	cItem "main/controller/item"
+	cItemActivity "main/controller/item-activity"
 	cUser "main/controller/user"
 	"main/service"
 )
 
 type Controller struct {
-	AuthenticationPage cAuthentication.AuthenticationPageController
-	Item               cItem.ItemController
-	ItemPage           cItem.ItemPageController
 	ApplicationModule  cApplicationModule.ApplicationModuleController
-	User               cUser.UserController
+	AuthenticationPage cAuthentication.AuthenticationPageController
 	Fallback           cFallback.FallbackController
+	Involvement        cInvolvement.InvolvementController
+	IPDisclosure       cIPDiscloure.IpDisclosureController
+	IPDisclourePage    cIPDiscloure.IpDisclosurePageController
+	Item               cItem.ItemController
+	ItemActivity       cItemActivity.ItemActivityController
+	ItemPage           cItem.ItemPageController
+	User               cUser.UserController
 }
 
 type ControllerOptionFunc func(*Controller)
@@ -31,21 +38,39 @@ func NewController(opts ...ControllerOptionFunc) *Controller {
 	return controller
 }
 
+func NewApplicationModuleController(svc *service.Service) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.ApplicationModule = cApplicationModule.NewApplicationModuleController(svc)
+	}
+}
+
 func NewAuthenticationController(svc *service.Service) ControllerOptionFunc {
 	return func(c *Controller) {
 		c.AuthenticationPage = cAuthentication.NewAuthenticationController(svc)
 	}
 }
 
-func NewItemController(svc *service.Service) ControllerOptionFunc {
+func NewInvolvementController(svc *service.Service) ControllerOptionFunc {
 	return func(c *Controller) {
-		c.Item = cItem.NewItemController(svc)
+		c.Involvement = cInvolvement.NewInvolvementController(svc)
 	}
 }
 
-func NewApplicationModuleController(svc *service.Service) ControllerOptionFunc {
+func NewIPDisclosureController(svc *service.Service, conf config.ConfigManager) ControllerOptionFunc {
 	return func(c *Controller) {
-		c.ApplicationModule = cApplicationModule.NewApplicationModuleController(svc)
+		c.IPDisclosure = cIPDiscloure.NewIpDisclosureController(svc, conf)
+	}
+}
+
+func NewItemController(svc *service.Service, conf config.ConfigManager) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.Item = cItem.NewItemController(svc, conf)
+	}
+}
+
+func NewItemActivityController(svc *service.Service, conf config.ConfigManager) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.ItemActivity = cItemActivity.NewItemActivityController(svc, conf)
 	}
 }
 
@@ -56,6 +81,12 @@ func NewUserController(svc *service.Service) ControllerOptionFunc {
 }
 
 // PAGES
+
+func NewIPDisclosurePageController(svc *service.Service) ControllerOptionFunc {
+	return func(c *Controller) {
+		c.IPDisclourePage = cIPDiscloure.NewIpDisclosurePageController(svc)
+	}
+}
 
 func NewItemPageController(svc *service.Service, conf config.ConfigManager) ControllerOptionFunc {
 	return func(c *Controller) {

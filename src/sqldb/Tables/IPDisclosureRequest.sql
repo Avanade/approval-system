@@ -1,0 +1,12 @@
+CREATE TABLE [dbo].[IPDisclosureRequest]
+(   
+    [Id]  INT          IDENTITY (1, 1),
+    [RequestorName] VARCHAR(100) NOT NULL,
+    [RequestorEmail] VARCHAR(100) NOT NULL,
+    [IPTitle] VARCHAR(100) NOT NULL,
+    [IPType] VARCHAR(100) NOT NULL,
+    [IPDescription] VARCHAR(100) NOT NULL,
+    [Reason] VARCHAR(100) NOT NULL,
+    [ApprovalRequestId] UNIQUEIDENTIFIER NULL,
+    CONSTRAINT PK_IPDisclosureRequest PRIMARY KEY (Id)
+)

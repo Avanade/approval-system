@@ -24,6 +24,7 @@ type Item struct {
 	RespondedBy         string   `json:"respondedBy"`
 	Approvers           []string `json:"approvers"`
 	RequestedBy         string   `json:"requestedBy"`
+	IPDRTitle           string   `json:"ipdrTitle"`
 }
 
 type ItemOptions struct {

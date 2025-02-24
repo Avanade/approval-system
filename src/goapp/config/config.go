@@ -7,22 +7,26 @@ type Config struct {
 }
 
 type ConfigManager interface {
-	GetDatabaseConnectionString() string
-	GetEnterpriseOwners() []string
-	GetEmailTenantID() string
-	GetEmailClientID() string
-	GetEmailClientSecret() string
-	GetEmailUserID() string
-	GetHomeURL() string
-	GetIsEmailEnabled() bool
-	GetTenantID() string
+	GetCallbackRetryFreq() string
 	GetClientID() string
 	GetClientSecret() string
+	GetCTO() string
+	GetCommunityPortalAppId() string
+	GetCommunityPortalDomain() string
+	GetDatabaseConnectionString() string
+	GetEmailClientID() string
+	GetEmailClientSecret() string
+	GetEmailTenantID() string
+	GetEmailUserID() string
+	GetEnterpriseOwners() []string
+	GetHomeURL() string
+	GetIPDRAppId() string
+	GetIPDRModuleId() string
+	GetIsEmailEnabled() bool
 	GetLinkFooters() string
 	GetOrganizationName() string
-	GetCommunityPortalAppId() string
-	GetCallbackRetryFreq() string
 	GetPort() string
-	GetSessionKey() string
 	GetScope() string
+	GetSessionKey() string
+	GetTenantID() string
 }
