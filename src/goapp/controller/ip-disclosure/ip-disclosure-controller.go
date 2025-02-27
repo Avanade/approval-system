@@ -286,8 +286,15 @@ func (c *ipDisclosureController) UpdateResponse(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	// Get request item
+	item, err := c.Service.Item.GetItemById(request.ApprovalRequestId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	// Send email to requestor
-	err = c.Service.Email.SendIPDRResponseEmail(request, nil, c.Config.GetHomeURL())
+	err = c.Service.Email.SendIPDRResponseEmail(request, item, c.Config.GetHomeURL())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -199,6 +199,13 @@ func (s *sdkEmailService) SendIPDRResponseEmail(data *model.IPDRequest, item *mo
 							</table>
 						</td>
 					</tr>
+					<tr>
+						<td style="padding: 15px 0;">
+							<a href="|Domain|/view/|AppId|/|AppModuleId|/|ItemId|/1?view=activities">
+								View Request
+							</a>
+						</td>
+					</tr>
 				</table>
 			</td>
 		</tr>
@@ -206,7 +213,7 @@ func (s *sdkEmailService) SendIPDRResponseEmail(data *model.IPDRequest, item *mo
 
 	replacer := strings.NewReplacer(
 		"|Action|", action,
-		"|Remarks|", data.ApproverRemarks,
+		"|Remarks|", strings.TrimSpace(data.ApproverRemarks),
 		"|Requestor|", data.RequestorName,
 		"|Email|", data.RequestorEmail,
 		"|Involvement|", strings.Join(data.Involvement, ", "),
@@ -214,6 +221,10 @@ func (s *sdkEmailService) SendIPDRResponseEmail(data *model.IPDRequest, item *mo
 		"|IPType|", data.IPType,
 		"|IPDescription|", data.IPDescription,
 		"|Reason|", data.Reason,
+		"|AppId|", item.ApplicationId,
+		"|AppModuleId|", item.ModuleId,
+		"|ItemId|", item.Id,
+		"|Domain|", domain,
 	)
 	htmlBody := s.buildHtmlBody(bodyTemplate, replacer)
 
