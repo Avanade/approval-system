@@ -207,7 +207,7 @@ func (c *ipDisclosureController) InsertIPDisclosureRequest(w http.ResponseWriter
 		ApplicationId:       c.Config.GetIPDRAppId(),
 		ApplicationModuleId: c.Config.GetIPDRModuleId(),
 		Emails:              []string{c.Config.GetCTO()},
-		Subject:             "IP Disclosure Request",
+		Subject:             "IP Disclosure Request - " + request.IPTitle,
 		Body:                body,
 		RequesterEmail:      user.Email,
 	}
