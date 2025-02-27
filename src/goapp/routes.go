@@ -30,6 +30,7 @@ func setApiRoutes() {
 	httpRouter.GET("/api/responsereassignedapi/{itemGuid}/{approver}/{ApplicationId}/{ApplicationModuleId}/{ApproveText}/{RejectText}", m.Chain(ctrl.Item.ReassignItem, m.AzureAuth()))
 	httpRouter.POST("/api/ipdisclosurerequest", m.Chain(ctrl.IPDisclosure.InsertIPDisclosureRequest, m.AzureAuth()))
 	httpRouter.POST("/api/ipdisclosurerequest/consultlegal", m.Chain(ctrl.Item.ConsultLegal, m.AzureAuth()))
+	httpRouter.POST("/api/ipdisclosurerequest/response", m.Chain(ctrl.IPDisclosure.UpdateResponse, m.ManagedIdentityAuth()))
 	httpRouter.POST("/api/activity", m.Chain(ctrl.ItemActivity.InsertItemActivity, m.AzureAuth()))
 	httpRouter.GET("/api/activity/{id}", m.Chain(ctrl.ItemActivity.GetItemActivity, m.AzureAuth()))
 }

@@ -262,3 +262,36 @@ func (c *ipDisclosureController) InsertIPDisclosureRequest(w http.ResponseWriter
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func (c *ipDisclosureController) UpdateResponse(w http.ResponseWriter, r *http.Request) {
+	// Decode payload
+	var data model.ResponseCallback
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Update response
+	err = c.Service.IPDisclosureRequest.UpdateResponse(&data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get IPD Request
+	request, err := c.Service.IPDisclosureRequest.GetIPDRequestByApprovalRequestId(data.ItemId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Send email to requestor
+	err = c.Service.Email.SendIPDRResponseEmail(request, nil, c.Config.GetHomeURL())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

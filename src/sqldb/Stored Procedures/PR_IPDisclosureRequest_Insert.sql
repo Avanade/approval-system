@@ -15,7 +15,8 @@ AS
         [IPTitle],
         [IPType],
         [IPDescription],
-        [Reason]
+        [Reason],
+        [Created]
 		)
 	OUTPUT INSERTED.Id INTO @ResultTable
 	VALUES (
@@ -24,7 +25,8 @@ AS
         @IPTitle,
         @IPType,
         @IPDescription,
-        @Reason
+        @Reason,
+        GETDATE()
 	)
 
 	SELECT [Id] FROM @ResultTable
