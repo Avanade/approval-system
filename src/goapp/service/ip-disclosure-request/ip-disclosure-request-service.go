@@ -15,6 +15,23 @@ func NewIpDisclosureRequestService(repo *repository.Repository) IpDisclosureRequ
 	}
 }
 
+func (s *ipDisclosureRequestService) GetIPDRequestByApprovalRequestId(approvalRequestId string) (*model.IPDRequest, error) {
+	item, err := s.Repository.IPDRequest.GetIpdRequestByApprovalRequestId(approvalRequestId)
+	if err != nil {
+		return nil, err
+	}
+
+	involvementIds, involvements, err := s.Repository.IpdrInvolvement.GetIpdrInvolvementByRequestId(item.RequestId)
+	if err != nil {
+		return nil, err
+	}
+
+	item.InvolvementId = involvementIds
+	item.Involvement = involvements
+
+	return item, nil
+}
+
 func (s *ipDisclosureRequestService) InsertIPDisclosureRequest(ipDisclosureRequest *model.IPDRequest) (*model.IPDRequest, error) {
 	id, err := s.Repository.IPDRequest.InsertIpdRequest(ipDisclosureRequest)
 	if err != nil {
@@ -39,4 +56,8 @@ func (s *ipDisclosureRequestService) InsertIPDisclosureRequest(ipDisclosureReque
 
 func (s *ipDisclosureRequestService) UpdateApprovalRequestId(approvalRequestId string, IPDRequestId int64) error {
 	return s.Repository.IPDRequest.UpdateApprovalRequestId(approvalRequestId, IPDRequestId)
+}
+
+func (s *ipDisclosureRequestService) UpdateResponse(data *model.ResponseCallback) error {
+	return s.Repository.IPDRequest.UpdateResponse(data)
 }

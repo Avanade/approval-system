@@ -57,7 +57,7 @@ func (r *legalConsultationRepository) GetLegalConsultationByEmail(email string, 
 		}
 
 		if v["DateResponded"] != nil {
-			item.DateResponded = v["DateResponded"].(time.Time).Format("2006-01-02T15:04:05.000Z")
+			item.DateResponded = v["DateResponded"].(time.Time).String()
 		}
 
 		if v["DateSent"] != nil {
