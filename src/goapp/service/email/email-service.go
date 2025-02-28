@@ -72,7 +72,7 @@ func (s *sdkEmailService) SendActivityEmail(req *model.ItemActivity, recipients 
 						<tr>
 							<td style="padding: 15px 0 10px 0;">
 								<span><b>|User|</b></span> 
-								<span>commented on your request:</span>
+								<span>commented on a request:</span>
 							</td>
 						</tr>
 						<tr>
