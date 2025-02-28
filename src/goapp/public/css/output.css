@@ -6310,10 +6310,6 @@ select {
   color: rgb(156 163 175 / var(--tw-text-opacity, 1));
 }
 
-.last-of-type\:hidden:last-of-type {
-  display: none;
-}
-
 .focus-within\:outline:focus-within {
   outline-style: solid;
 }

@@ -111,7 +111,7 @@
         <div class="max-w-[700px] mx-auto">
           <ul role="list" class="space-y-6">
             <li class="relative flex gap-x-4">
-              <div class="absolute -bottom-6 left-0 top-0 flex w-6 justify-center" :class="{ 'hidden' : !activitiesNotNull() && !alreadyProcessed }">
+              <div class="absolute -bottom-6 left-0 top-0 flex w-6 justify-center" :class="{ 'hidden' : (commentForm.action ==='audit' && !activitiesNotNull() && !alreadyProcessed ) }">
                 <div class="w-px bg-gray-200"></div>
               </div>
               <div class="relative flex size-6 flex-none items-center justify-center bg-white">
@@ -168,7 +168,7 @@
           </ul>
           
           <!-- New comment form -->
-          <div class="mt-6 flex gap-x-4" :class="{ 'hidden' : !activitiesNotNull() && !alreadyProcessed}">
+          <div class="mt-6 flex gap-x-4" :class="{ 'hidden' : commentForm.action==='audit' && !alreadyProcessed}">
             <div class="relative flex size-6 flex-none items-center justify-center bg-white">
               <div class="size-1.5 rounded-full bg-gray-200 ring-1 ring-gray-300"></div>
             </div>
@@ -198,7 +198,7 @@
               </div>
             </div>
           </div>
-          <!-- New comment form -->
+          <!-- For audit only, end of conversation marker -->
           <div class="mt-6 flex gap-x-4">
             <div class="relative flex size-6 flex-none items-center justify-center bg-white">
               <!-- <div class="size-1.5 rounded-full bg-gray-200 ring-1 ring-gray-300"></div> -->
