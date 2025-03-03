@@ -238,7 +238,7 @@ func (c *itemPageController) RespondToItem(w http.ResponseWriter, r *http.Reques
 		Data:                *item,
 		RequireRemarks:      itemIsAuthorized.RequireRemarks,
 		IsApprover:          isApprover, // show remarks and approve/reject buttons
-		AlreadyProcessed:    itemIsAuthorized.IsApproved.Value,
+		AlreadyProcessed:    item.DateResponded != "",
 		ApproverResponse:    approverResponse,
 		ConsultLegalButton:  consultLegalButton,
 		Action:              action,
