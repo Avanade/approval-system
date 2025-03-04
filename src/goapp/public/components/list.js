@@ -44,52 +44,57 @@ const list = ({
         this.state.showStart = this.state.items.length > 0 ? ((this.state.page * this.state.filter) + 1) : 0;
         this.state.showEnd = (this.state.page * this.state.filter) + this.state.items.length;
     },
+    async reload(){
+        this.state.page = 0;
+        this.state.total = 0;
+        this.load();
+    },
     //EVENT HANDLERS
     onChangeFilterHandler(e){
-        this.state.page = 0,
-        this.state.total = 0,
+        this.state.page = 0;
+        this.state.total = 0;
         this.state.filter = parseInt(e.target.value);
         this.load()
     },
     onSearchSubmitHandler(e){
-        this.state.page = 0,
-        this.state.total = 0,
+        this.state.page = 0;
+        this.state.total = 0;
         this.state.search = e.target.value;
         this.load();
     },
     onNextPageHandler(){
         if (!this.nextPageEnabled()) return;
 
-        this.state.page = this.state.page + 1
+        this.state.page = this.state.page + 1;
 
-        this.load()
+        this.load();
     },
     onPreviousPageHandler(){
         if (!this.previousPageEnabled()) return;
 
-        this.state.page = this.state.page - 1
+        this.state.page = this.state.page - 1;
 
         this.load();
     },
     //FUNCTIONS
     nextPageEnabled(){
-        return this.state.page < Math.ceil(this.state.total/this.state.filter) - 1
+        return this.state.page < Math.ceil(this.state.total/this.state.filter) - 1;
     },
     previousPageEnabled(){
-        return this.state.page > 0
+        return this.state.page > 0;
     }, 
     checkItemLenght(){
         if (!this.state.items  ){
-            return false
+            return false;
         }
         if (this.state.items.length == 0 ){
-            return false
+            return false;
         }
-        return  true
+        return  true;
     },
     //RENDER
     render(item){
-        return renderItem(item)
+        return renderItem(item);
     },
     template : `<nav class="bg-white flex items-center justify-between" aria-label="header">
             <template x-if="state.enabledSearch">
