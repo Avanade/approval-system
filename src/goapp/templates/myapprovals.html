@@ -33,7 +33,7 @@
               <select @change="(e) => {
                 state.other.requestType = requestTypes.find((obj) => { return e.target.value == obj.name})
                 state.other.organization = 'All'
-                load()
+                reload()
               }" 
               id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                   <template x-for="item in requestTypes" :key="item.id">
@@ -47,7 +47,7 @@
             <div class="content-start">
                 <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
                 <select @change="(e) => {
-                  load()
+                  reload()
                 }"
                 x-model="state.other.organization" 
                 id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
@@ -82,7 +82,7 @@
           <div class="content-start">
               <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Response</label>
               <select @change="() => {
-                load()
+                reload()
               }" 
               x-model="state.other.responseType" id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                   <option>All</option>
@@ -97,7 +97,7 @@
               <select @change="(e) => {
                 state.other.requestType = requestTypes.find((obj) => { return e.target.value == obj.name})
                 state.other.organization = 'All'
-                load()
+                reload()
               }" 
               id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                   <template x-for="item in requestTypes" :key="item.id">
@@ -112,7 +112,7 @@
                 <label for="filter" class="block text-sm font-medium text-gray-700">Filter by Organization</label>
                 <select @change="(e) => {
                   state.other.organization = e.target.value
-                  load()
+                  reload()
                 }" 
                 id="reponseType" name="responseType" class="block mt-1 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                     <template x-for="item in organizations">
@@ -392,7 +392,7 @@
     const offset = filter * page;
     search = encodeURIComponent(search)
     requestTypeParam = requestType == '' ? '' : '&requestType=' + requestType
-    organizationParam = organization == 'All' ? '' : '&organization=' + organization
+    organizationParam = organization.toLowerCase() == 'all' ? '' : '&organization=' + organization
     const res = await fetch(`/api/items/type/${type}/status/${status}?filter=${filter}&offset=${offset}&search=${search}${requestTypeParam}${organizationParam}`)
     const data = await res.json()
     return data
