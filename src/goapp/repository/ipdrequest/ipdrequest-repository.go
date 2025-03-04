@@ -106,7 +106,6 @@ func (r *ipdRequestRepository) UpdateResponse(data *model.ResponseCallback) erro
 		sql.Named("ApprovalRequestId", data.ItemId),
 		sql.Named("IsApproved", data.IsApproved),
 		sql.Named("ApproverRemarks", data.Remarks),
-		sql.Named("ResponseDate", data.ResponseDate),
 		sql.Named("RespondedBy", data.RespondedBy),
 	)
 
