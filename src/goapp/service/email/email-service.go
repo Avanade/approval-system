@@ -134,7 +134,7 @@ func (s *sdkEmailService) SendIPDRResponseEmail(data *model.IPDRequest, item *mo
 					</tr>
 					<tr>
 						<td style="padding: 10px 0 10px 0;">
-							<span>Approver Remarks: |Remarks|.</span>
+							<span>Approver Remarks: |Remarks|</span>
 						</td>
 					</tr>
 					<tr>

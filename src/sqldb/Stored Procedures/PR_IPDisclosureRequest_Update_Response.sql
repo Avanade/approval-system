@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[PR_IPDisclosureRequest_Update_Response]
   @ApprovalRequestId [UNIQUEIDENTIFIER],
   @IsApproved [BIT],
-  @ApproverRemarks [VARCHAR](100),
+  @ApproverRemarks [VARCHAR](255),
   @RespondedBy [VARCHAR](100)
 AS
 BEGIN
