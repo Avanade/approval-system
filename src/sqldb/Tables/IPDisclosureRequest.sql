@@ -9,7 +9,7 @@ CREATE TABLE [dbo].[IPDisclosureRequest]
     [Reason] VARCHAR(100) NOT NULL,
     [ApprovalRequestId] UNIQUEIDENTIFIER NULL,
     [IsApproved] BIT NULL,
-    [ApproverRemarks] VARCHAR(100) NULL,
+    [ApproverRemarks] VARCHAR(255) NULL,
     [Created] DATETIME NOT NULL,
     [ResponseDate] DATETIME NULL,
     [RespondedBy] VARCHAR(100) NULL
