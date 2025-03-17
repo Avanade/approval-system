@@ -44,6 +44,11 @@ const list = ({
         this.state.showStart = this.state.items.length > 0 ? ((this.state.page * this.state.filter) + 1) : 0;
         this.state.showEnd = (this.state.page * this.state.filter) + this.state.items.length;
     },
+    async reload(){
+        this.state.page = 0;
+        this.state.total = 0;
+        this.load();
+    },
     //EVENT HANDLERS
     onChangeFilterHandler(e){
         this.state.page = 0,
