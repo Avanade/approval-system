@@ -71,7 +71,7 @@ func (r *itemRepository) GetItemById(id string) (*model.Item, error) {
 	}
 
 	if result[0]["DateResponded"] != nil {
-		item.DateResponded = result[0]["DateResponded"].(time.Time).Format("2006-01-02T15:04:05.000Z")
+		item.DateResponded = result[0]["DateResponded"].(time.Time).String()
 	}
 
 	if result[0]["DateSent"] != nil {
@@ -212,7 +212,7 @@ func (r *itemRepository) GetItemsByModuleId(moduleId string, filterOptions model
 		}
 
 		if v["DateResponded"] != nil {
-			item.DateResponded = v["DateResponded"].(time.Time).Format("2006-01-02T15:04:05.000Z")
+			item.DateResponded = v["DateResponded"].(time.Time).String()
 		}
 
 		if v["DateSent"] != nil {

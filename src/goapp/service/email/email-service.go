@@ -65,14 +65,14 @@ func (s *sdkEmailService) SendApprovalRequestEmail(req *model.ItemInsertRequest,
 }
 
 func (s *sdkEmailService) SendActivityEmail(req *model.ItemActivity, recipients []string, domain, action string) error {
-	bodyTempate := ` 
+	bodyTemplate := ` 
 			<tr style="color: #5c5c5c;"  >
 				<td class="center-table" align="center">
 					<table style="width: 100%; max-width: 700px;" class="margin-auto">
 						<tr>
 							<td style="padding: 15px 0 10px 0;">
 								<span><b>|User|</b></span> 
-								<span>commented on your request:</span>
+								<span>commented on a request:</span>
 							</td>
 						</tr>
 						<tr>
@@ -102,9 +102,133 @@ func (s *sdkEmailService) SendActivityEmail(req *model.ItemActivity, recipients 
 		"|Action|", action,
 	)
 
-	htmlBody := s.buildHtmlBody(bodyTempate, replacer)
+	htmlBody := s.buildHtmlBody(bodyTemplate, replacer)
 
 	err := s.SendEmail(recipients, nil, "New Comment Notification", htmlBody, Html, false)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *sdkEmailService) SendIPDRResponseEmail(data *model.IPDRequest, item *model.Item, domain string) error {
+	action := "rejected"
+	if data.IsApproved {
+		action = "approved"
+	}
+
+	bodyTemplate := `
+		<tr style="color: #5c5c5c;"  >
+			<td class="center-table" align="center">
+				<table style="width: 100%; max-width: 700px;" class="margin-auto">
+					<tr>
+						<td style="padding: 15px 0 0px 0;">
+							<span>Hi,</span> 
+						</td>
+					</tr>
+					<tr>
+						<td style="padding: 10px 0 10px 0;">
+							<span>The following request for Intellectual Property disclosure has been |Action|.</span>
+						</td>
+					</tr>
+					<tr>
+						<td style="padding: 10px 0 10px 0;">
+							<span>Approver Remarks: |Remarks|</span>
+						</td>
+					</tr>
+					<tr>
+						<td class="center-table">
+							<table style="width: 100%; max-width: 700px; margin: auto">
+								<tr class="border-top">
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+										Requestor
+									</td>
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+										|Requestor|
+									</td>
+								</tr>
+								<tr class="border-top">
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+										Requestor Email
+									</td>
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+										|Email|
+									</td>
+								</tr>
+								<tr class="border-top">
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+										Involvement
+									</td>
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+										|Involvement|
+									</td>
+								</tr>
+								<tr class="border-top">
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+										Intellectual Property Title
+									</td>
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+										|IPTitle|
+									</td>
+								</tr>
+								<tr class="border-top">
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+										Intellectual Property Type
+									</td>
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+										|IPType|
+									</td>
+								</tr>
+								<tr class="border-top">
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+										Intellectual Property Description
+									</td>
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+										|IPDescription|
+									</td>
+								</tr>
+								<tr class="border-top">
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
+										Reason
+									</td>
+									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
+										|Reason|
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td style="padding: 15px 0;">
+							<a href="|Domain|/view/|AppId|/|AppModuleId|/|ItemId|/1?view=activities">
+								View Request
+							</a>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		`
+
+	replacer := strings.NewReplacer(
+		"|Action|", action,
+		"|Remarks|", strings.TrimSpace(data.ApproverRemarks),
+		"|Requestor|", data.RequestorName,
+		"|Email|", data.RequestorEmail,
+		"|Involvement|", strings.Join(data.Involvement, ", "),
+		"|IPTitle|", data.IPTitle,
+		"|IPType|", data.IPType,
+		"|IPDescription|", data.IPDescription,
+		"|Reason|", data.Reason,
+		"|AppId|", item.ApplicationId,
+		"|AppModuleId|", item.ModuleId,
+		"|ItemId|", item.Id,
+		"|Domain|", domain,
+	)
+	htmlBody := s.buildHtmlBody(bodyTemplate, replacer)
+
+	err := s.SendEmail([]string{data.RequestorEmail}, nil, "IP Disclosure Request", htmlBody, Html, false)
 	if err != nil {
 		return err
 	}

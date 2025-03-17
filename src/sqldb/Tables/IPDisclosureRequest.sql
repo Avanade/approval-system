@@ -8,5 +8,10 @@ CREATE TABLE [dbo].[IPDisclosureRequest]
     [IPDescription] VARCHAR(100) NOT NULL,
     [Reason] VARCHAR(100) NOT NULL,
     [ApprovalRequestId] UNIQUEIDENTIFIER NULL,
+    [IsApproved] BIT NULL,
+    [ApproverRemarks] VARCHAR(255) NULL,
+    [Created] DATETIME NOT NULL,
+    [ResponseDate] DATETIME NULL,
+    [RespondedBy] VARCHAR(100) NULL
     CONSTRAINT PK_IPDisclosureRequest PRIMARY KEY (Id)
 )

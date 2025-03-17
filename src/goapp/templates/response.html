@@ -11,7 +11,7 @@
           x-bind:class="view==='activities' ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'"> 
         Activities
       </div>
-      <div style="margin-left: auto !important;" x-show="consultLegalButton && !alreadyProcessed">
+      <div style="margin-left: auto !important;" x-show="consultLegalButton && !alreadyProcessed && isApprover">
         <button @click="consultLegal()"
           class="bg-[#FF5800] hover:bg-[#FF4300] text-white font-bold py-2 px-4 rounded" >
           Consult Legal
@@ -111,7 +111,7 @@
         <div class="max-w-[700px] mx-auto">
           <ul role="list" class="space-y-6">
             <li class="relative flex gap-x-4">
-              <div class="absolute -bottom-6 left-0 top-0 flex w-6 justify-center">
+              <div class="absolute -bottom-6 left-0 top-0 flex w-6 justify-center" :class="{ 'hidden' : (commentForm.action ==='audit' && !activitiesNotNull() && !alreadyProcessed ) }">
                 <div class="w-px bg-gray-200"></div>
               </div>
               <div class="relative flex size-6 flex-none items-center justify-center bg-white">
@@ -168,18 +168,12 @@
           </ul>
           
           <!-- New comment form -->
-          <div class="mt-6 flex gap-x-4">
+          <div class="mt-6 flex gap-x-4" :class="{ 'hidden' : commentForm.action==='audit' && !alreadyProcessed}">
             <div class="relative flex size-6 flex-none items-center justify-center bg-white">
               <div class="size-1.5 rounded-full bg-gray-200 ring-1 ring-gray-300"></div>
             </div>
             <!-- Already processed -->
-            <div x-show="'{{.Action}}' == 'audit'" class="w-full">
-              <div class="flex w-full">
-                <div class="flex-auto py-0.5 text-xs/5 text-gray-500">-- End of conversation --</div>
-              </div>
-            </div>
-            <!-- Already processed -->
-             <div x-show="alreadyProcessed && '{{.Action}}' !== 'audit'" class="w-full">
+             <div x-show="alreadyProcessed" class="w-full">
               <div class="flex w-full">
                 <div class="flex-auto py-0.5 text-xs/5 text-gray-500"><span class="font-medium text-gray-900">{{.Data.RequestedBy}}</span> {{.ApproverResponse}} the request.</div>
                 <div x-data="{date: new Date('{{.Data.DateResponded}}')}"
@@ -203,7 +197,18 @@
                 @click="submitActivity()" x-bind:disabled="!isCommentValid"  :class="!isCommentValid ? 'text-gray-300' : 'hover:bg-gray-50 text-gray-900'">Comment</button>
               </div>
             </div>
-          </div>        
+          </div>
+          <!-- For audit only, end of conversation marker -->
+          <div class="mt-6 flex gap-x-4">
+            <div class="relative flex size-6 flex-none items-center justify-center bg-white">
+              <!-- <div class="size-1.5 rounded-full bg-gray-200 ring-1 ring-gray-300"></div> -->
+            </div>
+            <div x-show="'{{.Action}}' == 'audit'" class="w-full">
+              <div class="flex w-full">
+                <div class="flex-auto py-0.5 text-xs/5 text-gray-500">-- End of conversation --</div>
+              </div>
+            </div>
+          </div>         
         </div>
       </div>
     </div>
