@@ -53,13 +53,14 @@ func (r *itemRepository) GetItemById(id string) (*model.Item, error) {
 	}
 
 	item := model.Item{
-		Id:          id,
-		Application: result[0]["Application"].(string),
-		Module:      result[0]["Module"].(string),
-		ApproveText: result[0]["ApproveText"].(string),
-		RejectText:  result[0]["RejectText"].(string),
-		Created:     result[0]["Created"].(time.Time).String(),
-		RequestedBy: result[0]["RequestedBy"].(string),
+		Id:            id,
+		ApplicationId: result[0]["ApplicationId"].(string),
+		Application:   result[0]["Application"].(string),
+		Module:        result[0]["Module"].(string),
+		ApproveText:   result[0]["ApproveText"].(string),
+		RejectText:    result[0]["RejectText"].(string),
+		Created:       result[0]["Created"].(time.Time).String(),
+		RequestedBy:   result[0]["RequestedBy"].(string),
 	}
 
 	if result[0]["ApproverRemarks"] != nil {

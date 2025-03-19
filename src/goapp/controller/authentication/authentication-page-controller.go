@@ -141,16 +141,13 @@ func (a *authenticationPageController) LoginRedirectHandler(w http.ResponseWrite
 }
 
 func (a *authenticationPageController) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	err := a.Authenticator.ClearFromSession(&w, r, "auth-session")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
 	url, err := a.Authenticator.GetLogoutURL()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	_ = a.Authenticator.ClearFromSession(&w, r, "auth-session")
 
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
