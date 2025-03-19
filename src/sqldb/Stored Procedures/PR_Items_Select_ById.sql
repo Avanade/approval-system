@@ -3,6 +3,7 @@ CREATE PROCEDURE [dbo].[PR_Items_Select_ById]
 AS
 	SELECT
 		A.[Name] [Application],
+		dbo.UidToString(A.[Id]) AS [ApplicationId],
 		AM.[Name] [Module], dbo.UidToString(AM.[Id]) [ApplicationModuleId],
 		[Subject], Body, DateSent,
 		DateResponded, IsApproved, ApproverRemarks,

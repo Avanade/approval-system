@@ -175,7 +175,7 @@
             <!-- Already processed -->
              <div x-show="alreadyProcessed" class="w-full">
               <div class="flex w-full">
-                <div class="flex-auto py-0.5 text-xs/5 text-gray-500"><span class="font-medium text-gray-900">{{.Data.RequestedBy}}</span> {{.ApproverResponse}} the request.</div>
+                <div class="flex-auto py-0.5 text-xs/5 text-gray-500"><span class="font-medium text-gray-900">{{.Data.RespondedBy}}</span> {{.ApproverResponse}} the request.</div>
                 <div x-data="{date: new Date('{{.Data.DateResponded}}')}"
                   x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"
                   class="flex-none py-0.5 text-xs/5 text-gray-500 ml-auto"></div>
