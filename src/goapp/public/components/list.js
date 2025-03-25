@@ -1,114 +1,115 @@
 const list = ({
+    enabledSearch = true,
+    otherState,
     callback,
-    renderItem,
+    renderItem
   }) => {
     return {
-    // FILTER
-    search : '',
-    filter : 10,
-    page : 0,
+    state: {
+        // FILTER
+        search : '',
+        filter : 10,
+        page : 0,
 
-    // DISPLAY
-    total : 0,
-    showStart : 0,
-    showEnd : 0,
-    isLoading : false,
+        // DISPLAY
+        total : 0,
+        showStart : 0,
+        showEnd : 0,
+        isLoading : false,
 
-    items : [],
+        enabledSearch: true,
+
+        other: {},
+
+        items : []
+    },
     async init(){
+        this.state.other = otherState
         await this.load();
     },
     async load(){
-        this.isLoading = true
-        this.showStart = 0
-        this.showEnd = 0
-        const {data, total} = await callback({
-            filter : this.filter,
-            page : this.page,
-            search : this.search,
-        })
+        this.state.enabledSearch = enabledSearch
+        this.state.isLoading = true
+        this.state.showStart = 0
+        this.state.showEnd = 0
+        const {data, total} = await callback(this.state)
 
-        this.items = data
-        this.total = total
+        this.state.items = data
+        this.state.total = total
         
-        this.isLoading = false
+        this.state.isLoading = false
 
-        if (this.items == null || this.items.length == 0) return;
+        if (this.state.items == null || this.state.items.length == 0) return;
 
-        this.showStart = this.items.length > 0 ? ((this.page * this.filter) + 1) : 0;
-        this.showEnd = (this.page * this.filter) + this.items.length;
+        this.state.showStart = this.state.items.length > 0 ? ((this.state.page * this.state.filter) + 1) : 0;
+        this.state.showEnd = (this.state.page * this.state.filter) + this.state.items.length;
+    },
+    async reload(){
+        this.state.page = 0;
+        this.state.total = 0;
+        this.load();
     },
     //EVENT HANDLERS
     onChangeFilterHandler(e){
-        this.page = 0,
-        this.total = 0,
-        this.filter = parseInt(e.target.value);
+        this.state.page = 0;
+        this.state.total = 0;
+        this.state.filter = parseInt(e.target.value);
         this.load()
     },
     onSearchSubmitHandler(e){
-        this.page = 0,
-        this.total = 0,
-        this.search = e.target.value;
+        this.state.page = 0;
+        this.state.total = 0;
+        this.state.search = e.target.value;
         this.load();
     },
     onNextPageHandler(){
         if (!this.nextPageEnabled()) return;
 
-        this.page = this.page + 1
+        this.state.page = this.state.page + 1;
 
-        this.load()
+        this.load();
     },
     onPreviousPageHandler(){
         if (!this.previousPageEnabled()) return;
 
-        this.page = this.page - 1
+        this.state.page = this.state.page - 1;
 
         this.load();
     },
     //FUNCTIONS
     nextPageEnabled(){
-        return this.page < Math.ceil(this.total/this.filter) - 1
+        return this.state.page < Math.ceil(this.state.total/this.state.filter) - 1;
     },
     previousPageEnabled(){
-        return this.page > 0
+        return this.state.page > 0;
     }, 
     checkItemLenght(){
-        if (!this.items  ){
-            return false
+        if (!this.state.items  ){
+            return false;
         }
-        if (this.items.length == 0 ){
-            return false
+        if (this.state.items.length == 0 ){
+            return false;
         }
-        return  true
+        return  true;
     },
     //RENDER
     render(item){
-        return renderItem(item)
+        return renderItem(item);
     },
     template : `<nav class="bg-white flex items-center justify-between" aria-label="header">
-            <div class="sm:block">
-                <div>
-                    <label for="filter" class="block text-sm font-medium text-gray-700">Filter</label>
-                    <select @change="onChangeFilterHandler" x-model="filter" id="filter" name="filter" class="mt-1 block w-20 pl-3 pr-10 py-2 text-base text-center border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                        <option>5</option>
-                        <option>10</option>
-                        <option>20</option>
-                        <option>50</option>
-                        <option>100</option>
-                    </select>
-                </div>
-            </div>
-            <div class="flex justify-between sm:justify-end">
-                <div class="sm:col-span-3">
-                    <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
-                    <div class="mt.-1">
-                        <input @keyup.enter="onSearchSubmitHandler" type="text" name="search" id="search"  class="block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-2    sm:text-sm border-gray-300 rounded-md"   x-model="search">
+            <template x-if="state.enabledSearch">
+                <div class="flex justify-between sm:justify-end">
+                    <div class="sm:col-span-3">
+                        <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
+                        <div class="mt.-1">
+                            <input @keyup.enter="onSearchSubmitHandler" type="text" name="search" id="search" class="block w-full focus:ring-indigo-500 focus:border-indigo-500 pl-2 sm:text-sm border-gray-300 rounded-md" x-model="state.search">
+                        </div>
                     </div>
                 </div>
-            </div>
+            </template>
         </nav>
 
-        <div x-show='isLoading' x-transition>
+        <div x-show='state.isLoading' x-transition>
             <svg 
                 role="status" 
                 class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-[#FF5800] m-auto my-5"
@@ -124,13 +125,13 @@ const list = ({
             </svg>
         </div>
         
-        <div x-show="!isLoading" x-transition>
-            <template x-if="!items">
+        <div x-show="!state.isLoading" x-transition>
+            <template x-if="!state.items">
                 <p class="text-center my-5">NO RESULT FOUND</p>
             </template>
             <template x-if="checkItemLenght ">
                 <ul role="list" class="divide-y divide-gray-300 my-3">
-                    <template x-for="item in items">
+                    <template x-for="item in state.items">
                         <li x-html="render(item)">
                         </li>
                     </template>
@@ -140,13 +141,25 @@ const list = ({
 
         <nav class="bg-white py-3 flex items-center justify-between border-t border-gray-200" aria-label="Pagination">
             <div class="sm:block">
+                <div class="content-start">
+                    <label for="filter" class="text-sm font-medium text-gray-700">Filter</label>
+                    <select @change="onChangeFilterHandler" x-model="state.filter" id="filter" name="filter" class="mt-1 w-20 pl-3 pr-10 py-2 text-base text-center border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option>5</option>
+                        <option>10</option>
+                        <option>20</option>
+                        <option>50</option>
+                        <option>100</option>
+                    </select>
+                </div>
+            </div>
+            <div class="sm:block">
                 <p class="text-sm text-gray-700">
                     Showing
-                    <span class="font-medium" x-text="showStart"></span>
+                    <span class="font-medium" x-text="state.showStart"></span>
                     to
-                    <span class="font-medium" x-text="showEnd"></span>
+                    <span class="font-medium" x-text="state.showEnd"></span>
                     of
-                    <span class="font-medium" x-text="total"></span>
+                    <span class="font-medium" x-text="state.total"></span>
                     results
                 </p>
             </div>

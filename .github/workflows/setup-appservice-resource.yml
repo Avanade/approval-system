@@ -1,0 +1,65 @@
+name: Setup App Service Resource
+run-name: Setup App Service Resource [${{inputs.selected_environment}}]
+
+on:
+  workflow_dispatch:
+    inputs:
+      selected_environment:
+        type: environment
+        description: Select environment
+        default: test
+
+jobs:
+  setup-appservice-resource:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.selected_environment }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: SUBSTITUTE VARIABLES
+        uses: microsoft/variable-substitution@v1 
+        with:
+          files: ./.bicep/webapp/parameters.json
+        env:
+          parameters.imageName.value: ${{ vars.APPSERVICE_NAME }}
+          parameters.appServicePlanName.value : ${{ vars.APPSERVICE_PLAN_NAME }}
+          parameters.sqlServerName.value : ${{ secrets.DATABASE_SERVER_NAME }}
+          parameters.projectName.value : ${{ vars.PROJECT_NAME }}
+          parameters.activeEnv.value : ${{ github.event.inputs.selected_environment }}
+          parameters.containerServer.value : ${{ secrets.CONTAINER_REGISTRY_SERVER }}
+          parameters.appServiceSettings.value.TENANT_ID : ${{ secrets.TENANT_ID }}
+          parameters.appServiceSettings.value.CLIENT_ID : ${{ secrets.CLIENT_ID }}
+          parameters.appServiceSettings.value.CLIENT_SECRET : ${{ secrets.CLIENT_SECRET }}
+          parameters.appServiceSettings.value.HOME_URL : ${{vars.HOME_URL}}
+          parameters.appServiceSettings.value.EMAIL_TENANT_ID : ${{ secrets.EMAIL_TENANT_ID }}
+          parameters.appServiceSettings.value.EMAIL_CLIENT_ID : ${{ secrets.EMAIL_CLIENT_ID }}
+          parameters.appServiceSettings.value.EMAIL_CLIENT_SECRET : ${{ secrets.EMAIL_CLIENT_SECRET }}
+          parameters.appServiceSettings.value.ENTERPRISE_OWNERS : ${{ secrets.ENTERPRISE_OWNERS }}
+          parameters.appServiceSettings.value.EMAIL_USER_ID : ${{ secrets.EMAIL_USER_ID }}
+          parameters.appServiceSettings.value.LINK_FOOTERS : ${{ vars.LINK_FOOTERS }}
+          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_URL : ${{ secrets.CONTAINER_REGISTRY_SERVER_URL }}
+          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_USERNAME : ${{ secrets.CONTAINER_REGISTRY_SERVER_USERNAME }} 
+          parameters.appServiceSettings.value.DOCKER_REGISTRY_SERVER_PASSWORD : ${{ secrets.CONTAINER_REGISTRY_SERVER_PASSWORD }}
+          parameters.appServiceSettings.value.APPROVALSYSTEMDB_CONNECTION_STRING : ${{ secrets.DATABASE_CONNECTION_STRING }}
+          parameters.appServiceSettings.value.COMMUNITY_PORTAL_APP_ID : ${{ vars.COMMUNITY_PORTAL_APP_ID }}
+          parameters.appServiceSettings.value.CALLBACK_RETRY_FREQ: ${{ vars.CALLBACK_RETRY_FREQ }}
+          parameters.appServiceSettings.value.SESSION_KEY: ${{ secrets.SESSION_KEY }}
+          parameters.appServiceSettings.value.SCOPE: ${{ secrets.SCOPE}}
+          parameters.appServiceSettings.value.IPDR_MODULE_ID: ${{ vars.IPDR_MODULE_ID }}
+          parameters.appServiceSettings.value.IPDR_APP_ID: ${{ vars.IPDR_APP_ID }}
+          parameters.appServiceSettings.value.CTO: ${{ vars.CTO }}
+          parameters.appServiceSettings.value.COMMUNITY_PORTAL_DOMAIN: ${{ vars.COMMUNITY_PORTAL_DOMAIN }}
+
+      - name: Deploy App Service Plan and Web App
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ fromJSON(secrets.AZURE_CREDENTIALS)['subscriptionId'] }}
+          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          template: ./.bicep/webapp/deployApprovalSystemAppService.bicep
+          parameters: ./.bicep/webapp/parameters.json
+          failOnStdErr: false
+          scope: resourcegroup

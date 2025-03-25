@@ -1,0 +1,224 @@
+{{ define "content" }}
+
+<div id="pageTitle">IP Disclosure Requests For Your Review</div>
+
+<div class="px-4" x-data="initHome()">
+  <nav class="flex space-x-4 mb-3" aria-label="Tabs">
+    <div class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer" x-bind:class="activeTab == tabs[0] ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'" x-on:click="onChangeTabs(0)"> Pending Request</div>
+    <div class="px-3 py-2 font-medium text-sm rounded-md cursor-pointer" x-bind:class="activeTab == tabs[1] ? 'bg-[#fff2eb] text-[#FF5800]':'text-gray-500 hover:text-gray-700'" x-on:click="onChangeTabs(1)"> Closed Request</div>
+  </nav>
+  <div x-show="activeTab == tabs[0]">
+    <div x-data="list({
+      enabledSearch: false,
+      otherState: { responseType: 'All', requestType: {id : '', name: 'All'}, organization: 'All' },
+      callback: pendingCallback,
+      renderItem: pendingRenderItem
+    })">
+      <div x-html="template"></div>
+    </div>
+  </div>
+  <div x-show="activeTab == tabs[1]">
+    <div class="p-5" x-data="list({
+      enabledSearch: false,
+      otherState: { responseType: 'All', requestType: {id : '', name: 'All'}, organization: 'All' },
+      callback: closedCallback,
+      renderItem: closedRenderItem
+    })">
+      <div x-html="template"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/public/components/popup.js"></script>
+<script src="/public/components/list.js"></script>
+<script type="text/javascript">
+    const initHome = () => {
+    return {
+      tabs : ['pending', 'closed'],
+      activeTab : '',
+      data: JSON.parse('{{ . }}'),
+      async init(){
+        this.activeTab = this.tabs[0];
+      },
+      onChangeTabs(tab){
+        this.activeTab = this.tabs[tab];
+      }
+    }
+  }
+  //PENDING REQUEST
+  function pendingRenderItem(item){
+    return `<div class="block hover:bg-gray-50">
+              <div class="px-4 py-4 sm:px-6 cursor-pointer" @click="window.location.href='/review/' + item.applicationId + '/' + item.moduleId + '/' + item.id + '/3'">
+                <div class="flex items-center justify-between">
+                  <div class="grow">
+                    <div class="items-center justify-between">
+                      <p class="text-sm font-medium text-gray-800 truncate" x-text="item.ipdrTitle"></p>
+                    </div>
+                    <div class="grid grid-cols-2 text-sm text-sm text-gray-500">
+                      <div>
+                        <p x-data="{ app: 'Requestor: ' + item.requestedBy}" x-text="app"></p>
+                      </div>
+                      <div>
+                        <p>
+                          Requested on
+                          <time x-data="{date: new Date(item.created.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}"
+                            x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                        </p>
+                      </div>
+                      <template x-if="item.approvers != null">
+                        <template x-if="item.approvers.length != 0">
+                          <div class="flex items-center">
+                            <p>Approver/s: <span x-text="item.approvers[0]"></span></p>
+                            <template x-if="item.approvers.length > 1">
+                              <div x-data="popup({
+                                              content: renderApprovers(item.approvers),
+                                              placement: 'top',
+                                              popupClass: 'shadow-md'
+                                            })" @mouseover="showPopup" @mouseover.away="hidePopup">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                  stroke="currentColor" class="w-4 h-4">
+                                  <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <div x-html="template"></div>
+                              </div>
+                            </template>
+                          </div>
+                        </template>
+                      </template>
+                    </div>
+                  </div>
+                  <div class="relative mt-1">
+                    <button class="ml-auto" x-on:click="item.show = !item.show" @click.stop>
+                      <template x-if="!item.show">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                      </template>
+                      <template x-if="item.show">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                        </svg>
+                      </template>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
+                <div x-html="item.body" class="text-sm"></div>
+              </div>
+            </div>`
+  }
+  
+  async function pendingCallback(e){
+    return await getItemsBy(0, 0, e.filter, e.page)
+  }
+  
+  //CLOSED REQUEST
+  function closedRenderItem(item){
+    return `<div class="block hover:bg-gray-50">
+              <div class="px-4 py-4 sm:px-6 cursor-pointer" @click="window.location.href='/review/' + item.applicationId + '/' + item.moduleId + '/' + item.id + '/3'">
+                <div class="flex items-center justify-between">
+                  <div class="grow">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-gray-800 truncate" x-text="item.ipdrTitle"></p>
+                      <div class="ml-2 flex-shrink-0 flex">
+                        <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                          x-bind:class="item.isApproved? 'bg-green-100 text-green-800':'bg-red-100 text-red-800'"
+                          x-text="item.isApproved ? 'Approved' : 'Rejected'"></p>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 text-sm text-sm text-gray-500">
+                      <div>
+                        <p x-data="{ app: 'Application: ' + item.application}" x-text="app"></p>
+                      </div>
+                      <div>
+                        <p x-data="{ mod: 'Module: ' + item.module}" x-text="mod"></p>
+                      </div>
+                      <div>
+                        <p x-data="{ respondedBy: 'Responded by: ' + item.respondedBy}" x-text="respondedBy"></p>
+                      </div>
+                      <template x-if="item.approvers != null">
+                        <template x-if="item.approvers.length != 0">
+                          <div class="flex items-center">
+                            <p>Approver/s: <span x-text="item.approvers[0]"></span></p>
+                            <template x-if="item.approvers.length > 1">
+                              <div x-data="popup({
+                                              content: renderApprovers(item.approvers),
+                                              placement: 'top',
+                                              popupClass: 'shadow-md'
+                                            })" @mouseover="showPopup" @mouseover.away="hidePopup">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                  stroke="currentColor" class="w-4 h-4">
+                                  <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <div x-html="template"></div>
+                              </div>
+                            </template>
+                          </div>
+                        </template>
+                      </template>
+                      <div>
+                        <p>
+                          Responded on
+                          <time x-data="{date: new Date(item.dateResponded.replace(' ', 'T').replace(' +0000 UTC', '') + 'Z')}"
+                            x-text="date.toLocaleString('en-US',{dateStyle: 'medium', timeStyle: 'short'})"></time>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="relative mt-1">
+                    <button class="ml-auto" x-on:click="item.show = !item.show" @click.stop>
+                      <template x-if="!item.show">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20"
+                          stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </template>
+                      <template x-if="item.show">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 20 20"
+                          stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                        </svg>
+                      </template>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div x-show="item.show" class="border-t-[1px] border-gray-100 mt-3 pt-3">
+                <div x-html="item.body" class="text-sm"></div>
+                <div class="border-[1px] mt-2 p-3 rounded-md">
+                  <div class="text-sm font-medium text-gray-800 truncate pb-2">Remarks</div>
+                  <div x-text="item.approverRemarks? item.approverRemarks:'none'" class="text-sm"></div>
+                </div>
+              </div>
+          </div>`
+  }
+
+  async function closedCallback(e){
+
+    return await getItemsBy(0, 3, e.filter, e.page)
+  }
+
+    function renderApprovers(approvers) {
+    approversListTag = approvers.map((approver) => {
+      return `<li>${approver}</li>`
+    })
+    return `<ul>${approversListTag.join('')}</ul>`
+  }
+
+  async function getItemsBy(type, status, filter, page){
+    page += 1;
+    const res = await fetch(`/api/items/forreview/${status}?filter=${filter}&page=${page}`)
+    const data = await res.json()
+    return data
+  }
+
+  async function getRequestTypes(){
+    const res = await fetch(`/api/request/types`)
+    const data = await res.json()
+    return data
+  }
+</script>
+{{ end }}

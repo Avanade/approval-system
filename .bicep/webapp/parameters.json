@@ -34,13 +34,22 @@
                 "WEBSITES_ENABLE_APP_SERVICE_STORAGE": "",
                 "CONTENT_SECURITY_POLICY": "",
                 "EMAIL_SUPPORT":"",
+                "ENTERPRISE_OWNERS":"",
                 "EMAIL_ENABLED" : "",
                 "EMAIL_TENANT_ID" : "",
                 "EMAIL_CLIENT_ID" : "",
                 "EMAIL_CLIENT_SECRET" : "",
                 "EMAIL_USER_ID" : "",
                 "LINK_FOOTERS": "",
-                "ORGANIZATION_NAME": ""
+                "ORGANIZATION_NAME": "",
+                "COMMUNITY_PORTAL_APP_ID": "",
+                "CALLBACK_RETRY_FREQ": "",
+                "SESSION_KEY": "",
+                "SCOPE":"",
+                "IPDR_MODULE_ID": "",
+                "IPDR_APP_ID": "",
+                "CTO": "",
+                "COMMUNITY_PORTAL_DOMAIN": ""
             }
         }
     }
