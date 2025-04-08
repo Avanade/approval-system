@@ -3,8 +3,8 @@ CREATE PROCEDURE [dbo].[PR_IPDisclosureRequest_Insert]
     @RequestorEmail [VARCHAR](100),
     @IPTitle [VARCHAR](100),
     @IPType [VARCHAR](100),
-    @IPDescription [VARCHAR](100),
-    @Reason [VARCHAR](100)
+    @IPDescription [VARCHAR](1000),
+    @Reason [VARCHAR](1000)
 AS
 
 	DECLARE @ResultTable TABLE(Id [INT]);
