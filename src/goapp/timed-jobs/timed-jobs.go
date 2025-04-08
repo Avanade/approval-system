@@ -36,7 +36,7 @@ func (t *timedJobs) ReprocessFailedCallbacks() {
 			}
 
 			for _, id := range f {
-				go t.postCallback(id)
+				t.postCallback(id)
 			}
 		}
 	}
