@@ -145,7 +145,7 @@ func (c *ipDisclosureController) InsertIPDisclosureRequest(w http.ResponseWriter
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Intellectual Property Title
+										Title
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|IPTitle|
@@ -153,7 +153,7 @@ func (c *ipDisclosureController) InsertIPDisclosureRequest(w http.ResponseWriter
 								</tr>
 								<tr class="border-top">
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 600;">
-										Intellectual Property Type
+										Type
 									</td>
 									<td style="font-size: 14px; padding-top: 15px; font-weight: 400;">
 										|IPType|
