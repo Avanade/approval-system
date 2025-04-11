@@ -23,7 +23,7 @@
                 <template x-for="item in involvementList" :key="item.id">
                     <div class="flex items-start mt-1">
                         <div class="flex items-center h-5">
-                            <input type="checkbox" x-model="involvement[item.id]"
+                            <input type="checkbox" @click="involvementSelected(item)"
                                 class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
                         </div>
                         <div class="ml-3 text-sm">
@@ -137,6 +137,23 @@
                     }
                 }
                 return false
+            },
+            involvementSelected(item) {
+                this.involvement[item.id] = !this.involvement[item.id]
+                if (!this.form.title && !this.form.type) {
+                    
+                    let value = this.involvementList.find( (x) => {
+                        return item.id == x.id
+                    })
+                    if(value.name === 'MVP') {
+                        this.form.title = 'MVP'
+                        this.form.type = 'MVP Activities'
+                    }
+                    else if(value.name === 'Open Source') {
+                        this.form.title = 'Open Source'
+                        this.form.type = 'Open Source Activities'
+                    }
+                }
             }
         }
     }
