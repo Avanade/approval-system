@@ -55,7 +55,8 @@ func NewAuthenticatorService(conf config.ConfigManager, session session.ConnectS
 }
 
 func (a *authenticatorService) AccessTokenIsValid(r *http.Request) bool {
-	tokenString := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
+	log.Println("Validating access token: ", r.Header.Get("Authorization"))
+	tokenString := strings.Replace(r.Header.Get("Authorization"), "Bearer ", "", 1)
 	keySet, err := jwk.Fetch(r.Context(), "https://login.microsoftonline.com/common/discovery/v2.0/keys")
 	if err != nil {
 		log.Println(err.Error())
