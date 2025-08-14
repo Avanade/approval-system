@@ -14,7 +14,7 @@ require (
 	github.com/microsoft/kiota-abstractions-go v1.7.0
 	github.com/microsoftgraph/msgraph-sdk-go v1.48.0
 	github.com/unrolled/secure v1.13.0
-	golang.org/x/oauth2 v0.12.0
+	golang.org/x/oauth2 v0.27.0
 )
 
 require (
@@ -55,7 +55,6 @@ require (
 	github.com/golang-jwt/jwt v3.2.1+incompatible
 	github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe // indirect
 	github.com/golang-sql/sqlexp v0.0.0-20170517235910-f1bb20e5a188 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
@@ -66,7 +65,5 @@ require (
 	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 )
