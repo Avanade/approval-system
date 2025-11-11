@@ -251,11 +251,38 @@ func (r *itemRepository) GetItemsByModuleId(moduleId string, filterOptions model
 }
 
 func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item, error) {
+	var storedProcedure string
 	var params []interface{}
 
-	if model.ItemType(itemOptions.ItemType) != model.AllType {
-		params = append(params, sql.Named("ItemType", itemOptions.ItemType))
-		params = append(params, sql.Named("User", itemOptions.User))
+	if itemOptions.ItemType == 0 {
+		params = append(params, sql.Named("Requestor", itemOptions.User))
+		if model.ItemStatus(itemOptions.ItemStatus) == model.Pending {
+			storedProcedure = "PR_Items_Select_PendingRequestOfRequestor"
+		} else {
+			storedProcedure = "PR_Items_Select_ClosedRequestOfRequestor"
+			if model.ItemStatus(itemOptions.ItemStatus) != model.Closed {
+				isApproved := false
+				if model.ItemStatus(itemOptions.ItemStatus) == model.Approved {
+					isApproved = true
+				}
+				params = append(params, sql.Named("IsApproved", isApproved))
+			}
+		}
+	}
+	if itemOptions.ItemType == 1 {
+		params = append(params, sql.Named("Approver", itemOptions.User))
+		if model.ItemStatus(itemOptions.ItemStatus) == model.Pending {
+			storedProcedure = "PR_Items_Select_PendingRequestOfApprover"
+		} else {
+			storedProcedure = "PR_Items_Select_ClosedRequestOfApprover"
+			if model.ItemStatus(itemOptions.ItemStatus) != model.Closed {
+				isApproved := false
+				if model.ItemStatus(itemOptions.ItemStatus) == model.Approved {
+					isApproved = true
+				}
+				params = append(params, sql.Named("IsApproved", isApproved))
+			}
+		}
 	}
 
 	if itemOptions.RequestType != "" {
@@ -266,12 +293,11 @@ func (r *itemRepository) GetItemsBy(itemOptions model.ItemOptions) ([]model.Item
 		params = append(params, sql.Named("Organization", itemOptions.Organization))
 	}
 
-	params = append(params, sql.Named("IsApproved", itemOptions.ItemStatus))
 	params = append(params, sql.Named("Search", itemOptions.Search))
 	params = append(params, sql.Named("Offset", itemOptions.Offset))
 	params = append(params, sql.Named("Filter", itemOptions.Filter))
 
-	resList, err := r.Query("PR_Items_Select", params...)
+	resList, err := r.Query(storedProcedure, params...)
 	if err != nil {
 		return []model.Item{}, err
 	}

@@ -107,13 +107,14 @@ func (c *itemController) GetItems(w http.ResponseWriter, r *http.Request) {
 	itemOptions.User = user.Email
 
 	vars := mux.Vars(r)
-
+	// type - 0: Requestor Items, 1: Approver Items
 	itemOptions.ItemType, err = strconv.ParseInt(vars["type"], 10, 8)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// status - 0 : Pending, 1: Approved, 2: Rejected, 3: Closed, 4: All
 	itemOptions.ItemStatus, err = strconv.ParseInt(vars["status"], 10, 8)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
