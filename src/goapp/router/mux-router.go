@@ -64,7 +64,10 @@ func (r *muxRouter) SERVE() {
 	}
 
 	secureMiddleware := secure.New(secureOptions)
-	muxDispatcher.Use(secureMiddleware.Handler)
+	muxDispatcher.Use(
+		secureMiddleware.Handler,
+		commonHeadersMiddleware,
+	)
 	http.Handle("/", muxDispatcher)
 
 	muxDispatcher.NotFoundHandler = http.HandlerFunc(r.m.Chain(r.Controller.Fallback.NotFound, r.m.AzureAuth()))
@@ -72,4 +75,15 @@ func (r *muxRouter) SERVE() {
 
 	fmt.Printf("Mux HTTP server running on port %v", r.Port)
 	http.ListenAndServe(fmt.Sprintf(":%v", r.Port), muxDispatcher)
+}
+
+// commonHeadersMiddleware is the middleware function to set common headers
+func commonHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set common headers for all requests
+		w.Header().Set("Cache-Control", "no-store")
+
+		// Call the next handler in the chain
+		next.ServeHTTP(w, r)
+	})
 }
