@@ -77,6 +77,7 @@ func (s *sessionManager) Save(maxAge int) error {
 	session.Options.MaxAge = maxAge
 	session.Options.HttpOnly = true
 	session.Options.Secure = true
+	session.Options.SameSite = http.SameSiteStrictMode
 
 	return session.Save(s.r, *s.w)
 }
