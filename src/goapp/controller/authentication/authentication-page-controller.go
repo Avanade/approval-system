@@ -36,7 +36,7 @@ func (a *authenticationPageController) AuthenticationFailedHandler(w http.Respon
 func (a *authenticationPageController) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	state, err := a.Authenticator.GetStringValue(r, "auth-session", "state")
 	if err != nil {
-		http.Redirect(w, r, "/authentication/azure/failed", http.StatusSeeOther)
+		http.Redirect(w, r, "/login/azure", http.StatusSeeOther)
 		return
 	}
 
@@ -121,6 +121,7 @@ func (a *authenticationPageController) LoginHandler(w http.ResponseWriter, r *ht
 		return
 	}
 	state := base64.StdEncoding.EncodeToString(b)
+	_ = a.Authenticator.ClearFromSession(&w, r, "auth-session")
 
 	data := map[string]interface{}{
 		"state": state,

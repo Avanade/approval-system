@@ -312,7 +312,7 @@ func (a *authenticatorService) SaveOnSession(w *http.ResponseWriter, r *http.Req
 		s.Set(k, val)
 	}
 
-	err := s.Save(43200)
+	err := s.Save(2592000)
 	if err != nil {
 		return err
 	}
