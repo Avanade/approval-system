@@ -147,11 +147,6 @@ func (a *authenticationPageController) LoginRedirectHandler(w http.ResponseWrite
 		"redirect": redirect,
 	}
 
-	c := http.Cookie{
-		Name:   "auth-session",
-		MaxAge: -1}
-	http.SetCookie(w, &c)
-
 	tmpl := template.Must(template.ParseFiles("templates/loginredirect.html"))
 	tmpl.Execute(w, data)
 }
