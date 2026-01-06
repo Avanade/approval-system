@@ -14,6 +14,9 @@ func setPageRoutes() {
 	httpRouter.GET("/login/azure", ctrl.AuthenticationPage.LoginHandler)
 	httpRouter.GET("/login/azure/callback", ctrl.AuthenticationPage.CallbackHandler)
 	httpRouter.GET("/logout/azure", ctrl.AuthenticationPage.LogoutHandler)
+	httpRouter.GET("/authentication/azure/inprogress", ctrl.AuthenticationPage.AuthenticationInProgressHandler)
+	httpRouter.GET("/authentication/azure/successful", ctrl.AuthenticationPage.AuthenticationSuccessfulHandler)
+	httpRouter.GET("/authentication/azure/failed", ctrl.AuthenticationPage.AuthenticationFailedHandler)
 }
 
 func setApiRoutes() {
