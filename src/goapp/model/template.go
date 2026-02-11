@@ -17,6 +17,7 @@ type Headers struct {
 	Menu          []Menu
 	ExternalLinks []Menu
 	Page          string
+	LogoPath      string
 }
 
 type Menu struct {

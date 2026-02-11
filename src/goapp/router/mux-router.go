@@ -73,6 +73,14 @@ func (r *muxRouter) SERVE() {
 	muxDispatcher.NotFoundHandler = http.HandlerFunc(r.m.Chain(r.Controller.Fallback.NotFound, r.m.AzureAuth()))
 	muxDispatcher.PathPrefix("/public/").Handler(http.StripPrefix("/public/", http.FileServer(http.Dir("./public/"))))
 
+	// Serve favicon.ico directly from the public folder without authentication.
+	// Browsers automatically request /favicon.ico at the root path, which would
+	// otherwise hit the NotFoundHandler (wrapped with AzureAuth middleware),
+	// causing an auth-session cookie to be cleared on every page load.
+	muxDispatcher.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./public/favicon.ico")
+	})
+
 	fmt.Printf("Mux HTTP server running on port %v", r.Port)
 	http.ListenAndServe(fmt.Sprintf(":%v", r.Port), muxDispatcher)
 }

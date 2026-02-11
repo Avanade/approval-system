@@ -32,7 +32,7 @@ func (t *templateService) UseTemplate(page, path string, user model.AzureUser, p
 	if user.IsAuditor {
 		menu = append(menu, model.Menu{Name: "Audit IP Disclosure Request", Url: "/audit", IconPath: "/public/icons/audit.svg"})
 	}
-	masterPageData := model.Headers{Menu: menu, Page: getUrlPath(path)}
+	masterPageData := model.Headers{Menu: menu, Page: getUrlPath(path), LogoPath: "/public/favicon.ico"}
 
 	//Footers
 	var footers []model.Footer
