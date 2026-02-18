@@ -46,8 +46,13 @@ func (m *middleware) AzureAuth() MiddlewareFunc {
 			isAuth, tokenExpired, err := m.Service.Authenticator.IsAuthenticated(r)
 			if err != nil {
 				c := http.Cookie{
-					Name:   "auth-session",
-					MaxAge: -1}
+					Name:     "auth-session",
+					MaxAge:   -1,
+					Path:     "/",
+					Secure:   true,
+					HttpOnly: true,
+					SameSite: http.SameSiteLaxMode,
+				}
 				http.SetCookie(w, &c)
 				http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 				return
@@ -58,8 +63,13 @@ func (m *middleware) AzureAuth() MiddlewareFunc {
 					err := m.Service.Authenticator.RefreshToken(&w, r)
 					if err != nil {
 						c := http.Cookie{
-							Name:   "auth-session",
-							MaxAge: -1}
+							Name:     "auth-session",
+							MaxAge:   -1,
+							Path:     "/",
+							Secure:   true,
+							HttpOnly: true,
+							SameSite: http.SameSiteLaxMode,
+						}
 						http.SetCookie(w, &c)
 						http.Redirect(w, r, "/logout", http.StatusTemporaryRedirect)
 						return
